@@ -33,8 +33,14 @@ public class Notification {
     private String contend;
 
     @NotNull
+    @Lob
+    @Column(name = "image", nullable = false)
+    private String image;
+
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
+
 
 }

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.util.Set;
 
@@ -27,6 +28,11 @@ public class Account {
     @NotNull
     @Column(name = "password", nullable = false, length = 155)
     private String password;
+
+    @NotNull
+    @ColumnDefault("1")
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;

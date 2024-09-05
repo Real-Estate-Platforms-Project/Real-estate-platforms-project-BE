@@ -48,6 +48,11 @@ public class Employee {
     @Column(name = "email", nullable = false, length = 100)
     private String email;
 
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "title_id", nullable = false)
+    private Position title;
+
     @Size(max = 10)
     @NotNull
     @Column(name = "phone_number", nullable = false, length = 10)
@@ -57,5 +62,15 @@ public class Employee {
     @ColumnDefault("0")
     @Column(name = "is_admin", nullable = false)
     private Boolean isAdmin = false;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
+
+    @NotNull
+    @ColumnDefault("1")
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 
 }

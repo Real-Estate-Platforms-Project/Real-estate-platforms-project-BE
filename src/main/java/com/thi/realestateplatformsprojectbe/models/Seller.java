@@ -15,7 +15,6 @@ import java.time.LocalDate;
 @Table(name = "sellers", schema = "real_estate_platform")
 public class Seller {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
@@ -59,8 +58,18 @@ public class Seller {
     private String idNumber;
 
     @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
+
+    @NotNull
     @ColumnDefault("0")
     @Column(name = "enable", nullable = false)
     private Boolean enable = false;
+
+    @NotNull
+    @ColumnDefault("1")
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 
 }

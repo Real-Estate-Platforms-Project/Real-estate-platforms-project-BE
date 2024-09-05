@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -49,8 +52,17 @@ public class Demand {
     @Column(name = "max_area", nullable = false)
     private Integer maxArea;
 
+    @NotNull
+    @Column(name = "created_at", nullable = false)
+    private LocalDate createdAt;
+
     @Lob
     @Column(name = "notes")
     private String notes;
+
+    @NotNull
+    @ColumnDefault("1")
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 
 }

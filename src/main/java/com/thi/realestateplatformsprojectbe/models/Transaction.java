@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 
@@ -14,7 +15,6 @@ import java.time.LocalDate;
 @Table(name = "transactions", schema = "real_estate_platform")
 public class Transaction {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
@@ -58,5 +58,10 @@ public class Transaction {
     @NotNull
     @Column(name = "status", nullable = false, length = 10)
     private String status;
+
+    @NotNull
+    @ColumnDefault("1")
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 
 }

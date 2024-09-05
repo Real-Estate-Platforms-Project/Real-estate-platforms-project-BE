@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Setter
@@ -11,9 +12,13 @@ import lombok.Setter;
 @Table(name = "real_estate_details", schema = "real_estate_platform")
 public class RealEstateDetail {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
+
+    @NotNull
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "real_estate_id", nullable = false)
+    private RealEstate realEstate;
 
     @NotNull
     @Column(name = "front_side", nullable = false)
@@ -41,5 +46,10 @@ public class RealEstateDetail {
     @NotNull
     @Column(name = "toilet", nullable = false)
     private Integer toilet;
+
+    @NotNull
+    @ColumnDefault("1")
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 
 }

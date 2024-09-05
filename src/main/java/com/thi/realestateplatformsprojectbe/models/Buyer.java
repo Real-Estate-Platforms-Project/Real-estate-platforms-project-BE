@@ -55,12 +55,22 @@ public class Buyer {
 
     @Size(max = 12)
     @NotNull
-    @Column(name = "id_number", nullable = false, length = 12)
-    private String idNumber;
+    @Column(name = "id_card", nullable = false, length = 12)
+    private String idCard;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "account_id", nullable = false)
+    private Account account;
 
     @NotNull
     @ColumnDefault("0")
     @Column(name = "enable", nullable = false)
     private Boolean enable = false;
+
+    @NotNull
+    @ColumnDefault("1")
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
 
 }

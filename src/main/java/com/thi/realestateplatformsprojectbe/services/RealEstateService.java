@@ -1,6 +1,7 @@
 package com.thi.realestateplatformsprojectbe.services;
 
 import com.thi.realestateplatformsprojectbe.dto.RealEstateDTO;
+import com.thi.realestateplatformsprojectbe.models.RealEstate;
 import com.thi.realestateplatformsprojectbe.repositories.IRealEstateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

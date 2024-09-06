@@ -1,5 +1,6 @@
 package com.thi.realestateplatformsprojectbe.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -27,6 +28,7 @@ public class RealEstate {
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "seller_id", nullable = false)
+    @JsonBackReference
     private Seller seller;
 
     @NotNull

@@ -1,6 +1,6 @@
-package com.thi.realestateplatformsprojectbe.config.service;
+package com.thi.realestateplatformsprojectbe.configs.service;
 
-import com.thi.realestateplatformsprojectbe.config.UserPrinciple;
+import com.thi.realestateplatformsprojectbe.configs.UserPrinciple;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

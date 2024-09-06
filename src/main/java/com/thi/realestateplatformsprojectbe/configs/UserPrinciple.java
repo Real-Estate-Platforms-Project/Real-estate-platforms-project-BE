@@ -1,4 +1,4 @@
-package com.thi.realestateplatformsprojectbe.config;
+package com.thi.realestateplatformsprojectbe.configs;
 
 
 import com.thi.realestateplatformsprojectbe.models.Account;

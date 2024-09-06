@@ -1,6 +1,6 @@
-package com.thi.realestateplatformsprojectbe.config.service;
+package com.thi.realestateplatformsprojectbe.configs.service;
 
-import com.thi.realestateplatformsprojectbe.config.UserPrinciple;
+import com.thi.realestateplatformsprojectbe.configs.UserPrinciple;
 import com.thi.realestateplatformsprojectbe.models.Account;
 import com.thi.realestateplatformsprojectbe.repositories.IAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;

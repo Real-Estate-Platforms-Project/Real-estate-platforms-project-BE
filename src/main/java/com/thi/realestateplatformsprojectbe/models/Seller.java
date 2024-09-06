@@ -3,20 +3,18 @@ package com.thi.realestateplatformsprojectbe.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name = "sellers", schema = "real_estate_platform")
 public class Seller {
     @Id
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @Size(max = 10)
     @NotNull
@@ -40,7 +38,7 @@ public class Seller {
     @Size(max = 255)
     @NotNull
     @Column(name = "address", nullable = false)
-    private String address;
+    private String addressLine;
 
     @Size(max = 100)
     @NotNull
@@ -58,7 +56,7 @@ public class Seller {
     private String idNumber;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 

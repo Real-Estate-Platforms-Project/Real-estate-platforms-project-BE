@@ -16,7 +16,7 @@ import lombok.Setter;
 public class Position {
     @Id
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @Size(max = 155)
     @NotNull

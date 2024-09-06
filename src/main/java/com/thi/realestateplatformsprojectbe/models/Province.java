@@ -3,8 +3,6 @@ package com.thi.realestateplatformsprojectbe.models;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 @Entity
 @Table(name = "provinces")

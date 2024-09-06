@@ -37,4 +37,10 @@ public class DemandController {
         demandService.delete(demand);
         return new ResponseEntity<>(demand, HttpStatus.OK);
     }
+
+    @PostMapping
+    public ResponseEntity<Demand> addStudent(@RequestBody Demand demand) {
+        demandService.save(demand);
+        return new ResponseEntity<>(demand, HttpStatus.CREATED);
+    }
 }

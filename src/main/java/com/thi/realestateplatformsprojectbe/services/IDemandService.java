@@ -12,4 +12,6 @@ public interface IDemandService {
     List<Demand> findInvalidatedDemand();
 
     boolean verifyDemand(Long id);
+
+    void save(Demand demand);
 }

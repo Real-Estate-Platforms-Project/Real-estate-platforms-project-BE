@@ -20,7 +20,7 @@ public class DemandController {
         List<Demand> demands = demandService.findAll();
         return new ResponseEntity<>(demands, HttpStatus.BAD_REQUEST);
     }
-
+// tai danh sach cac demand chua duoc verify cho admin duyet
     @GetMapping("/validate")
     public ResponseEntity<?> getInvalidatedDemand() {
         List<Demand> demands = demandService.findInvalidatedDemand();

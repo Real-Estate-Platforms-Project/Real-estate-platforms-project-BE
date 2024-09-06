@@ -1,7 +1,7 @@
-package com.thi.realestateplatformsprojectbe.config.jwt;
+package com.thi.realestateplatformsprojectbe.configs.jwt;
 
-import com.thi.realestateplatformsprojectbe.config.service.AccountService;
-import com.thi.realestateplatformsprojectbe.config.service.JwtService;
+import com.thi.realestateplatformsprojectbe.configs.service.AccountService;
+import com.thi.realestateplatformsprojectbe.configs.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

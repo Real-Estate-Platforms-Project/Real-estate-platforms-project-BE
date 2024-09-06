@@ -16,4 +16,26 @@ public class DemandService implements IDemandService {
     public List<Demand> findAll() {
         return demandRepository.findAll();
     }
+
+    @Override
+    public void delete(Demand demand) {
+        demandRepository.delete(demand);
+    }
+
+    @Override
+    public List<Demand> findInvalidatedDemand() {
+        return demandRepository.findInvalidatedDemand();
+    }
+
+    @Override
+    public boolean verifyDemand(Long id) {
+        if (demandRepository.findById(id).isPresent()) {
+            if (!demandRepository.findById(id).get().getIsVerify()) {
+                demandRepository.findById(id).get().setIsVerify(true);
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
 }

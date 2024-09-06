@@ -61,6 +61,11 @@ public class Demand {
     private String notes;
 
     @NotNull
+    @ColumnDefault("0")
+    @Column(name = "is_verify", nullable = false)
+    private Boolean isVerify;
+
+    @NotNull
     @ColumnDefault("1")
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;

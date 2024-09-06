@@ -1,4 +1,4 @@
-package com.thi.realestateplatformsprojectbe.config.service;
+package com.thi.realestateplatformsprojectbe.configs.service;
 
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;

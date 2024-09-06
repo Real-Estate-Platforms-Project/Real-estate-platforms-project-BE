@@ -70,11 +70,19 @@ public class SecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
+<<<<<<< Updated upstream:src/main/java/com/thi/realestateplatformsprojectbe/configs/SecurityConfig.java
                                 .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
                         .requestMatchers("/api/auth/register").permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/role").permitAll()
 //                        .requestMatchers(HttpMethod.GET,"/api/customers**").authenticated()
+=======
+                                .requestMatchers("/api/auth/updatePassWord").authenticated()
+                                .requestMatchers("/**").permitAll()
+//                        .requestMatchers("/api/auth/register").permitAll()
+//                        .requestMatchers("/api/auth/login").permitAll()
+//                        .requestMatchers("/api/role").permitAll()
+>>>>>>> Stashed changes:src/main/java/com/thi/realestateplatformsprojectbe/config/SecurityConfig.java
 ////                        .requestMatchers("/api/customers**").hasAnyAuthority("ROLE_ADMIN")
 //                        .requestMatchers(HttpMethod.PUT,"/api/customers**").hasAnyAuthority("ROLE_ADMIN")
 //                        .requestMatchers(HttpMethod.POST,"/api/customers**").hasAnyAuthority("ROLE_ADMIN")

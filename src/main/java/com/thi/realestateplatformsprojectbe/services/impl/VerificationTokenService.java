@@ -1,4 +1,4 @@
-package com.thi.realestateplatformsprojectbe.services.iml;
+package com.thi.realestateplatformsprojectbe.services.impl;
 
 import com.thi.realestateplatformsprojectbe.models.Account;
 import com.thi.realestateplatformsprojectbe.models.VerificationToken;

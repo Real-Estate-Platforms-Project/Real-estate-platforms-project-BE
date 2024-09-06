@@ -12,7 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/real-estate-posts")
+@CrossOrigin("*")
+@RequestMapping("/api/real-estate")
 public class RealEstateController {
 
     @Autowired

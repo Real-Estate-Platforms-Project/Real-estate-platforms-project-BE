@@ -1,16 +1,11 @@
 package com.thi.realestateplatformsprojectbe.controllers.auth;
 
-<<<<<<< Updated upstream
+import com.thi.realestateplatformsprojectbe.configs.UserPrinciple;
 import com.thi.realestateplatformsprojectbe.configs.service.AccountService;
 import com.thi.realestateplatformsprojectbe.configs.service.JwtResponse;
 import com.thi.realestateplatformsprojectbe.configs.service.JwtService;
-=======
-import com.thi.realestateplatformsprojectbe.config.UserPrinciple;
-import com.thi.realestateplatformsprojectbe.config.service.AccountService;
-import com.thi.realestateplatformsprojectbe.config.service.JwtResponse;
-import com.thi.realestateplatformsprojectbe.config.service.JwtService;
+
 import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
->>>>>>> Stashed changes
 import com.thi.realestateplatformsprojectbe.models.Account;
 import com.thi.realestateplatformsprojectbe.models.Role;
 import com.thi.realestateplatformsprojectbe.models.RoleName;

@@ -16,7 +16,7 @@ import java.time.LocalDate;
 public class Transaction {
     @Id
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @Size(max = 10)
     @NotNull

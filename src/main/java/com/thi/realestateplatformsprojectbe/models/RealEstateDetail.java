@@ -13,7 +13,7 @@ import org.hibernate.annotations.ColumnDefault;
 public class RealEstateDetail {
     @Id
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY, optional = false)

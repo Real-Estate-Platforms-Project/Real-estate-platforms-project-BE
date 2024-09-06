@@ -33,14 +33,20 @@ public class DemandController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteStudent(@RequestBody Demand demand) {
+    public ResponseEntity<?> deleteDemand(@RequestBody Demand demand) {
         demandService.delete(demand);
         return new ResponseEntity<>(demand, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<Demand> addStudent(@RequestBody Demand demand) {
+    public ResponseEntity<Demand> addDemand(@RequestBody Demand demand) {
         demandService.save(demand);
         return new ResponseEntity<>(demand, HttpStatus.CREATED);
+    }
+
+    @PutMapping
+    public ResponseEntity<?> updateDemand(@RequestBody Demand demand) {
+        demandService.save(demand);
+        return new ResponseEntity<>(demand, HttpStatus.OK);
     }
 }

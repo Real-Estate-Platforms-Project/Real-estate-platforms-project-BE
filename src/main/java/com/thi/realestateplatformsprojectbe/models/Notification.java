@@ -21,7 +21,7 @@ public class Notification {
 
     @NotNull
     @Column(name = "create_at", nullable = false)
-    private Instant createAt;
+    private Long createAt;
 
     @Size(max = 255)
     @NotNull

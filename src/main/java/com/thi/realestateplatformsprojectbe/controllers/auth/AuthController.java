@@ -115,32 +115,6 @@ public class AuthController {
         return new ResponseEntity<>("Tài khoản đã được kích hoạt thành công!", HttpStatus.OK);
     }
 
-//    @PutMapping("/updatePassWord/{accountName}")
-//    public ResponseEntity<?> editAccount(
-//            @RequestBody Account account,
-//            Authentication authentication
-//            ) {
-//        authentication.getPrincipal();
-//        Account account1 = accountService.findByAccountName(accountName);
-//        if (account1 == null) {
-//            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//        }
-//        account1.setId(account.getId());
-//        account1.setIsDeleted();
-//        account1.setPassword(account.getPassword());
-//
-//        String pw = passwordEncoder.encode(account1.getPassword());
-//        account1.setPassword(pw);
-//        Set<Role> roles = new HashSet<>();
-//
-//        Role role = roleService.findByName(RoleName.ROLE_BUYER.toString());
-//        roles.add(role);
-//        account1.setRoles(roles);
-//
-//        accountService.save(account1);
-//        return new ResponseEntity<>(account,HttpStatus.OK);
-//    }
-
     @PutMapping("/updatePassWord")
     public ResponseEntity<?> editAccount(
             Authentication authentication,

@@ -6,8 +6,10 @@ import com.thi.realestateplatformsprojectbe.repositories.IRealEstateRepository;
 import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
 import com.thi.realestateplatformsprojectbe.services.IRealEstateService;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -35,8 +37,10 @@ public class RealEstateService implements IRealEstateService {
         return realEstateRepository.save(realEstate);
     }
 
+
     @Override
     public Page<RealEstate> searchRealEstates(Double minPrice, Double maxPrice, String region, String type, Integer minArea, Integer maxArea, Pageable pageable) {
         return realEstateRepository.searchRealEstates(minPrice,maxPrice,region,type,minArea,maxArea,pageable);
     }
+
 }

@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface IWardRepository extends JpaRepository<Ward,String> {
     List<Ward> findAllByDistrictCode(String code);
+
+    Ward findWardByCode(String wardCode);
 }

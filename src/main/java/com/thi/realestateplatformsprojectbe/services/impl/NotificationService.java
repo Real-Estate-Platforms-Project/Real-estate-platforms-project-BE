@@ -23,4 +23,37 @@ public class NotificationService implements INotificationService {
     public void save(Notification notification) {
         notificationRepository.save(notification);
     }
+
+    @Override
+    public List<Notification> findAllNotificationByTitle(String title) {
+        return notificationRepository.findAllNotificationByTitleContaining(title);
+    }
+
+    @Override
+    public Notification findNotificationById(int id) {
+        return notificationRepository.findNotificationById(id);
+    }
+
+    @Override
+    public Notification saveNotification(Notification notification) {
+        return notificationRepository.save(notification);
+    }
+
+    @Override
+    public Notification updateNotification(int id, Notification notification) {
+        if (notificationRepository.existsById(id)) {
+            notification.setId(id);
+            return notificationRepository.save(notification);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean deleteNotification(int id) {
+        if (notificationRepository.existsById(id)) {
+            notificationRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 }

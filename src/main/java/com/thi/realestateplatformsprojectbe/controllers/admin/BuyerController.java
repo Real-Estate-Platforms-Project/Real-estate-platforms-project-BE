@@ -18,8 +18,12 @@ public class BuyerController {
 
     @GetMapping
     @PermitAll
-    public ResponseEntity<List<Buyer>> getAllBuyers() {
-        return ResponseEntity.ok(buyerService.getAllBuyers());
+    public ResponseEntity<?> getAllBuyers() {
+        List<Buyer> buyers = buyerService.getAllBuyers();
+        if (buyers.isEmpty()) {
+            return ResponseEntity.status(404).body("Không có khách hàng nào cả.");
+        }
+        return ResponseEntity.ok(buyers);
     }
 
     @PostMapping
@@ -30,7 +34,11 @@ public class BuyerController {
 
     @GetMapping("/{id}")
     @PermitAll
-    public ResponseEntity<Buyer> getBuyerDetails(@PathVariable Long id) {
-        return ResponseEntity.ok(buyerService.getBuyerById(id));
+    public ResponseEntity<?> getBuyerDetails(@PathVariable Long id) {
+        Buyer buyer = buyerService.getBuyerById(id);
+        if (buyer == null) {
+            return ResponseEntity.status(404).body("Không tìm thấy khách hàng với ID: " + id);
+        }
+        return ResponseEntity.ok(buyer);
     }
 }

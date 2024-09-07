@@ -1,6 +1,6 @@
 package com.thi.realestateplatformsprojectbe.services.impl;
 
-import com.thi.realestateplatformsprojectbe.dto.RealEstateDTO;
+import  com.thi.realestateplatformsprojectbe.dto.RealEstateDTO;
 import com.thi.realestateplatformsprojectbe.models.RealEstate;
 import com.thi.realestateplatformsprojectbe.repositories.IRealEstateRepository;
 import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;

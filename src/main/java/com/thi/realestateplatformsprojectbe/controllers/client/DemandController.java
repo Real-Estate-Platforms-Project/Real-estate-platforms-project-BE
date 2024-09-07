@@ -20,7 +20,7 @@ public class DemandController {
         List<Demand> demands = demandService.findAll();
         return new ResponseEntity<>(demands, HttpStatus.BAD_REQUEST);
     }
-
+// tai danh sach cac demand chua duoc verify cho admin duyet
     @GetMapping("/validate")
     public ResponseEntity<?> getInvalidatedDemand() {
         List<Demand> demands = demandService.findInvalidatedDemand();
@@ -33,8 +33,20 @@ public class DemandController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteStudent(@RequestBody Demand demand) {
+    public ResponseEntity<?> deleteDemand(@RequestBody Demand demand) {
         demandService.delete(demand);
+        return new ResponseEntity<>(demand, HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<Demand> addDemand(@RequestBody Demand demand) {
+        demandService.save(demand);
+        return new ResponseEntity<>(demand, HttpStatus.CREATED);
+    }
+
+    @PutMapping
+    public ResponseEntity<?> updateDemand(@RequestBody Demand demand) {
+        demandService.save(demand);
         return new ResponseEntity<>(demand, HttpStatus.OK);
     }
 }

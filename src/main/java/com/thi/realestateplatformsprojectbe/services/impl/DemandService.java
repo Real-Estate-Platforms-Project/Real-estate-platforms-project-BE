@@ -38,4 +38,9 @@ public class DemandService implements IDemandService {
         }
         return false;
     }
+
+    @Override
+    public void save(Demand demand) {
+        demandRepository.save(demand);
+    }
 }

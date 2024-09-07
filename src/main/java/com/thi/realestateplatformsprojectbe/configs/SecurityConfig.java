@@ -1,9 +1,9 @@
-package com.thi.realestateplatformsprojectbe.config;
+package com.thi.realestateplatformsprojectbe.configs;
 
-import com.thi.realestateplatformsprojectbe.config.jwt.CustomAccessDeniedHandler;
-import com.thi.realestateplatformsprojectbe.config.jwt.JwtAuthenticationTokenFilter;
-import com.thi.realestateplatformsprojectbe.config.jwt.RestAuthenticationEntryPoint;
-import com.thi.realestateplatformsprojectbe.config.service.AccountService;
+import com.thi.realestateplatformsprojectbe.configs.jwt.CustomAccessDeniedHandler;
+import com.thi.realestateplatformsprojectbe.configs.jwt.JwtAuthenticationTokenFilter;
+import com.thi.realestateplatformsprojectbe.configs.jwt.RestAuthenticationEntryPoint;
+import com.thi.realestateplatformsprojectbe.configs.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -70,15 +70,13 @@ public class SecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
-                        .requestMatchers("/api/auth/register").permitAll()
-                        .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/api/role").permitAll()
-//                        .requestMatchers(HttpMethod.GET,"/api/customers**").authenticated()
-////                        .requestMatchers("/api/customers**").hasAnyAuthority("ROLE_ADMIN")
-//                        .requestMatchers(HttpMethod.PUT,"/api/customers**").hasAnyAuthority("ROLE_ADMIN")
-//                        .requestMatchers(HttpMethod.POST,"/api/customers**").hasAnyAuthority("ROLE_ADMIN")
-//                        .requestMatchers(HttpMethod.DELETE,"/api/customers/**").hasAnyAuthority("ROLE_ADMIN")
+                                .requestMatchers("**").permitAll()
+//                        .requestMatchers("/api/auth/register").permitAll()
+//                        .requestMatchers("/api/auth/login").permitAll()
+//                        .requestMatchers("/api/role").permitAll()
+//                        .requestMatchers("/api/role").permitAll()
+//                        .requestMatchers("/api/real-estate-posts").permitAll()
+//                        .requestMatchers("/api/demand").permitAll()
                 )
                 .exceptionHandling(customizer -> customizer.accessDeniedHandler(customAccessDeniedHandler()))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

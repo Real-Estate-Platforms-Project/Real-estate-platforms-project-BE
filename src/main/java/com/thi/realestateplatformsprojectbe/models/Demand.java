@@ -17,7 +17,7 @@ public class Demand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @Size(max = 10)
     @NotNull
@@ -59,6 +59,11 @@ public class Demand {
     @Lob
     @Column(name = "notes")
     private String notes;
+
+    @NotNull
+    @ColumnDefault("0")
+    @Column(name = "is_verify", nullable = false)
+    private Boolean isVerify;
 
     @NotNull
     @ColumnDefault("1")

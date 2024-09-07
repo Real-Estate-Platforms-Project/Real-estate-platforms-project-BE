@@ -1,4 +1,4 @@
-package com.thi.realestateplatformsprojectbe.config;
+package com.thi.realestateplatformsprojectbe.configs;
 
 
 import com.thi.realestateplatformsprojectbe.models.Account;
@@ -15,13 +15,13 @@ import java.util.List;
 public class UserPrinciple implements UserDetails {
     @Serial
     private static final long serialVersionUID = 1L;
-    private final String accountName;
+    private final String email;
     private final String password;
     private final Collection<? extends GrantedAuthority> roles;
 
-    public UserPrinciple(String accountName, String password,
+    public UserPrinciple(String email, String password,
                          Collection<? extends GrantedAuthority> roles) {
-        this.accountName = accountName;
+        this.email = email;
         this.password = password;
         this.roles = roles;
     }
@@ -32,13 +32,13 @@ public class UserPrinciple implements UserDetails {
             authorities.add(new SimpleGrantedAuthority(role.getName()));
         }
 
-        return new UserPrinciple(account.getAccountName(),
+        return new UserPrinciple(account.getEmail(),
                 account.getPassword(),authorities);
     }
 
     @Override
     public String getUsername() {
-        return accountName;
+        return email;
     }
 
     @Override

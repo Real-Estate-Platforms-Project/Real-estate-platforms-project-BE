@@ -1,6 +1,6 @@
-package com.thi.realestateplatformsprojectbe.config.service;
+package com.thi.realestateplatformsprojectbe.configs.service;
 
-import com.thi.realestateplatformsprojectbe.config.UserPrinciple;
+import com.thi.realestateplatformsprojectbe.configs.UserPrinciple;
 import com.thi.realestateplatformsprojectbe.models.Account;
 import com.thi.realestateplatformsprojectbe.repositories.IAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,15 +13,20 @@ public class AccountService implements UserDetailsService {
     @Autowired
     private IAccountRepository accountRepository;
 
-    public Account findByAccountName(String name) {
-        return accountRepository.findByAccountName(name);
+    public Account findByEmail(String email) {
+        return accountRepository.findByEmail(email);
     }
 
-    public UserDetails loadUserByUsername(String accountName) {
-        return UserPrinciple.build(accountRepository.findByAccountName(accountName));
+    public UserDetails loadUserByUsername(String email) {
+        return UserPrinciple.build(accountRepository.findByEmail(email));
     }
 
     public void save(Account account) {
         accountRepository.save(account);
     }
+
+    public boolean existsByEmail(String email) {
+        return accountRepository.existsByEmail(email);    }
+
+
 }

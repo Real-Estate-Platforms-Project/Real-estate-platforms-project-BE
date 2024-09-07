@@ -7,6 +7,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface IRealEstateService {
     RealEstate addRealEstatePost(RealEstateDTO realEstatePostDTO);
-    Page<RealEstate> searchRealEstates(Double minPrice, Double maxPrice, String region, String type, Integer minArea, Integer maxArea, Pageable pageable);
+    Page<RealEstate> searchRealEstates(Double minPrice, Double maxPrice, String location, String type, Integer minArea, Integer maxArea, Pageable pageable);
 
 }

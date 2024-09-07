@@ -2,8 +2,7 @@ package com.thi.realestateplatformsprojectbe.services.impl;
 
 import  com.thi.realestateplatformsprojectbe.dto.RealEstateDTO;
 import com.thi.realestateplatformsprojectbe.models.RealEstate;
-import com.thi.realestateplatformsprojectbe.repositories.IRealEstateRepository;
-import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
+import com.thi.realestateplatformsprojectbe.repositories.*;
 import com.thi.realestateplatformsprojectbe.services.IRealEstateService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,9 +20,20 @@ public class RealEstateService implements IRealEstateService {
     @Autowired
     private ISellerRepository sellerRepository;
 
+    @Autowired
+    private IProvinceRepository provinceRepository;
+
+    @Autowired
+    private IDistrictRepository districtRepository;
+
+    @Autowired
+    private IWardRepository wardRepository;
+
     @Override
     public RealEstate addRealEstatePost(RealEstateDTO realEstatePostDTO) {
         RealEstate realEstate = new RealEstate();
+
+        realEstate.setSeller(sellerRepository.findById(realEstatePostDTO.getSellerId()).orElse(null));
         realEstate.setDemandType(realEstatePostDTO.getDemandType());
         realEstate.setType(realEstatePostDTO.getType());
         realEstate.setAddress(realEstatePostDTO.getAddress());
@@ -33,7 +43,9 @@ public class RealEstateService implements IRealEstateService {
         realEstate.setPrice(realEstatePostDTO.getPrice());
         realEstate.setStatus(realEstatePostDTO.getStatus());
         realEstate.setNote(realEstatePostDTO.getNote());
-        realEstate.setSeller(sellerRepository.findById(realEstatePostDTO.getSellerId()).orElse(null));
+        realEstate.setProvince(provinceRepository.findProvinceByCode(realEstatePostDTO.getProvinceCode()));
+        realEstate.setDistrict(districtRepository.findDistrictByCode(realEstatePostDTO.getDistrictCode()));
+        realEstate.setWard(wardRepository.findWardByCode(realEstatePostDTO.getWardCode()));
         return realEstateRepository.save(realEstate);
     }
 

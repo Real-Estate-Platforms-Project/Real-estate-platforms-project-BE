@@ -15,7 +15,7 @@ import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
 import com.thi.realestateplatformsprojectbe.services.role.IRoleService;
 import jakarta.mail.MessagingException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,28 +31,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 @RestController
+@RequiredArgsConstructor
 @CrossOrigin("*")
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private AccountService accountService;
-
-    @Autowired
-    private IRoleService roleService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private EmailService emailService;
-    @Autowired
-    private IVerificationTokenService verificationTokenService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+    private final AccountService accountService;
+    private final IRoleService roleService;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final IVerificationTokenService verificationTokenService;
 
 
     @PostMapping("/login")
@@ -63,7 +53,7 @@ public class AuthController {
         String jwt = jwtService.generateTokenLogin(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         Account currentAccount = accountService.findByEmail(account.getEmail());
-        return ResponseEntity.ok(new JwtResponse(currentAccount.getId(), jwt, userDetails.getUsername(), userDetails.getUsername(), userDetails.getAuthorities()));
+        return ResponseEntity.ok(new JwtResponse(currentAccount.getId(), jwt, userDetails.getUsername(), currentAccount.getName(), userDetails.getAuthorities()));
     }
 
     @PostMapping("/register")
@@ -78,11 +68,14 @@ public class AuthController {
         account.setEmail(accountDTO.getEmail());
         String pw = passwordEncoder.encode(accountDTO.getPassword());
         account.setPassword(pw);
+        account.setName(accountDTO.getName());
+
 //        set Roles mac dinh
         Set<Role> roles = new HashSet<>();
         Role role = roleService.findByName(RoleName.ROLE_BUYER.toString());
         roles.add(role);
         account.setRoles(roles);
+
 //        luu lai vao db
         accountService.save(account);
 

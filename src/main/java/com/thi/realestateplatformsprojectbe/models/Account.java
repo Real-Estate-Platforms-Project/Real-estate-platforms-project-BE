@@ -19,6 +19,10 @@ public class Account {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Size(max = 255)
+    @Column(name = "name", nullable = false)
+    private String name;
+
     @Size(max = 155)
     @NotNull
     @Column(name = "email", nullable = false, length = 155, unique = true)

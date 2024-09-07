@@ -8,4 +8,6 @@ import java.util.List;
 public interface IDistrictRepository extends JpaRepository<District, String> {
 
     List<District> findAllByProvinceCode(String code);
+
+    District findDistrictByCode(String districtCode);
 }

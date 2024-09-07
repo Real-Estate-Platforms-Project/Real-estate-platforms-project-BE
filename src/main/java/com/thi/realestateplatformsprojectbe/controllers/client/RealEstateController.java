@@ -24,6 +24,7 @@ public class RealEstateController {
         RealEstate post = realEstateService.addRealEstatePost(realEstatePostDTO);
         return ResponseEntity.ok(post);
     }
+
     @GetMapping("/search")
     public ResponseEntity<Page<RealEstate>> searchRealEstates(
             @RequestParam(required = false) Double minPrice,

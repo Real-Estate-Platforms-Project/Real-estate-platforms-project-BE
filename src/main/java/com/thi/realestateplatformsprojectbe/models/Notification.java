@@ -3,16 +3,20 @@ package com.thi.realestateplatformsprojectbe.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name = "notifications", schema = "real_estate_platform")
+@EntityListeners(AuditingEntityListener.class)
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,8 +24,9 @@ public class Notification {
     private Integer id;
 
     @NotNull
+    @CreatedDate
     @Column(name = "create_at", nullable = false)
-    private Long createAt;
+    private LocalDateTime createAt;
 
     @Size(max = 255)
     @NotNull
@@ -34,7 +39,7 @@ public class Notification {
     private String contend;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
@@ -47,5 +52,8 @@ public class Notification {
     @ColumnDefault("1")
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
+
+    @Transient
+    private String formattedCreateNotification;
 
 }

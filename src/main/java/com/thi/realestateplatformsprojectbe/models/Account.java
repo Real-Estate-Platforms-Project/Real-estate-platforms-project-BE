@@ -21,13 +21,17 @@ public class Account {
 
     @Size(max = 155)
     @NotNull
-    @Column(name = "account_name", nullable = false, length = 155)
-    private String accountName;
+    @Column(name = "email", nullable = false, length = 155, unique = true)
+    private String email;
 
-    @Size(max = 155)
+    @Size(max = 255)
     @NotNull
     @Column(name = "password", nullable = false, length = 155)
     private String password;
+
+    @ColumnDefault("0")
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = false;
 
     @NotNull
     @ColumnDefault("1")

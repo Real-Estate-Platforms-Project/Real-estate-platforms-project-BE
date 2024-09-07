@@ -5,7 +5,10 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 src/main/resources/application.properties
+<<<<<<< HEAD
+=======
 
+>>>>>>> 6debedc1d93f25a48a0641db20f50340db098bff
 ### STS ###
 .apt_generated
 .classpath

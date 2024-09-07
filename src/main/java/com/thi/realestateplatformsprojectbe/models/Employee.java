@@ -49,7 +49,7 @@ public class Employee {
     private String email;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "title_id", nullable = false)
     private Position title;
 
@@ -64,7 +64,7 @@ public class Employee {
     private Boolean isAdmin = false;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 

@@ -44,6 +44,10 @@ public class NotificationController {
         if (notification == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        PrettyTime prettyTime = new PrettyTime(new Locale("vi"));
+        Instant instant = notification.getCreateAt().atZone(ZoneId.systemDefault()).toInstant();
+        Date date = Date.from(instant);
+        notification.setFormattedCreateNotification(prettyTime.format(date));
         return new ResponseEntity<>(notification, HttpStatus.OK);
     }
 }

@@ -21,7 +21,7 @@ public class BuyerController {
     public ResponseEntity<?> getAllBuyers() {
         List<Buyer> buyers = buyerService.getAllBuyers();
         if (buyers.isEmpty()) {
-            return ResponseEntity.status(404).body("Không có khách hàng nào cả.");
+            return ResponseEntity.status(404).body("Không có người mua nào cả.");
         }
         return ResponseEntity.ok(buyers);
     }
@@ -37,7 +37,7 @@ public class BuyerController {
     public ResponseEntity<?> getBuyerDetails(@PathVariable Long id) {
         Buyer buyer = buyerService.getBuyerById(id);
         if (buyer == null) {
-            return ResponseEntity.status(404).body("Không tìm thấy khách hàng với ID: " + id);
+            return ResponseEntity.status(404).body("Không tìm thấy người mua với ID: " + id);
         }
         return ResponseEntity.ok(buyer);
     }

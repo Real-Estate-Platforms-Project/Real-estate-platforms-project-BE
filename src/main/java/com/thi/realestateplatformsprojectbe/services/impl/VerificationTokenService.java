@@ -19,7 +19,8 @@ public class VerificationTokenService implements IVerificationTokenService {
         String token = UUID.randomUUID().toString();
         LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(10);
         VerificationToken verificationToken = new VerificationToken(token, account, expiryDate);
-        return tokenRepository.save(verificationToken);
+        tokenRepository.save(verificationToken);
+        return verificationToken;
     }
 
     public VerificationToken getVerificationToken(String token) {

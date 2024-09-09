@@ -14,12 +14,13 @@ public class DemandService implements IDemandService {
     private IDemandRepository demandRepository;
     @Override
     public List<Demand> findAll() {
-        return demandRepository.findAll();
+        return demandRepository.findAllByIsDeleted(false);
     }
 
     @Override
     public void delete(Demand demand) {
-        demandRepository.delete(demand);
+        demand.setIsDeleted(true);
+        demandRepository.save(demand);
     }
 
     @Override
@@ -30,8 +31,10 @@ public class DemandService implements IDemandService {
     @Override
     public boolean verifyDemand(Long id) {
         if (demandRepository.findById(id).isPresent()) {
-            if (!demandRepository.findById(id).get().getIsVerify()) {
-                demandRepository.findById(id).get().setIsVerify(true);
+            Demand demand = demandRepository.findById(id).get();
+            if (!demand.getIsVerify()) {
+                demand.setIsVerify(true);
+                demandRepository.save(demand);
                 return true;
             }
             return false;
@@ -42,5 +45,10 @@ public class DemandService implements IDemandService {
     @Override
     public void save(Demand demand) {
         demandRepository.save(demand);
+    }
+
+    @Override
+    public Demand findById(Long id) {
+        return demandRepository.findById(id).orElse(null);
     }
 }

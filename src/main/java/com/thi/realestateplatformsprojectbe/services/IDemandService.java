@@ -14,4 +14,6 @@ public interface IDemandService {
     boolean verifyDemand(Long id);
 
     void save(Demand demand);
+
+    Demand findById(Long id);
 }

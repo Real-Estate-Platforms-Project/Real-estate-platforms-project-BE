@@ -10,9 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAnyRole;
-
-
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/api/demand")
@@ -36,15 +33,19 @@ public class DemandController {
         return new ResponseEntity<>(demands, HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping("/verify/id")
-    public boolean verifyDemand(@RequestParam Long id) {
+    @PutMapping("{id}/verify")
+    public boolean verifyDemand(@PathVariable Long id) {
         return demandService.verifyDemand(id);
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> deleteDemand(@RequestBody Demand demand) {
-        demandService.delete(demand);
-        return new ResponseEntity<>(demand, HttpStatus.OK);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteDemand(@PathVariable Long id) {
+        Demand demand = demandService.findById(id);
+        if (demand != null) {
+            demandService.delete(demand);
+            return new ResponseEntity<>(demand, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping
@@ -53,8 +54,9 @@ public class DemandController {
         return new ResponseEntity<>(demand, HttpStatus.CREATED);
     }
 
-    @PutMapping
-    public ResponseEntity<?> updateDemand(@RequestBody Demand demand) {
+    @PutMapping("{id}")
+    public ResponseEntity<?> updateDemand(@PathVariable Long id, @RequestBody Demand demand) {
+
         demandService.save(demand);
         return new ResponseEntity<>(demand, HttpStatus.OK);
     }

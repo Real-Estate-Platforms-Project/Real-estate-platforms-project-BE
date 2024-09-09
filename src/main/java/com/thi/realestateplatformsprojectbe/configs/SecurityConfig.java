@@ -70,7 +70,7 @@ public class SecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("**").permitAll()
+                                .requestMatchers("**", "/api/demand/*").permitAll()
 //                        .requestMatchers("/api/auth/register").permitAll()
 //                        .requestMatchers("/api/auth/login").permitAll()
 //                        .requestMatchers("/api/role").permitAll()

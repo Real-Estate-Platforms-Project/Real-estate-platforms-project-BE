@@ -47,44 +47,48 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Account account) {
-        Authentication authentication
-                = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(account.getEmail(), account.getPassword()));
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(account.getEmail(), account.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        Account currentAccount = accountService.findByEmail(account.getEmail());
+
+        if (!currentAccount.getIsActive()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email để kích hoạt tài khoản.");
+        }
+
         String jwt = jwtService.generateTokenLogin(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        Account currentAccount = accountService.findByEmail(account.getEmail());
+
         return ResponseEntity.ok(new JwtResponse(currentAccount.getId(), jwt, userDetails.getUsername(), currentAccount.getName(), userDetails.getAuthorities()));
     }
+
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody AccountDTO accountDTO) throws MessagingException {
         if (accountService.existsByEmail(accountDTO.getEmail())) {
-            return new ResponseEntity<>("Email đã tồn tại!", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email đã tồn tại!");
         }
         if (!accountDTO.getPassword().equals(accountDTO.getConfirmPassword())) {
-            return new ResponseEntity<>("Mật khẩu không khớp!", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Mật khẩu không khớp!");
         }
+
         Account account = new Account();
         account.setEmail(accountDTO.getEmail());
-        String pw = passwordEncoder.encode(accountDTO.getPassword());
-        account.setPassword(pw);
+        account.setPassword(passwordEncoder.encode(accountDTO.getPassword()));
         account.setName(accountDTO.getName());
 
-//        set Roles mac dinh
         Set<Role> roles = new HashSet<>();
-        Role role = roleService.findByName(RoleName.ROLE_BUYER.toString());
-        roles.add(role);
+        roles.add(roleService.findByName(RoleName.ROLE_BUYER.toString()));
         account.setRoles(roles);
 
-//        luu lai vao db
         accountService.save(account);
 
         VerificationToken token = verificationTokenService.createVerificationToken(account);
-
-        String confirmationUrl = "http://localhost:8080/api/auth/confirm?token=" + token.getToken();
+        String confirmationUrl = "http://localhost:3000/activation-success?token=" + token.getToken(); // Frontend URL
         emailService.sendVerifyEmail(account.getEmail(), confirmationUrl);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.");
     }
 
     @GetMapping("/confirm")
@@ -92,21 +96,22 @@ public class AuthController {
         VerificationToken verificationToken = verificationTokenService.getVerificationToken(token);
 
         if (verificationToken == null) {
-            return new ResponseEntity<>("Token không hợp lệ!", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ!");
         }
 
         if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            return new ResponseEntity<>("Token đã hết hạn!", HttpStatus.BAD_REQUEST);
+            verificationTokenService.deleteToken(verificationToken);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn! Vui lòng yêu cầu gửi lại email xác minh.");
         }
 
         Account account = verificationToken.getAccount();
         account.setIsActive(true);
         accountService.save(account);
-
         verificationTokenService.deleteToken(verificationToken);
 
-        return new ResponseEntity<>("Tài khoản đã được kích hoạt thành công!", HttpStatus.OK);
+        return ResponseEntity.ok("Tài khoản đã được kích hoạt thành công!");
     }
+
 
     @PutMapping("/updatePassWord")
     public ResponseEntity<?> editAccount(

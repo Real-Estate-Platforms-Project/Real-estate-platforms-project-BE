@@ -68,15 +68,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers("**").permitAll()
-//                        .requestMatchers("/api/auth/register").permitAll()
-//                        .requestMatchers("/api/auth/login").permitAll()
-//                        .requestMatchers("/api/role").permitAll()
-//                        .requestMatchers("/api/role").permitAll()
-//                        .requestMatchers("/api/real-estate-posts").permitAll()
-//                        .requestMatchers("/api/demand").permitAll()
                 )
                 .exceptionHandling(customizer -> customizer.accessDeniedHandler(customAccessDeniedHandler()))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

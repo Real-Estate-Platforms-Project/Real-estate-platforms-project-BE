@@ -7,10 +7,9 @@ import com.thi.realestateplatformsprojectbe.configs.service.JwtService;
 import com.thi.realestateplatformsprojectbe.dto.AccountDTO;
 
 import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
-import com.thi.realestateplatformsprojectbe.models.Account;
-import com.thi.realestateplatformsprojectbe.models.Role;
-import com.thi.realestateplatformsprojectbe.models.RoleName;
-import com.thi.realestateplatformsprojectbe.models.VerificationToken;
+import com.thi.realestateplatformsprojectbe.models.*;
+import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
+import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
 import com.thi.realestateplatformsprojectbe.services.role.IRoleService;
@@ -32,8 +31,8 @@ import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin("*")
 @RequestMapping("/api/auth")
+@CrossOrigin("*")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -43,6 +42,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final IVerificationTokenService verificationTokenService;
+    private final ISellerService sellerService;
 
 
     @PostMapping("/login")
@@ -135,4 +135,22 @@ public class AuthController {
         accountService.save(account1);
         return new ResponseEntity<>(userPrinciple.getPassword(), HttpStatus.OK);
     }
+
+    @GetMapping("/seller-info")
+    public ResponseEntity<?> getMe(Authentication authentication) {
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+        // tra loi k phai seller
+        //xs
+        // check role seller is present?
+        if (accountService.checkRole(account)) {
+            Seller seller = sellerService.findByAccountId(account.getId());
+            return ResponseEntity.ok(seller);
+            // neu k co
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Tài khoản này không phải là người bán (seller).");
+        }
+    }
+
 }

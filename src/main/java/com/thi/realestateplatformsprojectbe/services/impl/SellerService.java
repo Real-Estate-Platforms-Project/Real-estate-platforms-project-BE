@@ -29,4 +29,9 @@ public class SellerService implements ISellerService {
         return sellerRepository.save(seller);
     }
 
+    @Override
+    public Seller findByAccountId(Long id) {
+      return  sellerRepository.findSellerByAccount_Id(id);
+    }
+
 }

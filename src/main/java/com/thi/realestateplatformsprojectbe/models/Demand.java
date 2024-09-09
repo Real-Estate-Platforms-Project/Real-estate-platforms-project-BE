@@ -25,6 +25,10 @@ public class Demand {
     private String code;
 
     @NotNull
+    @Column(name = "title", nullable = false)
+    private String title;
+
+    @NotNull
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "buyer_id", nullable = false)
     private Buyer buyer;

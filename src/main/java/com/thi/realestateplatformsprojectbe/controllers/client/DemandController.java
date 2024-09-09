@@ -5,20 +5,29 @@ import com.thi.realestateplatformsprojectbe.services.IDemandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAnyRole;
+
+
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/demand")
 public class DemandController {
     @Autowired
     private IDemandService demandService;
 
+//    @PreAuthorize("hasAnyRole()")
     @GetMapping
     public ResponseEntity<?> getAllDemand() {
         List<Demand> demands = demandService.findAll();
-        return new ResponseEntity<>(demands, HttpStatus.BAD_REQUEST);
+        if (demands.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(demands, HttpStatus.OK);
     }
 // tai danh sach cac demand chua duoc verify cho admin duyet
     @GetMapping("/validate")

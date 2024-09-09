@@ -7,10 +7,9 @@ import com.thi.realestateplatformsprojectbe.configs.service.JwtService;
 import com.thi.realestateplatformsprojectbe.dto.AccountDTO;
 
 import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
-import com.thi.realestateplatformsprojectbe.models.Account;
-import com.thi.realestateplatformsprojectbe.models.Role;
-import com.thi.realestateplatformsprojectbe.models.RoleName;
-import com.thi.realestateplatformsprojectbe.models.VerificationToken;
+import com.thi.realestateplatformsprojectbe.models.*;
+import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
+import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
 import com.thi.realestateplatformsprojectbe.services.role.IRoleService;
@@ -23,6 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,8 +32,8 @@ import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin("*")
 @RequestMapping("/api/auth")
+@CrossOrigin("*")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -43,6 +43,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final IVerificationTokenService verificationTokenService;
+    private final ISellerService sellerService;
 
 
     @PostMapping("/login")
@@ -118,21 +119,50 @@ public class AuthController {
             Authentication authentication,
             @RequestBody UpdateAccount updateAccount
     ) {
+        // Lấy thông tin tài khoảng hiện tại
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
         Account account1 = accountService.findByEmail(userPrinciple.getUsername());
+
+        // Xác định tài khoảng có tồn tại không
         if (account1 == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("Tài khoảng không tồn tại",HttpStatus.NOT_FOUND);
         }
+
+        // Xác minh mật khẩu hiện tại nhập vào có đúng không
+        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(),account1.getPassword());
+        if(!isTrue){
+            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng",HttpStatus.BAD_REQUEST);
+        }
+
+        // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
         if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Nhập lại mật khẩu không đúng",HttpStatus.BAD_REQUEST);
         }
+
+        // Mã hoá encoder mật khẩu mới
         String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
+
+        // Lưu vào db
         account1.setPassword(pw);
-        Set<Role> roles = new HashSet<>();
-        Role role = roleService.findByName(RoleName.ROLE_BUYER.toString());
-        roles.add(role);
-        account1.setRoles(roles);
         accountService.save(account1);
         return new ResponseEntity<>(userPrinciple.getPassword(), HttpStatus.OK);
     }
+
+    @GetMapping("/seller-info")
+    public ResponseEntity<?> getMe(Authentication authentication) {
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+        // tra loi k phai seller
+        //xs
+        // check role seller is present?
+        if (accountService.checkRole(account)) {
+            Seller seller = sellerService.findByAccountId(account.getId());
+            return ResponseEntity.ok(seller);
+            // neu k co
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Tài khoản này không phải là người bán (seller).");
+        }
+    }
+
 }

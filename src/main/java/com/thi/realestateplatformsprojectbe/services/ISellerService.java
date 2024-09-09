@@ -7,4 +7,5 @@ public interface ISellerService {
     List<Seller> getAllSellers();
     Seller getSellerById(Long id);
     Seller addSeller(Seller seller);
+    Seller findByAccountId(Long id);
 }

@@ -16,7 +16,7 @@ public class RealEstateDetail {
     private Long id;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "real_estate_id", nullable = false)
     private RealEstate realEstate;
 

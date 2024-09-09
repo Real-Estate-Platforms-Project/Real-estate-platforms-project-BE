@@ -5,7 +5,9 @@ import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -16,6 +18,7 @@ public class SellerController {
 
     @Autowired
     private ISellerService sellerService;
+    private AuthenticationManager authenticationManager;
 
     @GetMapping
     @PermitAll

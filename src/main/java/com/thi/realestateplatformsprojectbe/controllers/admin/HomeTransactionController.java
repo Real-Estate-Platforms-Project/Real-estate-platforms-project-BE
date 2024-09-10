@@ -28,7 +28,7 @@ public class HomeTransactionController {
 
     private static final int DEFAULT_PAGE = 0;
 
-    public static final int PAGE_SIZE = 1;
+    public static final int PAGE_SIZE = 2;
 
 
     @GetMapping

@@ -34,10 +34,10 @@ public class TransactionServiceImpl implements ITransactionService {
         return transactionPage.map(transaction -> TransactionResponse.builder()
                 .id(transaction.getId())
                 .code(transaction.getCode())
-                .realEstateId(transaction.getId())
-                .employeeId(transaction.getId())
-                .buyerId(transaction.getId())
-                .SellerId(transaction.getId())
+                .realEstate(transaction.getBuyer().getCode())
+                .employee(transaction.getEmployee().getName())
+                .buyer(transaction.getBuyer().getName())
+                .seller(transaction.getSeller().getName())
                 .amount(transaction.getAmount())
                 .createAt(transaction.getCreateAt())
                 .commissionFee(transaction.getCommissionFee())
@@ -50,13 +50,13 @@ public class TransactionServiceImpl implements ITransactionService {
     @Override
     public Page<TransactionResponse> findAll(Pageable pageable) {
         Page<Transaction> transactionPage = transactionRepository.findAll(pageable);
-        return transactionPage.map(transaction -> TransactionResponse.builder()
+        Page<TransactionResponse> transactionPageResponse = transactionPage.map(transaction -> TransactionResponse.builder()
                 .id(transaction.getId())
                 .code(transaction.getCode())
-                .realEstateId(transaction.getRealEstate() != null ? transaction.getRealEstate().getId() : null)
-                .employeeId(transaction.getEmployee() != null ? transaction.getEmployee().getId() : null)
-                .buyerId(transaction.getBuyer() != null ? transaction.getBuyer().getId() : null)
-                .SellerId(transaction.getSeller() != null ? transaction.getSeller().getId() : null)
+                .realEstate(transaction.getRealEstate().getCode()) // Lấy mã bất động sản
+                .employee(transaction.getEmployee().getName()) // Lấy tên nhân viên
+                .buyer(transaction.getBuyer().getName()) // Lấy tên bên mua
+                .seller(transaction.getSeller().getName()) // Lấy tên bên bán
                 .amount(transaction.getAmount())
                 .createAt(transaction.getCreateAt())
                 .commissionFee(transaction.getCommissionFee())
@@ -64,7 +64,10 @@ public class TransactionServiceImpl implements ITransactionService {
                 .status(transaction.getStatus())
                 .isDeleted(transaction.getIsDeleted())
                 .build());
+
+        return transactionPageResponse;
     }
+
 
 
     @Override

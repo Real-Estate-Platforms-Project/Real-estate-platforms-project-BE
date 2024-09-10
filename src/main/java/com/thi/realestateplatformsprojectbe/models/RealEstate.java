@@ -82,4 +82,9 @@ public class RealEstate {
     @ManyToOne
     @JoinColumn(name = "ward_code",nullable = false)
     private Ward ward;
+
+    @Size(max = 15)
+    @NotNull
+    @Column(name = "code", nullable = false, length = 15)
+    private String code;
 }

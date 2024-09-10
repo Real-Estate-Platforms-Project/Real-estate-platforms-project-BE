@@ -22,13 +22,13 @@ public class TransactionResponse {
 
     String code;
 
-    Long employeeId;
+    String employee;
 
-    Long realEstateId;
+    String realEstate;
 
-    Long buyerId;
+    String buyer;
 
-    Long SellerId;
+    String seller;
 
     Integer amount;
 

@@ -87,7 +87,7 @@ public class CustomerService implements ICustomerService {
     }
 
     private String generateRandomCode() {
-        return RandomStringUtils.randomNumeric(5);
+        return RandomStringUtils.randomNumeric(4);
     }
 
 }

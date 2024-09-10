@@ -9,6 +9,7 @@ import com.thi.realestateplatformsprojectbe.dto.AccountDTO;
 import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
 import com.thi.realestateplatformsprojectbe.models.*;
 import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
+import com.thi.realestateplatformsprojectbe.services.IBuyerService;
 import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
@@ -44,6 +45,7 @@ public class AuthController {
     private final EmailService emailService;
     private final IVerificationTokenService verificationTokenService;
     private final ISellerService sellerService;
+    private final IBuyerService buyerService;
 
 
     @PostMapping("/login")
@@ -162,6 +164,40 @@ public class AuthController {
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Tài khoản này không phải là người bán (seller).");
+        }
+    }
+
+    @GetMapping("/buyer-info")
+    public ResponseEntity<?> getBuyer(Authentication authentication) {
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+        // tra loi k phai seller
+        //xs
+        // check role seller is present?
+        if (accountService.checkRoleBuyer(account)) {
+            Buyer buyer = buyerService.getBuyerById(account.getId());
+            return ResponseEntity.ok(buyer);
+            // neu k co
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Tài khoản này không phải là người mua (buyer).");
+        }
+    }
+
+    @GetMapping("/get-roles")
+    public ResponseEntity<?> getAllRole(Authentication authentication) {
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+        // tra loi k phai seller
+        //xs
+        // check role seller is present?
+        if (account != null) {
+            Set<Role> roles = account.getRoles();
+            return ResponseEntity.ok(roles);
+            // neu k co
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Tài khoản này không có quyền truy cập");
         }
     }
 

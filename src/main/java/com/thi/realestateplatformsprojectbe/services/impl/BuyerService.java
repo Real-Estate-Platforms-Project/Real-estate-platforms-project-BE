@@ -21,7 +21,7 @@ public class BuyerService implements IBuyerService {
 
     @Override
     public Buyer getBuyerById(Long id) {
-        return buyerRepository.findById(id).orElse(null);
+        return buyerRepository.findBuyerByAccountId(id);
     }
 
     @Override

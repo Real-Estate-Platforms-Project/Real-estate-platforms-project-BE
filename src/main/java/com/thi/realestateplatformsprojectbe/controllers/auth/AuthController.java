@@ -173,22 +173,19 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/buyer-info")
-    public ResponseEntity<?> getBuyer(Authentication authentication) {
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        Account account = accountService.findByEmail(userPrinciple.getUsername());
-        // tra loi k phai seller
-        //xs
-        // check role seller is present?
-        if (accountService.checkRoleBuyer(account)) {
-            Buyer buyer = buyerService.getBuyerById(account.getId());
-            return ResponseEntity.ok(buyer);
-            // neu k co
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Tài khoản này không phải là người mua (buyer).");
-        }
-    }
+//    @GetMapping("/buyer-info")
+//    public ResponseEntity<?> getBuyer(Authentication authentication) {
+//        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+//        Account account = accountService.findByEmail(userPrinciple.getUsername());
+//        if (accountService.checkRoleBuyer(account)) {
+//            Buyer buyer = buyerService.getBuyerById(account.getId());
+//            return ResponseEntity.ok(buyer);
+//            // neu k co
+//        } else {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//                    .body("Tài khoản này không phải là người mua (buyer).");
+//        }
+//    }
 
     @GetMapping("/get-roles")
     public ResponseEntity<?> getAllRole(Authentication authentication) {

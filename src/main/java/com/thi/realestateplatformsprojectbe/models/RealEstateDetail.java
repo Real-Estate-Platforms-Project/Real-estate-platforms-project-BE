@@ -12,7 +12,7 @@ import lombok.*;
 @Table(name = "real_estate_details", schema = "real_estate_platform")
 public class RealEstateDetail {
     @Id
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull

@@ -9,8 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class
-SellerService implements ISellerService {
+public class SellerService implements ISellerService {
 
     @Autowired
     private ISellerRepository sellerRepository;

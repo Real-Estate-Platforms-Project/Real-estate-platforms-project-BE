@@ -20,8 +20,10 @@ public class CustomerController {
         try {
             customerService.addNewCustomer(customerDTO);
             return ResponseEntity.status(HttpStatus.OK).body("Customer added successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid data: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Customer not added");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred: " + e.getMessage());
         }
     }
 }

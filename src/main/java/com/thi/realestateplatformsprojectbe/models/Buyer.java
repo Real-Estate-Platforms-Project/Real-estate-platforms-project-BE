@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -14,6 +17,9 @@ import java.time.LocalDate;
 @Setter
 @Entity
 @Table(name = "buyers", schema = "real_estate_platform")
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Buyer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

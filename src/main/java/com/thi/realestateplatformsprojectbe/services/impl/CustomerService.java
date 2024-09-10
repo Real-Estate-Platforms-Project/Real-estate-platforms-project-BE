@@ -34,6 +34,7 @@ public class CustomerService implements ICustomerService {
         account.setPassword(encodedPassword);
         account.setIsActive(true);
         account.setIsDeleted(false);
+        account.setName(customerDTO.getName());
         account = accountRepository.save(account);
 
         if ("BUYER".equalsIgnoreCase(customerDTO.getCustomerType())) {

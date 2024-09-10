@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -43,5 +44,5 @@ public class Account {
     private Boolean isDeleted = false;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Role> roles;
+    private Set<Role> roles = new HashSet<>();
 }

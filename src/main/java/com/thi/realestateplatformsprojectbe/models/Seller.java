@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @Table(name = "sellers", schema = "real_estate_platform")
 public class Seller {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 

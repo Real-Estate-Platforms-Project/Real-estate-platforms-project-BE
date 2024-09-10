@@ -44,5 +44,5 @@ public class Account {
     private Boolean isDeleted = false;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Role> roles = new HashSet<>();
+    private Set<Role> roles;
 }

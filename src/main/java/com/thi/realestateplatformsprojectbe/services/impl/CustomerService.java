@@ -81,7 +81,6 @@ public class CustomerService implements ICustomerService {
 
         emailService.sendAccountCreationEmail(customerDTO.getEmail(), customerDTO.getName(), tempPassword);
     }
-
     private String generateRandomPassword() {
         return RandomStringUtils.randomAlphanumeric(8);
     }
@@ -89,5 +88,4 @@ public class CustomerService implements ICustomerService {
     private String generateRandomCode() {
         return RandomStringUtils.randomNumeric(4);
     }
-
 }

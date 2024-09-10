@@ -30,4 +30,9 @@ public class VerificationTokenService implements IVerificationTokenService {
     public void deleteToken(VerificationToken token) {
         tokenRepository.delete(token);
     }
+
+    @Override
+    public VerificationToken getVerificationTokenByAccount(Account currentAccount) {
+        return tokenRepository.getVerificationTokenByAccount(currentAccount);
+    }
 }

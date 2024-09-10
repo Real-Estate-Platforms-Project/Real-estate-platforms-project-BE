@@ -8,7 +8,6 @@ import com.thi.realestateplatformsprojectbe.dto.AccountDTO;
 
 import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
 import com.thi.realestateplatformsprojectbe.models.*;
-import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
 import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
@@ -34,6 +33,7 @@ import java.util.Set;
 @RequestMapping("/api/auth")
 @CrossOrigin("*")
 public class AuthController {
+
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
@@ -118,22 +118,30 @@ public class AuthController {
             Authentication authentication,
             @RequestBody UpdateAccount updateAccount
     ) {
+
+        // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
+        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
+            return new ResponseEntity<>("Nhập lại mật khẩu không đúng",HttpStatus.BAD_REQUEST);
+        }
+
+        // Lấy thông tin tài khoảng hiện tại
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
         Account account1 = accountService.findByEmail(userPrinciple.getUsername());
-        if (account1 == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(),account1.getPassword());
+        if(!isTrue){
+            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng",HttpStatus.BAD_REQUEST);
         }
-        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+
+
+
+        // Mã hoá encoder mật khẩu mới
         String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
+
+        // Lưu vào db
         account1.setPassword(pw);
-        Set<Role> roles = new HashSet<>();
-        Role role = roleService.findByName(RoleName.ROLE_BUYER.toString());
-        roles.add(role);
-        account1.setRoles(roles);
         accountService.save(account1);
-        return new ResponseEntity<>(userPrinciple.getPassword(), HttpStatus.OK);
+        return new ResponseEntity<>("{}", HttpStatus.OK);
     }
 
     @GetMapping("/seller-info")

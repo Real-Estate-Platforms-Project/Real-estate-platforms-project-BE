@@ -1,7 +1,6 @@
 package com.thi.realestateplatformsprojectbe.controllers.admin;
 
 import com.thi.realestateplatformsprojectbe.dto.response.TransactionResponse;
-import com.thi.realestateplatformsprojectbe.models.Transaction;
 import com.thi.realestateplatformsprojectbe.services.impl.TransactionServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

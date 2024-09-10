@@ -1,6 +1,5 @@
 package com.thi.realestateplatformsprojectbe.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -16,10 +15,9 @@ public class RealEstateDetail {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @MapsId
+    @NotNull
+    @OneToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "real_estate_id", nullable = false)
-    @JsonBackReference
     private RealEstate realEstate;
 
     @NotNull

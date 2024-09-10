@@ -143,25 +143,22 @@ public class AuthController {
             Authentication authentication,
             @RequestBody UpdateAccount updateAccount
     ) {
-        // Lấy thông tin tài khoảng hiện tại
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        Account account1 = accountService.findByEmail(userPrinciple.getUsername());
-
-        // Xác định tài khoảng có tồn tại không
-        if (account1 == null) {
-            return new ResponseEntity<>("Tài khoảng không tồn tại",HttpStatus.NOT_FOUND);
-        }
-
-        // Xác minh mật khẩu hiện tại nhập vào có đúng không
-        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(),account1.getPassword());
-        if(!isTrue){
-            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng",HttpStatus.BAD_REQUEST);
-        }
 
         // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
         if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
             return new ResponseEntity<>("Nhập lại mật khẩu không đúng",HttpStatus.BAD_REQUEST);
         }
+
+        // Lấy thông tin tài khoảng hiện tại
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account1 = accountService.findByEmail(userPrinciple.getUsername());
+
+        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(),account1.getPassword());
+        if(!isTrue){
+            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng",HttpStatus.BAD_REQUEST);
+        }
+
+
 
         // Mã hoá encoder mật khẩu mới
         String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
@@ -169,7 +166,7 @@ public class AuthController {
         // Lưu vào db
         account1.setPassword(pw);
         accountService.save(account1);
-        return new ResponseEntity<>(userPrinciple.getPassword(), HttpStatus.OK);
+        return new ResponseEntity<>("{}", HttpStatus.OK);
     }
 
     @GetMapping("/seller-info")

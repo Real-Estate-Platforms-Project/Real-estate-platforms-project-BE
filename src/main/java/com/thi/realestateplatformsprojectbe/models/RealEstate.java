@@ -1,6 +1,7 @@
 package com.thi.realestateplatformsprojectbe.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -82,6 +83,10 @@ public class RealEstate {
     @ManyToOne
     @JoinColumn(name = "ward_code",nullable = false)
     private Ward ward;
+
+    @OneToOne(mappedBy = "realEstate", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private RealEstateDetail realEstateDetail;
 
     @Size(max = 15)
     @NotNull

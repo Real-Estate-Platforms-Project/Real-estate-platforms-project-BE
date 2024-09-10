@@ -42,7 +42,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final IVerificationTokenService verificationTokenService;
-    private final ISellerService sellerService;
+
 
 
     @PostMapping("/login")
@@ -158,8 +158,6 @@ public class AuthController {
             return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng",HttpStatus.BAD_REQUEST);
         }
 
-
-
         // Mã hoá encoder mật khẩu mới
         String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
 
@@ -169,21 +167,6 @@ public class AuthController {
         return new ResponseEntity<>("{}", HttpStatus.OK);
     }
 
-    @GetMapping("/seller-info")
-    public ResponseEntity<?> getMe(Authentication authentication) {
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        Account account = accountService.findByEmail(userPrinciple.getUsername());
-        // tra loi k phai seller
-        //xs
-        // check role seller is present?
-        if (accountService.checkRole(account)) {
-            Seller seller = sellerService.findByAccountId(account.getId());
-            return ResponseEntity.ok(seller);
-            // neu k co
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Tài khoản này không phải là người bán (seller).");
-        }
-    }
+
 
 }

@@ -19,11 +19,6 @@ public class Demand {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Size(max = 10)
-    @NotNull
-    @Column(name = "code", nullable = false, length = 10)
-    private String code;
-
     @NotNull
     @Column(name = "title", nullable = false)
     private String title;
@@ -56,7 +51,6 @@ public class Demand {
     @Column(name = "max_area", nullable = false)
     private Integer maxArea;
 
-    @NotNull
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;
 
@@ -64,7 +58,6 @@ public class Demand {
     @Column(name = "notes")
     private String notes;
 
-    @NotNull
     @ColumnDefault("0")
     @Column(name = "is_verify", nullable = false)
     private Boolean isVerify;

@@ -182,22 +182,6 @@ public class AuthController {
         return new ResponseEntity<>("{}", HttpStatus.OK);
     }
 
-    @GetMapping("/seller-info")
-    public ResponseEntity<?> getMe(Authentication authentication) {
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        Account account = accountService.findByEmail(userPrinciple.getUsername());
-        // tra loi k phai seller
-        //xs
-        // check role seller is present?
-        if (accountService.checkRole(account)) {
-            Seller seller = sellerService.findByAccountId(account.getId());
-            return ResponseEntity.ok(seller);
-            // neu k co
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Tài khoản này không phải là người bán (seller).");
-        }
-    }
 
 //    @GetMapping("/buyer-info")
 //    public ResponseEntity<?> getBuyer(Authentication authentication) {

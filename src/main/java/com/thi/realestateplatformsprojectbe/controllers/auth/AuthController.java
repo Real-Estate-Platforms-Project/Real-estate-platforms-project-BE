@@ -121,6 +121,12 @@ public class AuthController {
             Authentication authentication,
             @RequestBody UpdateAccount updateAccount
     ) {
+
+        // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
+        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
+            return new ResponseEntity<>("Nhập lại mật khẩu không đúng",HttpStatus.BAD_REQUEST);
+        }
+
         // Lấy thông tin tài khoảng hiện tại
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
         Account account1 = accountService.findByEmail(userPrinciple.getUsername());

@@ -153,7 +153,7 @@ public class AuthController {
         // Lưu vào db
         account1.setPassword(pw);
         accountService.save(account1);
-        return new ResponseEntity<>(userPrinciple.getPassword(), HttpStatus.OK);
+        return new ResponseEntity<>("{}", HttpStatus.OK);
     }
 
     @GetMapping("/seller-info")

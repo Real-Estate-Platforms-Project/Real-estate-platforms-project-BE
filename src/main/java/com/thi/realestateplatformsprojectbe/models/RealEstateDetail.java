@@ -2,12 +2,12 @@ package com.thi.realestateplatformsprojectbe.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "real_estate_details", schema = "real_estate_platform")
 public class RealEstateDetail {
@@ -21,21 +21,6 @@ public class RealEstateDetail {
     private RealEstate realEstate;
 
     @NotNull
-    @Column(name = "front_side", nullable = false)
-    private Integer frontSide;
-
-    @NotNull
-    @Column(name = "street_width", nullable = false)
-    private Integer streetWidth;
-
-    @Column(name = "distance_to_main_street")
-    private Integer distanceToMainStreet;
-
-    @NotNull
-    @Column(name = "length", nullable = false)
-    private Integer length;
-
-    @NotNull
     @Column(name = "floor", nullable = false)
     private Integer floor;
 
@@ -46,10 +31,5 @@ public class RealEstateDetail {
     @NotNull
     @Column(name = "toilet", nullable = false)
     private Integer toilet;
-
-    @NotNull
-    @ColumnDefault("1")
-    @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }

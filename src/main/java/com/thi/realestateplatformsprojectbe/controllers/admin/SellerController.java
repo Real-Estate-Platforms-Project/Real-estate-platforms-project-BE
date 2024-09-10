@@ -1,11 +1,16 @@
 package com.thi.realestateplatformsprojectbe.controllers.admin;
 
+import com.thi.realestateplatformsprojectbe.configs.UserPrinciple;
+import com.thi.realestateplatformsprojectbe.configs.service.AccountService;
+import com.thi.realestateplatformsprojectbe.models.Account;
 import com.thi.realestateplatformsprojectbe.models.Seller;
 import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import jakarta.annotation.security.PermitAll;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -14,11 +19,11 @@ import java.util.List;
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/api/admin/sellers")
+@RequiredArgsConstructor
 public class SellerController {
 
-    @Autowired
-    private ISellerService sellerService;
-    private AuthenticationManager authenticationManager;
+    private final ISellerService sellerService;
+    private final AccountService accountService;
 
     @GetMapping
     @PermitAll
@@ -44,5 +49,22 @@ public class SellerController {
             return ResponseEntity.status(404).body("Không tìm thấy người bán với ID: " + id);
         }
         return ResponseEntity.ok(seller);
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<?> getSeller(Authentication authentication) {
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+        // tra loi k phai seller
+        //xs
+        // check role seller is present?
+        if (accountService.checkRole(account)) {
+            Seller seller = sellerService.findByAccountId(account.getId());
+            return ResponseEntity.ok(seller);
+            // neu k co
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Tài khoản này không phải là người bán (seller).");
+        }
     }
 }

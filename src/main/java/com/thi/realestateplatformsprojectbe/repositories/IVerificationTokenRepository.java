@@ -1,5 +1,6 @@
 package com.thi.realestateplatformsprojectbe.repositories;
 
+import com.thi.realestateplatformsprojectbe.models.Account;
 import com.thi.realestateplatformsprojectbe.models.VerificationToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -10,4 +11,6 @@ public interface IVerificationTokenRepository extends JpaRepository<Verification
     VerificationToken findByToken(String token);
 
     List<VerificationToken> findAllByExpiryDateBefore(LocalDateTime now);
+
+    VerificationToken getVerificationTokenByAccount(Account currentAccount);
 }

@@ -8,6 +8,7 @@ import com.thi.realestateplatformsprojectbe.dto.AccountDTO;
 
 import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
 import com.thi.realestateplatformsprojectbe.models.*;
+import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
 import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
@@ -34,7 +35,6 @@ import java.util.Set;
 @CrossOrigin("*")
 public class AuthController {
 
-
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final AccountService accountService;
@@ -47,21 +47,46 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Account account) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(account.getEmail(), account.getPassword()));
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(account.getEmail(), account.getPassword())
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Thông tin đăng nhập không đúng!");
+        }
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         Account currentAccount = accountService.findByEmail(account.getEmail());
 
         if (!currentAccount.getIsActive()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email để kích hoạt tài khoản.");
+            VerificationToken token = verificationTokenService.getVerificationTokenByAccount(currentAccount);
+
+            if (token == null || token.getExpiryDate().isBefore(LocalDateTime.now().minusMinutes(5))) {
+                VerificationToken newToken = verificationTokenService.createVerificationToken(currentAccount);
+                String confirmationUrl = "http://localhost:3000/activation-success?token=" + newToken.getToken();
+                try {
+                    emailService.sendVerifyEmail(currentAccount.getEmail(), confirmationUrl);
+                } catch (MessagingException e) {
+                    throw new RuntimeException(e);
+                }
+
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Tài khoản chưa được kích hoạt! Email xác nhận đã được gửi lại. Vui lòng kiểm tra email.");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email để kích hoạt tài khoản.");
+            }
         }
 
         String jwt = jwtService.generateTokenLogin(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        return ResponseEntity.ok(new JwtResponse(currentAccount.getId(), jwt, userDetails.getUsername(), currentAccount.getName(), userDetails.getAuthorities()));
+        return ResponseEntity.ok(new JwtResponse(currentAccount.getId(), jwt, userDetails.getUsername(),
+                currentAccount.getName(), userDetails.getAuthorities()));
     }
+
 
 
     @PostMapping("/register")

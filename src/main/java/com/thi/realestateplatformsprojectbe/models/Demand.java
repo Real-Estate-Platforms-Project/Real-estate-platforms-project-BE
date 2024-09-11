@@ -3,8 +3,7 @@ package com.thi.realestateplatformsprojectbe.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
@@ -12,7 +11,10 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "demands", schema = "real_estate_platform")
+@Builder
 public class Demand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

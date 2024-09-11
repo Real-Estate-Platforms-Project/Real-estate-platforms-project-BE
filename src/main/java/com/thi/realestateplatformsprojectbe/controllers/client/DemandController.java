@@ -1,5 +1,6 @@
 package com.thi.realestateplatformsprojectbe.controllers.client;
 
+import com.thi.realestateplatformsprojectbe.dto.DemandDTO;
 import com.thi.realestateplatformsprojectbe.models.Demand;
 import com.thi.realestateplatformsprojectbe.services.IDemandService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,14 +19,25 @@ public class DemandController {
     private IDemandService demandService;
 
 //    @PreAuthorize("hasAnyRole()")
+
+
     @GetMapping
-    public ResponseEntity<?> getAllDemand() {
+    public ResponseEntity<?> getAllVerifiedDemand(@RequestParam(value = "isVerify", defaultValue = "") Boolean isVerify) {
+        if (isVerify != null) {
+            List<Demand> demands = demandService.findAllVerifiedDemand(isVerify);
+            if (demands.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(demands, HttpStatus.OK);
+        }
         List<Demand> demands = demandService.findAll();
         if (demands.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(demands, HttpStatus.OK);
     }
+
+
 // tai danh sach cac demand chua duoc verify cho admin duyet
     @GetMapping("/validate")
     public ResponseEntity<?> getInvalidatedDemand() {
@@ -49,15 +61,15 @@ public class DemandController {
     }
 
     @PostMapping
-    public ResponseEntity<Demand> addDemand(@RequestBody Demand demand) {
-        demandService.save(demand);
-        return new ResponseEntity<>(demand, HttpStatus.CREATED);
+    public ResponseEntity<DemandDTO> addDemand(@RequestBody DemandDTO demandDTO) {
+        demandService.save(demandDTO);
+        return new ResponseEntity<>(demandDTO, HttpStatus.CREATED);
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<?> updateDemand(@PathVariable Long id, @RequestBody Demand demand) {
+    public ResponseEntity<?> updateDemand(@PathVariable Long id, @RequestBody DemandDTO demandDTO) {
 
-        demandService.save(demand);
-        return new ResponseEntity<>(demand, HttpStatus.OK);
+        demandService.save(demandDTO);
+        return new ResponseEntity<>(demandDTO, HttpStatus.OK);
     }
 }

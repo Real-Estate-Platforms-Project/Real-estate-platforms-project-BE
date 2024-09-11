@@ -11,4 +11,5 @@ public interface IDemandRepository extends JpaRepository<Demand, Long> {
     List<Demand> findInvalidatedDemand();
 
     List<Demand> findAllByIsDeleted(Boolean isDeleted);
+    List<Demand> findAllByIsDeletedAndIsVerify(Boolean isDeleted, Boolean isVerify);
 }

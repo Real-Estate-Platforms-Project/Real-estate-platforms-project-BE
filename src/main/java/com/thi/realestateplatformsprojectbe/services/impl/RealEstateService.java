@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 
 import org.springframework.stereotype.Service;
 
+import java.util.Random;
+
 @Service
 @RequiredArgsConstructor
 public class RealEstateService implements IRealEstateService {
@@ -26,7 +28,10 @@ public class RealEstateService implements IRealEstateService {
 
     @Override
     public RealEstate addRealEstatePost(RealEstateWithDetailDTO realEstatePostDTO) {
-        // Sử dụng Builder để tạo đối tượng RealEstate
+        Random random = new Random();
+        int randomNumber = 1000 + random.nextInt(9000);
+        String generatedCode = "MBDS-" + randomNumber;
+        // Create the RealEstate object using the Builder pattern
         RealEstate realEstate = RealEstate.builder()
                 .seller(sellerRepository.findById(realEstatePostDTO.getSellerId()).orElse(null))
                 .demandType(realEstatePostDTO.getDemandType())
@@ -41,19 +46,22 @@ public class RealEstateService implements IRealEstateService {
                 .province(provinceRepository.findProvinceByCode(realEstatePostDTO.getProvinceCode()))
                 .district(districtRepository.findDistrictByCode(realEstatePostDTO.getDistrictCode()))
                 .ward(wardRepository.findWardByCode(realEstatePostDTO.getWardCode()))
+                .code(generatedCode)
                 .build();
         RealEstate savedRealEstate = realEstateRepository.save(realEstate);
-        // Sử dụng Builder để tạo đối tượng RealEstateDetail
-        RealEstateDetail realEstateDetail = RealEstateDetail.builder()
-                .bedroom(realEstatePostDTO.getNumberOfBedrooms())
-                .floor(realEstatePostDTO.getNumberOfFloors())
-                .toilet(realEstatePostDTO.getNumberOfToilet())
-                .realEstate(savedRealEstate)
-                .build();
-        realEstateDetailRepository.save(realEstateDetail);
-
+        // Conditionally create and save RealEstateDetail if type is "Nhà ở"
+        if ("Nhà ở".equals(realEstatePostDTO.getType())) {
+            RealEstateDetail realEstateDetail = RealEstateDetail.builder()
+                    .bedroom(realEstatePostDTO.getBedroom())
+                    .floor(realEstatePostDTO.getFloor())
+                    .toilet(realEstatePostDTO.getToilet())
+                    .realEstate(savedRealEstate)
+                    .build();
+            realEstateDetailRepository.save(realEstateDetail);
+        }
         return savedRealEstate;
     }
+
 
 
     @Override

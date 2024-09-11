@@ -48,11 +48,11 @@ public class RealEstateWithDetailDTO {
     private String wardCode;
 
     @NotNull(message = "Phòng không được để trống")
-    private Integer numberOfBedrooms;
+    private Integer floor;
 
     @NotNull(message = "Tầng không được để trống")
-    private Integer numberOfFloors;
+    private Integer bedroom;
 
     @NotNull(message = "Toilet không được để trống")
-    private Integer numberOfToilet;
+    private Integer toilet;
 }

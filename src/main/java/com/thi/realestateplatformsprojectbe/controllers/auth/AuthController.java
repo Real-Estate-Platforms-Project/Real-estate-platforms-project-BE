@@ -9,6 +9,7 @@ import com.thi.realestateplatformsprojectbe.dto.AccountDTO;
 import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
 import com.thi.realestateplatformsprojectbe.models.*;
 import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
+import com.thi.realestateplatformsprojectbe.services.IBuyerService;
 import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
@@ -22,6 +23,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,6 +37,7 @@ import java.util.Set;
 @CrossOrigin("*")
 public class AuthController {
 
+
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final AccountService accountService;
@@ -42,7 +45,8 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final IVerificationTokenService verificationTokenService;
-
+    private final ISellerService sellerService;
+    private final IBuyerService buyerService;
 
 
     @PostMapping("/login")
@@ -153,9 +157,20 @@ public class AuthController {
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
         Account account1 = accountService.findByEmail(userPrinciple.getUsername());
 
+        // Xác định tài khoảng có tồn tại không
+        if (account1 == null) {
+            return new ResponseEntity<>("Tài khoảng không tồn tại",HttpStatus.NOT_FOUND);
+        }
+
+        // Xác minh mật khẩu hiện tại nhập vào có đúng không
         boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(),account1.getPassword());
         if(!isTrue){
             return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng",HttpStatus.BAD_REQUEST);
+        }
+
+        // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
+        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
+            return new ResponseEntity<>("Nhập lại mật khẩu không đúng",HttpStatus.BAD_REQUEST);
         }
 
         // Mã hoá encoder mật khẩu mới
@@ -168,5 +183,35 @@ public class AuthController {
     }
 
 
+//    @GetMapping("/buyer-info")
+//    public ResponseEntity<?> getBuyer(Authentication authentication) {
+//        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+//        Account account = accountService.findByEmail(userPrinciple.getUsername());
+//        if (accountService.checkRoleBuyer(account)) {
+//            Buyer buyer = buyerService.getBuyerById(account.getId());
+//            return ResponseEntity.ok(buyer);
+//            // neu k co
+//        } else {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//                    .body("Tài khoản này không phải là người mua (buyer).");
+//        }
+//    }
+
+    @GetMapping("/get-roles")
+    public ResponseEntity<?> getAllRole(Authentication authentication) {
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+        // tra loi k phai seller
+        //xs
+        // check role seller is present?
+        if (account != null) {
+            Set<Role> roles = account.getRoles();
+            return ResponseEntity.ok(roles);
+            // neu k co
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Tài khoản này không có quyền truy cập");
+        }
+    }
 
 }

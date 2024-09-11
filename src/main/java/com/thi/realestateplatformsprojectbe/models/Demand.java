@@ -3,8 +3,7 @@ package com.thi.realestateplatformsprojectbe.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
@@ -12,17 +11,15 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "demands", schema = "real_estate_platform")
+@Builder
 public class Demand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
-
-    @Size(max = 10)
-    @NotNull
-    @Column(name = "code", nullable = false, length = 10)
-    private String code;
 
     @NotNull
     @Column(name = "title", nullable = false)
@@ -56,7 +53,6 @@ public class Demand {
     @Column(name = "max_area", nullable = false)
     private Integer maxArea;
 
-    @NotNull
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;
 
@@ -64,7 +60,6 @@ public class Demand {
     @Column(name = "notes")
     private String notes;
 
-    @NotNull
     @ColumnDefault("0")
     @Column(name = "is_verify", nullable = false)
     private Boolean isVerify;

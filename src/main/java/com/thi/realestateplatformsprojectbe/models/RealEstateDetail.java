@@ -3,17 +3,17 @@ package com.thi.realestateplatformsprojectbe.models;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
+import lombok.*;
 
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "real_estate_details", schema = "real_estate_platform")
 public class RealEstateDetail {
     @Id
-    @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -21,21 +21,6 @@ public class RealEstateDetail {
     @JoinColumn(name = "real_estate_id", nullable = false)
     @JsonBackReference
     private RealEstate realEstate;
-
-    @NotNull
-    @Column(name = "front_side", nullable = false)
-    private Integer frontSide;
-
-    @NotNull
-    @Column(name = "street_width", nullable = false)
-    private Integer streetWidth;
-
-    @Column(name = "distance_to_main_street")
-    private Integer distanceToMainStreet;
-
-    @NotNull
-    @Column(name = "length", nullable = false)
-    private Integer length;
 
     @NotNull
     @Column(name = "floor", nullable = false)
@@ -48,10 +33,5 @@ public class RealEstateDetail {
     @NotNull
     @Column(name = "toilet", nullable = false)
     private Integer toilet;
-
-    @NotNull
-    @ColumnDefault("1")
-    @Column(name = "is_deleted", nullable = false)
-    private Boolean isDeleted = false;
 
 }

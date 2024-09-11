@@ -22,7 +22,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,26 +42,51 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final IVerificationTokenService verificationTokenService;
-    private final ISellerService sellerService;
+
 
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Account account) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(account.getEmail(), account.getPassword()));
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(account.getEmail(), account.getPassword())
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Thông tin đăng nhập không đúng!");
+        }
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         Account currentAccount = accountService.findByEmail(account.getEmail());
 
         if (!currentAccount.getIsActive()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email để kích hoạt tài khoản.");
+            VerificationToken token = verificationTokenService.getVerificationTokenByAccount(currentAccount);
+
+            if (token == null || token.getExpiryDate().isBefore(LocalDateTime.now().minusMinutes(5))) {
+                VerificationToken newToken = verificationTokenService.createVerificationToken(currentAccount);
+                String confirmationUrl = "http://localhost:3000/activation-success?token=" + newToken.getToken();
+                try {
+                    emailService.sendVerifyEmail(currentAccount.getEmail(), confirmationUrl);
+                } catch (MessagingException e) {
+                    throw new RuntimeException(e);
+                }
+
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Tài khoản chưa được kích hoạt! Email xác nhận đã được gửi lại. Vui lòng kiểm tra email.");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email để kích hoạt tài khoản.");
+            }
         }
 
         String jwt = jwtService.generateTokenLogin(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        return ResponseEntity.ok(new JwtResponse(currentAccount.getId(), jwt, userDetails.getUsername(), currentAccount.getName(), userDetails.getAuthorities()));
+        return ResponseEntity.ok(new JwtResponse(currentAccount.getId(), jwt, userDetails.getUsername(),
+                currentAccount.getName(), userDetails.getAuthorities()));
     }
+
 
 
     @PostMapping("/register")
@@ -119,24 +143,19 @@ public class AuthController {
             Authentication authentication,
             @RequestBody UpdateAccount updateAccount
     ) {
-        // Lấy thông tin tài khoảng hiện tại
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        Account account1 = accountService.findByEmail(userPrinciple.getUsername());
-
-        // Xác định tài khoảng có tồn tại không
-        if (account1 == null) {
-            return new ResponseEntity<>("Tài khoảng không tồn tại",HttpStatus.NOT_FOUND);
-        }
-
-        // Xác minh mật khẩu hiện tại nhập vào có đúng không
-        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(),account1.getPassword());
-        if(!isTrue){
-            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng",HttpStatus.BAD_REQUEST);
-        }
 
         // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
         if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
             return new ResponseEntity<>("Nhập lại mật khẩu không đúng",HttpStatus.BAD_REQUEST);
+        }
+
+        // Lấy thông tin tài khoảng hiện tại
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account1 = accountService.findByEmail(userPrinciple.getUsername());
+
+        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(),account1.getPassword());
+        if(!isTrue){
+            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng",HttpStatus.BAD_REQUEST);
         }
 
         // Mã hoá encoder mật khẩu mới
@@ -145,24 +164,9 @@ public class AuthController {
         // Lưu vào db
         account1.setPassword(pw);
         accountService.save(account1);
-        return new ResponseEntity<>(userPrinciple.getPassword(), HttpStatus.OK);
+        return new ResponseEntity<>("{}", HttpStatus.OK);
     }
 
-    @GetMapping("/seller-info")
-    public ResponseEntity<?> getMe(Authentication authentication) {
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        Account account = accountService.findByEmail(userPrinciple.getUsername());
-        // tra loi k phai seller
-        //xs
-        // check role seller is present?
-        if (accountService.checkRole(account)) {
-            Seller seller = sellerService.findByAccountId(account.getId());
-            return ResponseEntity.ok(seller);
-            // neu k co
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Tài khoản này không phải là người bán (seller).");
-        }
-    }
+
 
 }

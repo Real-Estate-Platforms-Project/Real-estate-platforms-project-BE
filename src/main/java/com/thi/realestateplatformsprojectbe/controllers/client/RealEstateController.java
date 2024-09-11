@@ -1,6 +1,6 @@
 package com.thi.realestateplatformsprojectbe.controllers.client;
 
-import com.thi.realestateplatformsprojectbe.dto.RealEstateDTO;
+import com.thi.realestateplatformsprojectbe.dto.RealEstateWithDetailDTO;
 import com.thi.realestateplatformsprojectbe.models.RealEstate;
 import com.thi.realestateplatformsprojectbe.services.IRealEstateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class  RealEstateController {
     private IRealEstateService realEstateService;
 
     @PostMapping
-    public ResponseEntity<RealEstate> addRealEstatePost(@RequestBody RealEstateDTO realEstatePostDTO) {
+    public ResponseEntity<RealEstate> addRealEstatePost(@RequestBody RealEstateWithDetailDTO realEstatePostDTO) {
         RealEstate post = realEstateService.addRealEstatePost(realEstatePostDTO);
         return ResponseEntity.ok(post);
     }

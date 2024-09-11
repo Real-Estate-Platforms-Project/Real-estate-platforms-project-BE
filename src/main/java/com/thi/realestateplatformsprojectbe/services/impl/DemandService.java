@@ -1,5 +1,6 @@
 package com.thi.realestateplatformsprojectbe.services.impl;
 
+import com.thi.realestateplatformsprojectbe.configs.service.JwtService;
 import com.thi.realestateplatformsprojectbe.dto.DemandDTO;
 import com.thi.realestateplatformsprojectbe.models.Demand;
 import com.thi.realestateplatformsprojectbe.models.RealEstate;
@@ -20,6 +21,9 @@ public class DemandService implements IDemandService {
 
     @Autowired
     private BuyerService buyerService;
+
+    @Autowired
+    private JwtService jwtService;
 
     @Override
     public List<Demand> findAllVerifiedDemand(boolean isVerify) {

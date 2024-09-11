@@ -17,7 +17,7 @@ public class AdminAccountCreationEmailService {
         this.javaMailSender = javaMailSender;
     }
 
-    public void sendAccountCreationEmail(String to, String username, String temporaryPassword) throws MessagingException {
+    public void sendAccountCreationEmail(String to, String email, String temporaryPassword) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
@@ -50,7 +50,7 @@ public class AdminAccountCreationEmailService {
                 + "                                </tr>"
                 + "                                <tr>"
                 + "                                    <td style=\"padding: 20px 0 10px 0; color: #555555; font-family: Arial, sans-serif; font-size: 16px;\">"
-                + "                                        <b>Tên đăng nhập:</b> " + username + "<br/>"
+                + "                                        <b>Tên đăng nhập:</b> " + email + "<br/>"
                 + "                                        <b>Mật khẩu tạm thời:</b> " + temporaryPassword
                 + "                                    </td>"
                 + "                                </tr>"

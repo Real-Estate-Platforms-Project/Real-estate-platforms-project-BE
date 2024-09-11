@@ -112,19 +112,14 @@ public class AuthController {
         return ResponseEntity.ok("Tài khoản đã được kích hoạt thành công!");
     }
 
-
     @PutMapping("/updatePassWord")
     public ResponseEntity<?> editAccount(
             Authentication authentication,
             @RequestBody UpdateAccount updateAccount
     ) {
-
-        // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
         if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
             return new ResponseEntity<>("Nhập lại mật khẩu không đúng",HttpStatus.BAD_REQUEST);
         }
-
-        // Lấy thông tin tài khoảng hiện tại
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
         Account account1 = accountService.findByEmail(userPrinciple.getUsername());
 
@@ -132,13 +127,7 @@ public class AuthController {
         if(!isTrue){
             return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng",HttpStatus.BAD_REQUEST);
         }
-
-
-
-        // Mã hoá encoder mật khẩu mới
         String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
-
-        // Lưu vào db
         account1.setPassword(pw);
         accountService.save(account1);
         return new ResponseEntity<>("{}", HttpStatus.OK);
@@ -148,13 +137,9 @@ public class AuthController {
     public ResponseEntity<?> getMe(Authentication authentication) {
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
         Account account = accountService.findByEmail(userPrinciple.getUsername());
-        // tra loi k phai seller
-        //xs
-        // check role seller is present?
         if (accountService.checkRole(account)) {
             Seller seller = sellerService.findByAccountId(account.getId());
             return ResponseEntity.ok(seller);
-            // neu k co
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Tài khoản này không phải là người bán (seller).");

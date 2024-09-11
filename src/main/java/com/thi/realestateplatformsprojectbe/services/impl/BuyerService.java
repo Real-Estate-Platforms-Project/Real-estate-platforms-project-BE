@@ -24,9 +24,4 @@ public class BuyerService implements IBuyerService {
         return buyerRepository.findById(id).orElse(null);
     }
 
-    @Override
-    public Buyer addBuyer(Buyer buyer) {
-        return buyerRepository.save(buyer);
-    }
-
 }

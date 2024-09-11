@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/admin/buyers")
 public class BuyerController {
@@ -24,12 +25,6 @@ public class BuyerController {
             return ResponseEntity.status(404).body("Không có người mua nào cả.");
         }
         return ResponseEntity.ok(buyers);
-    }
-
-    @PostMapping
-    @PermitAll
-    public ResponseEntity<Buyer> addBuyer(@RequestBody Buyer buyer) {
-        return ResponseEntity.ok(buyerService.addBuyer(buyer));
     }
 
     @GetMapping("/{id}")

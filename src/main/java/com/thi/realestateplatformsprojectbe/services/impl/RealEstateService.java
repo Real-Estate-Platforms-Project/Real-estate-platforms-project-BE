@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -63,10 +64,15 @@ public class RealEstateService implements IRealEstateService {
     }
 
 
+    @Override
+    public List<RealEstate> getAll() {
+        return realEstateRepository.findAll();
+    }
+
 
     @Override
-    public Page<RealEstate> searchRealEstates(Double minPrice, Double maxPrice, String location, String type, Integer minArea, Integer maxArea, Pageable pageable) {
-        return realEstateRepository.searchRealEstates(minPrice,maxPrice,location,type,minArea,maxArea,pageable);
+    public Page<RealEstate> searchRealEstates(String address,Double minPrice, Double maxPrice, String location, String type, Integer minArea, Integer maxArea, Pageable pageable) {
+        return realEstateRepository.searchRealEstates(address,minPrice,maxPrice,location,type,minArea,maxArea,pageable);
     }
 
 }

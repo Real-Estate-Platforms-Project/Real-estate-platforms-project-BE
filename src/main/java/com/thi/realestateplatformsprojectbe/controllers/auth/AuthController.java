@@ -8,10 +8,12 @@ import com.thi.realestateplatformsprojectbe.dto.AccountDTO;
 
 import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
 import com.thi.realestateplatformsprojectbe.models.*;
-import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
+import com.thi.realestateplatformsprojectbe.services.IBuyerService;
+import com.thi.realestateplatformsprojectbe.services.IEmployeeService;
 import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
+import com.thi.realestateplatformsprojectbe.services.impl.UserService;
 import com.thi.realestateplatformsprojectbe.services.role.IRoleService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,7 +45,10 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final IVerificationTokenService verificationTokenService;
-
+    private final IBuyerService buyerService;
+    private final ISellerService sellerService;
+    private final IEmployeeService employeeService;
+    private final UserService userService;
 
 
     @PostMapping("/login")
@@ -88,7 +94,6 @@ public class AuthController {
     }
 
 
-
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody AccountDTO accountDTO) throws MessagingException {
         if (accountService.existsByEmail(accountDTO.getEmail())) {
@@ -108,6 +113,13 @@ public class AuthController {
         account.setRoles(roles);
 
         accountService.save(account);
+
+        User user = new User();
+        user.setAccount(account);
+        user.setName(account.getName());
+        user.setEmail(account.getEmail());
+        user.setCode(userService.generateBuyerCode());
+        userService.save(user);
 
         VerificationToken token = verificationTokenService.createVerificationToken(account);
         String confirmationUrl = "http://localhost:3000/activation-success?token=" + token.getToken(); // Frontend URL
@@ -146,16 +158,16 @@ public class AuthController {
 
         // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
         if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
-            return new ResponseEntity<>("Nhập lại mật khẩu không đúng",HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Nhập lại mật khẩu không đúng", HttpStatus.BAD_REQUEST);
         }
 
         // Lấy thông tin tài khoảng hiện tại
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
         Account account1 = accountService.findByEmail(userPrinciple.getUsername());
 
-        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(),account1.getPassword());
-        if(!isTrue){
-            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng",HttpStatus.BAD_REQUEST);
+        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(), account1.getPassword());
+        if (!isTrue) {
+            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng", HttpStatus.BAD_REQUEST);
         }
 
         // Mã hoá encoder mật khẩu mới
@@ -167,6 +179,20 @@ public class AuthController {
         return new ResponseEntity<>("{}", HttpStatus.OK);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<?> me(Authentication authentication) {
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
 
+        if (userPrinciple == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Chưa xác thực");
+        }
 
+        User currentUser = userService.getByAccountId(userPrinciple.getAccountId());
+
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Người dùng không tồn tại");
+        }
+
+        return new ResponseEntity<>(currentUser, HttpStatus.OK);
+    }
 }

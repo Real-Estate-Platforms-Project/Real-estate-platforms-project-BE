@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface IRealEstateService {
     RealEstate addRealEstatePost(RealEstateWithDetailDTO realEstatePostDTO);
-    Page<RealEstate> searchRealEstates(String address,Double minPrice, Double maxPrice, String location, String type, Integer minArea, Integer maxArea, Pageable pageable);
+    Page<RealEstate> searchRealEstates(String address,Double minPrice, Double maxPrice, List<String> location, List<String> demandType, Integer minArea, Integer maxArea, Pageable pageable);
 
     List<RealEstate> getAll();
 }

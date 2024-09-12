@@ -11,6 +11,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.util.Set;
+
 @Data
 @Entity
 @AllArgsConstructor
@@ -92,4 +94,8 @@ public class RealEstate {
     @NotNull
     @Column(name = "code", nullable = false, length = 15)
     private String code;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false, name = "real_estate_id")
+    private Set<Image> images;
 }

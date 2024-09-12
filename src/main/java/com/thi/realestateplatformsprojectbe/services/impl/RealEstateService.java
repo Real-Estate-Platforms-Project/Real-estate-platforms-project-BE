@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +35,10 @@ public class RealEstateService implements IRealEstateService {
         Random random = new Random();
         int randomNumber = 1000 + random.nextInt(9000);
         String generatedCode = "MBDS-" + randomNumber;
+        Image image = Image.builder()
+                .name(realEstatePostDTO.getImageUrl())
+                .build();
+        image = imageRepository.save(image);
         // Create the RealEstate object using the Builder pattern
         RealEstate realEstate = RealEstate.builder()
                 .seller(sellerRepository.findById(realEstatePostDTO.getSellerId()).orElse(null))
@@ -50,14 +55,11 @@ public class RealEstateService implements IRealEstateService {
                 .district(districtRepository.findDistrictByCode(realEstatePostDTO.getDistrictCode()))
                 .ward(wardRepository.findWardByCode(realEstatePostDTO.getWardCode()))
                 .code(generatedCode)
+                .images(Set.of(image))
                 .build();
         RealEstate savedRealEstate = realEstateRepository.save(realEstate);
         //Lưu ảnh vào db
-        Image image = Image.builder()
-                .name(realEstatePostDTO.getImageUrl())
-                .realEstate(savedRealEstate)
-                .build();
-        imageRepository.save(image);
+
         // Conditionally create and save RealEstateDetail if type is "Nhà ở"
         if ("Nhà ở".equals(realEstatePostDTO.getType())) {
             RealEstateDetail realEstateDetail = RealEstateDetail.builder()

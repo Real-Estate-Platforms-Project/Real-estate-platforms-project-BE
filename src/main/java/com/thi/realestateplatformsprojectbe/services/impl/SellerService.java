@@ -33,5 +33,4 @@ public class SellerService implements ISellerService {
     public Seller findByAccountId(Long id) {
         return  sellerRepository.findSellerByAccount_Id(id);
     }
-
 }

@@ -1,4 +1,4 @@
-package com.thi.realestateplatformsprojectbe.models.DTO;
+package com.thi.realestateplatformsprojectbe.dto;
 
 public interface GetNumberOfRole {
     String getName();

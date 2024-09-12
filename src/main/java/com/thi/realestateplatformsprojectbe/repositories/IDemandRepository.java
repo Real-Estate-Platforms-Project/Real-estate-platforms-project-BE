@@ -17,17 +17,17 @@ public interface IDemandRepository extends JpaRepository<Demand, Long> {
     @Query("SELECT r FROM Demand r WHERE "
             + "(r.isDeleted = false) AND "
             + "(:notes IS NULL OR r.notes LIKE %:notes%) AND "
-            + "(:region IS NULL OR r.region = :region) AND "
+            + "(:region IS NULL OR r.region IN :region) AND "
             + "(:type IS NULL OR r.type = :type) AND "
-            + "(:realEstateType IS NULL OR r.realEstateType = :realEstateType) AND "
+            + "(:realEstateType IS NULL OR r.realEstateType IN :realEstateType) AND "
             + "(:minArea IS NULL OR r.minArea >= :minArea) AND "
             + "(:maxArea IS NULL OR r.maxArea <= :maxArea) AND"
             + "(:isVerify IS NULL OR r.isVerify = :isVerify) order by r.createdAt desc" )
     List<Demand> searchVerifiedDemands(
             @Param("notes") String notes,
-            @Param("region") String region,
+            @Param("region") List<String> region,
             @Param("type") String type,
-            @Param("realEstateType") String realEstateType,
+            @Param("realEstateType") List<String> realEstateType,
             @Param("minArea") Integer minArea,
             @Param("maxArea") Integer maxArea,
             @Param("isVerify") Boolean isVerify);
@@ -35,16 +35,16 @@ public interface IDemandRepository extends JpaRepository<Demand, Long> {
     @Query("SELECT r FROM Demand r WHERE "
             + "(r.isDeleted = false) AND "
             + "(:notes IS NULL OR r.notes LIKE %:notes%) AND "
-            + "(:region IS NULL OR r.region = :region) AND "
+            + "(:region IS NULL OR r.region IN :region) AND "
             + "(:type IS NULL OR r.type = :type) AND "
-            + "(:realEstateType IS NULL OR r.realEstateType = :realEstateType) AND "
+            + "(:realEstateType IS NULL OR r.realEstateType IN :realEstateType) AND "
             + "(:minArea IS NULL OR r.minArea >= :minArea) AND "
             + "(:maxArea IS NULL OR r.maxArea <= :maxArea) order by r.isVerify asc , r.createdAt desc ")
     List<Demand> searchDemands(
             @Param("notes") String notes,
-            @Param("region") String region,
+            @Param("region") List<String> region,
             @Param("type") String type,
-            @Param("realEstateType") String realEstateType,
+            @Param("realEstateType") List<String> realEstateType,
             @Param("minArea") Integer minArea,
             @Param("maxArea") Integer maxArea);
 }

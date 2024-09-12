@@ -54,7 +54,7 @@ public class TransactionServiceImpl implements ITransactionService {
                 .id(transaction.getId())
                 .code(transaction.getCode())
                 .realEstate(transaction.getRealEstate().getCode()) // Lấy mã bất động sản
-                .employee(transaction.getEmployee().getName()) // Lấy tên nhân viên
+                .employee(transaction.getEmployee().getCode()) // Lấy tên nhân viên
                 .buyer(transaction.getBuyer().getName()) // Lấy tên bên mua
                 .seller(transaction.getSeller().getName()) // Lấy tên bên bán
                 .amount(transaction.getAmount())

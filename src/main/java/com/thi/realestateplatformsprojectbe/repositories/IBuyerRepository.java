@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface IBuyerRepository extends JpaRepository<Buyer, Long> {
-    Buyer findBuyerByAccountId(Long id);
+    Buyer findBuyerByAccount_Id(Long id);
 }

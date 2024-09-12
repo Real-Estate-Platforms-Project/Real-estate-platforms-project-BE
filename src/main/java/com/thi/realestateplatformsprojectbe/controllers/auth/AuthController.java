@@ -9,15 +9,17 @@ import com.thi.realestateplatformsprojectbe.dto.AccountDTO;
 import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
 import com.thi.realestateplatformsprojectbe.dto.UserDTO;
 import com.thi.realestateplatformsprojectbe.models.*;
+import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
+import com.thi.realestateplatformsprojectbe.services.IBuyerService;
+import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
+import com.thi.realestateplatformsprojectbe.services.email.ConfirmEmail;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
 import com.thi.realestateplatformsprojectbe.services.impl.BuyerService;
 import com.thi.realestateplatformsprojectbe.services.impl.EmployeeService;
 import com.thi.realestateplatformsprojectbe.services.impl.SellerService;
 import com.thi.realestateplatformsprojectbe.services.role.IRoleService;
 import jakarta.mail.MessagingException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,10 +53,11 @@ public class AuthController {
     private final BuyerService buyerService;
     private final SellerService sellerService;
     private final EmployeeService employeeService;
+    private final ConfirmEmail confirmEmail;
 
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Account account, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody Account account) {
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
@@ -94,7 +98,6 @@ public class AuthController {
     }
 
 
-
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody AccountDTO accountDTO) throws MessagingException {
         if (accountService.existsByEmail(accountDTO.getEmail())) {
@@ -123,7 +126,7 @@ public class AuthController {
         user.setAddress("");
         user.setEnable(true);
         user.setGender("");
-        user.setDob(LocalDate.of(2000,1,1));
+        user.setDob(LocalDate.of(2000, 1, 1));
         user.setIdCard("");
         user.setPhoneNumber("");
         buyerService.save(user);
@@ -163,19 +166,26 @@ public class AuthController {
             @RequestBody UpdateAccount updateAccount
     ) {
 
+        // Lấy thông tin tài khoảng hiện tại
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account1 = accountService.findByEmail(userPrinciple.getUsername());
+
+        // Xác định tài khoảng có tồn tại không
+        if (account1 == null) {
+            return new ResponseEntity<>("Tài khoảng không tồn tại", HttpStatus.NOT_FOUND);
+        }
+
+        // Xác minh mật khẩu hiện tại nhập vào có đúng không
+        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(), account1.getPassword());
+        if (!isTrue) {
+            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng", HttpStatus.BAD_REQUEST);
+        }
+
         // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
         if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
             return new ResponseEntity<>("Nhập lại mật khẩu không đúng", HttpStatus.BAD_REQUEST);
         }
 
-        // Lấy thông tin tài khoảng hiện tại
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        Account account1 = accountService.findByEmail(userPrinciple.getUsername());
-
-        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(), account1.getPassword());
-        if (!isTrue) {
-            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng", HttpStatus.BAD_REQUEST);
-        }
 
         // Mã hoá encoder mật khẩu mới
         String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
@@ -213,5 +223,76 @@ public class AuthController {
         userDTO.setRoles(account.getRoles());
 
         return new ResponseEntity<>(userDTO, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/get-roles")
+    public ResponseEntity<?> getAllRole(Authentication authentication) {
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+        // tra loi k phai seller
+        //xs
+        // check role seller is present?
+        if (account != null) {
+            Set<Role> roles = account.getRoles();
+            return ResponseEntity.ok(roles);
+            // neu k co
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Tài khoản này không có quyền truy cập");
+        }
+    }
+
+
+    @PostMapping("/createToken/{email}")
+    public ResponseEntity<?> createToken(@PathVariable String email) throws MessagingException {
+        Account account = accountService.findByEmail(email);
+        VerificationToken token = verificationTokenService.createVerificationToken(account);
+        String confirmationUrl = "http://localhost:3000/confirm-email?token=" + token.getToken(); // Frontend URL
+        confirmEmail.sendVerifyEmail(account.getEmail(), confirmationUrl);
+        return ResponseEntity.ok(" Vui lòng kiểm tra email để kích hoạt tài khoản.");
+    }
+
+    @GetMapping("/confirmEmail")
+    public ResponseEntity<?> confirmEmail(@RequestParam("token") String token) {
+        VerificationToken verificationToken = verificationTokenService.getVerificationToken(token);
+
+        if (verificationToken == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ!");
+        }
+
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            verificationTokenService.deleteToken(verificationToken);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn! Vui lòng yêu cầu gửi lại email xác minh.");
+        }
+
+
+        return ResponseEntity.ok("Chuyển đến trang cập nhật mật khẩu!");
+    }
+
+    @PutMapping("/updateForgetPassword")
+    public ResponseEntity<?> updateForgetPassword(@RequestParam("token") String token,
+                                                  @RequestBody UpdateAccount updateAccount) {
+        System.out.println("*******************************************");
+        VerificationToken verificationToken = verificationTokenService.getVerificationToken(token);
+        if (verificationToken == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ!");
+        }
+
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            verificationTokenService.deleteToken(verificationToken);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn! Vui lòng yêu cầu gửi lại email xác minh.");
+        }
+        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
+            return new ResponseEntity<>("Nhập lại mật khẩu không đúng", HttpStatus.BAD_REQUEST);
+        }
+
+        Account account = verificationToken.getAccount();
+        String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
+        account.setPassword(pw);
+        accountService.save(account);
+
+        verificationTokenService.deleteToken(verificationToken);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

@@ -31,7 +31,7 @@ public class SellerService implements ISellerService {
 
     @Override
     public Seller findByAccountId(Long id) {
-      return  sellerRepository.findSellerByAccount_Id(id);
+        return  sellerRepository.findSellerByAccount_Id(id);
     }
 
 }

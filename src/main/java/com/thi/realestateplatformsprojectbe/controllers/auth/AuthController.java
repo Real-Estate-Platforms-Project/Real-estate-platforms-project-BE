@@ -7,12 +7,16 @@ import com.thi.realestateplatformsprojectbe.configs.service.JwtService;
 import com.thi.realestateplatformsprojectbe.dto.AccountDTO;
 
 import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
+import com.thi.realestateplatformsprojectbe.dto.UserDTO;
 import com.thi.realestateplatformsprojectbe.models.*;
 import com.thi.realestateplatformsprojectbe.services.IBuyerService;
 import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
 import com.thi.realestateplatformsprojectbe.services.email.ConfirmEmailService;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
+import com.thi.realestateplatformsprojectbe.services.impl.BuyerService;
+import com.thi.realestateplatformsprojectbe.services.impl.EmployeeService;
+import com.thi.realestateplatformsprojectbe.services.impl.SellerService;
 import com.thi.realestateplatformsprojectbe.services.role.IRoleService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +30,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -36,7 +41,6 @@ import java.util.Set;
 @CrossOrigin("*")
 public class AuthController {
 
-
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final AccountService accountService;
@@ -44,11 +48,14 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final IVerificationTokenService verificationTokenService;
+
     private final ISellerService sellerService;
 
     private final ConfirmEmailService confirmEmailService;
 
     private final IBuyerService buyerService;
+    private final EmployeeService employeeService;
+
 
 
     @PostMapping("/login")
@@ -89,8 +96,7 @@ public class AuthController {
         String jwt = jwtService.generateTokenLogin(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        return ResponseEntity.ok(new JwtResponse(currentAccount.getId(), jwt, userDetails.getUsername(),
-                currentAccount.getName(), userDetails.getAuthorities()));
+        return ResponseEntity.ok(new JwtResponse(currentAccount.getId(), jwt, userDetails.getAuthorities()));
     }
 
 
@@ -116,13 +122,25 @@ public class AuthController {
 
         accountService.save(account);
 
+        Buyer user = new Buyer();
+        user.setAccount(account);
+        user.setName(account.getName());
+        user.setEmail(account.getEmail());
+        user.setCode(buyerService.generateBuyerCode());
+        user.setAddress("");
+        user.setEnable(true);
+        user.setGender("");
+        user.setDob(LocalDate.of(2000, 1, 1));
+        user.setIdCard("");
+        user.setPhoneNumber("");
+        buyerService.save(user);
+
         VerificationToken token = verificationTokenService.createVerificationToken(account);
         String confirmationUrl = "http://localhost:3000/activation-success?token=" + token.getToken(); // Frontend URL
         emailService.sendVerifyEmail(account.getEmail(), confirmationUrl);
 
         return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.");
     }
-
 
     @GetMapping("/confirm")
     public ResponseEntity<?> confirmAccount(@RequestParam("token") String token) {
@@ -151,39 +169,86 @@ public class AuthController {
             Authentication authentication,
             @RequestBody UpdateAccount updateAccount
     ) {
-        return accountService.updatePassword(authentication, updateAccount, passwordEncoder);
+
+
+        // Lấy thông tin tài khoảng hiện tại
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account1 = accountService.findByEmail(userPrinciple.getUsername());
+
+        // Xác định tài khoảng có tồn tại không
+        if (account1 == null) {
+            return new ResponseEntity<>("Tài khoảng không tồn tại", HttpStatus.NOT_FOUND);
+        }
+
+        // Xác minh mật khẩu hiện tại nhập vào có đúng không
+        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(), account1.getPassword());
+        if (!isTrue) {
+            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng", HttpStatus.BAD_REQUEST);
+        }
+
+        // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
+        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
+            return new ResponseEntity<>("Nhập lại mật khẩu không đúng", HttpStatus.BAD_REQUEST);
+        }
+
+
+        // Mã hoá encoder mật khẩu mới
+        String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
+
+        // Lưu vào db
+        account1.setPassword(pw);
+        accountService.save(account1);
+        return new ResponseEntity<>("{}", HttpStatus.OK);
+
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me(Authentication authentication) {
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+        IUser user = null;
+        for (Role role : account.getRoles()) {
+            if (role.getName().equals(RoleName.ROLE_BUYER.toString())) {
+                user = buyerService.findByAccountId(account.getId());
+            }
+            if (role.getName().equals(RoleName.ROLE_SELLER.toString())) {
+                user = sellerService.findByAccountId(account.getId());
+            }
+            if (role.getName().equals(RoleName.ROLE_EMPLOYEE.toString())) {
+                user = employeeService.findByAccountId(account.getId());
+            }
+            if (role.getName().equals(RoleName.ROLE_ADMIN.toString())) {
+                user = employeeService.findByAccountId(account.getId());
+            }
+        }
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Người dùng không tồn tại");
+        }
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUser(user);
+        userDTO.setRoles(account.getRoles());
+
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 
 
-//    @GetMapping("/buyer-info")
-//    public ResponseEntity<?> getBuyer(Authentication authentication) {
-//        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-//        Account account = accountService.findByEmail(userPrinciple.getUsername());
-//        if (accountService.checkRoleBuyer(account)) {
-//            Buyer buyer = buyerService.getBuyerById(account.getId());
-//            return ResponseEntity.ok(buyer);
-//            // neu k co
-//        } else {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-//                    .body("Tài khoản này không phải là người mua (buyer).");
-//        }
-//    }
-
     @GetMapping("/get-roles")
     public ResponseEntity<?> getAllRole(Authentication authentication) {
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        Account account = accountService.findByEmail(userPrinciple.getUsername());
-        // tra loi k phai seller
-        //xs
-        // check role seller is present?
-        if (account != null) {
-            Set<Role> roles = account.getRoles();
-            return ResponseEntity.ok(roles);
-            // neu k co
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Tài khoản này không có quyền truy cập");
-        }
+
+            UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+            Account account = accountService.findByEmail(userPrinciple.getUsername());
+
+            if (account != null) {
+                Set<Role> roles = account.getRoles();
+                return ResponseEntity.ok(roles);
+                // neu k co
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Tài khoản này không có quyền truy cập");
+            }
     }
 
 
@@ -202,6 +267,7 @@ public class AuthController {
                                                   @RequestBody UpdateAccount updateAccount) {
         return accountService.updateForgetPassword(verificationTokenService, token, updateAccount, passwordEncoder);
     }
+
     @GetMapping("/checkExpiryDate/{email}")
     public ResponseEntity<?> checkExpiryDate(@PathVariable String email) {
         Account account = accountService.findByEmail(email);
@@ -235,3 +301,6 @@ public class AuthController {
     }
 
 }
+
+
+

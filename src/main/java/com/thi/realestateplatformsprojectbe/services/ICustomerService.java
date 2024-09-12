@@ -5,4 +5,6 @@ import jakarta.mail.MessagingException;
 
 public interface ICustomerService {
     void addNewCustomer(CustomerDTO customerDTO) throws MessagingException;
+    boolean emailExists(String email);
+
 }

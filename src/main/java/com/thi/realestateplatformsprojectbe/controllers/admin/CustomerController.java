@@ -10,10 +10,17 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/customers")
+@CrossOrigin(origins = "*")
 public class CustomerController {
 
     @Autowired
     private ICustomerService customerService;
+
+    @GetMapping("/check-email")
+    public ResponseEntity<Boolean> checkEmailExists(@RequestParam String email) {
+        boolean exists = customerService.emailExists(email);
+        return ResponseEntity.ok(exists);
+    }
 
     @PostMapping("/add")
     public ResponseEntity<String> addCustomer(@Valid @RequestBody CustomerDTO customerDTO) {

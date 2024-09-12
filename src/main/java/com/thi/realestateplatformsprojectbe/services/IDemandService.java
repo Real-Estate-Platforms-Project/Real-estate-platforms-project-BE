@@ -21,7 +21,7 @@ public interface IDemandService {
 
     Demand findById(Long id);
 
-    List<Demand> searchDemand(String notes, String region, String type, String realEstateType, Integer minArea, Integer maxArea);
+    List<Demand> searchDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea);
 
-    List<Demand> searchVerifiedDemand(String notes, String region, String type, String realEstateType, Integer minArea, Integer maxArea, boolean isVerify);
+    List<Demand> searchVerifiedDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea, boolean isVerify);
 }

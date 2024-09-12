@@ -8,11 +8,11 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ConfirmEmail {
+public class ConfirmEmailService {
     private final JavaMailSender javaMailSender;
 
     @Autowired
-    public ConfirmEmail(JavaMailSender javaMailSender) {
+    public ConfirmEmailService(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
     }
 

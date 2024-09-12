@@ -2,6 +2,7 @@ package com.thi.realestateplatformsprojectbe.services.impl;
 
 import com.thi.realestateplatformsprojectbe.configs.service.JwtService;
 import com.thi.realestateplatformsprojectbe.dto.DemandDTO;
+import com.thi.realestateplatformsprojectbe.models.Buyer;
 import com.thi.realestateplatformsprojectbe.models.Demand;
 import com.thi.realestateplatformsprojectbe.models.RealEstate;
 import com.thi.realestateplatformsprojectbe.repositories.IDemandRepository;
@@ -14,7 +15,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class DemandService implements IDemandService {
     @Autowired
     private IDemandRepository demandRepository;
@@ -22,8 +22,6 @@ public class DemandService implements IDemandService {
     @Autowired
     private BuyerService buyerService;
 
-    @Autowired
-    private JwtService jwtService;
 
     @Override
     public List<Demand> findAllVerifiedDemand(boolean isVerify) {
@@ -86,5 +84,10 @@ public class DemandService implements IDemandService {
     @Override
     public Demand findById(Long id) {
         return demandRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public List<Demand> searchDemand(String notes, String region, String type, String realEstateType, Integer minArea, Integer maxArea) {
+        return demandRepository.searchDemands(notes,region,type,realEstateType,minArea,maxArea);
     }
 }

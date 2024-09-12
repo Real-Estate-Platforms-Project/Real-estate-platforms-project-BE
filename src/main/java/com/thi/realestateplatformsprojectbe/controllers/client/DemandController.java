@@ -151,7 +151,7 @@ public class DemandController {
             String userName = jwtService.getUsernameFromJwtToken(token);
             Account account = accountService.findByEmail(userName);
             if (account != null) {
-                Buyer buyer = buyerService.getBuyerByAccountId(account.getId());
+                Buyer buyer = buyerService.findByAccountId(account.getId());
                 demandService.save(demandDTO,buyer);
                 return new ResponseEntity<>(demandDTO, HttpStatus.CREATED);
             }

@@ -78,8 +78,8 @@ public class RealEstateService implements IRealEstateService {
 
 
     @Override
-    public Page<RealEstate> searchRealEstates(String address,Double minPrice, Double maxPrice, String location, String type, Integer minArea, Integer maxArea, Pageable pageable) {
-        return realEstateRepository.searchRealEstates(address,minPrice,maxPrice,location,type,minArea,maxArea,pageable);
+    public Page<RealEstate> searchRealEstates(String address,Double minPrice, Double maxPrice, List<String> location, List<String> demandType, Integer minArea, Integer maxArea, Pageable pageable) {
+        return realEstateRepository.searchRealEstates(address,minPrice,maxPrice,location,demandType,minArea,maxArea,pageable);
     }
 
     @Override

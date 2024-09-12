@@ -22,6 +22,7 @@ public class RealEstateDetail {
     @JsonBackReference
     private RealEstate realEstate;
 
+
     @NotNull
     @Column(name = "floor", nullable = false)
     private Integer floor;

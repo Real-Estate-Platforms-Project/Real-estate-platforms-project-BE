@@ -35,6 +35,12 @@ public class BuyerController {
         return ResponseEntity.ok(buyers);
     }
 
+    @PostMapping
+    @PermitAll
+    public ResponseEntity<Buyer> addBuyer(@RequestBody Buyer buyer) {
+        return ResponseEntity.ok(buyerService.addBuyer(buyer));
+    }
+
     @GetMapping("/{id}")
     @PermitAll
     public ResponseEntity<?> getBuyerDetails(@PathVariable Long id) {
@@ -47,15 +53,18 @@ public class BuyerController {
 
     @GetMapping("/info")
     public ResponseEntity<?> getBuyer(Authentication authentication) {
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        Account account = accountService.findByEmail(userPrinciple.getUsername());
-        if (accountService.checkRoleBuyer(account)) {
-            Buyer buyer = buyerService.getBuyerByAccountId(account.getId());
-            return ResponseEntity.ok(buyer);
-            // neu k co
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Tài khoản này không phải là người mua (buyer).");
+        if(authentication != null) {
+            UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+            Account account = accountService.findByEmail(userPrinciple.getUsername());
+            if (accountService.checkRoleBuyer(account)) {
+                Buyer buyer = buyerService.findByAccountId(account.getId());
+                return ResponseEntity.ok(buyer);
+                // neu k co
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Tài khoản này không phải là người mua (buyer).");
+            }
         }
+        return  ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

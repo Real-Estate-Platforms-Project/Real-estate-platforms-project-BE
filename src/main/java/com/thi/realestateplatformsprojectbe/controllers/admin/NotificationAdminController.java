@@ -1,11 +1,19 @@
 package com.thi.realestateplatformsprojectbe.controllers.admin;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thi.realestateplatformsprojectbe.models.Notification;
 import com.thi.realestateplatformsprojectbe.services.INotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
+
+import org.springframework.web.socket.WebSocketSession;
+
+import java.util.Map;
 
 @RestController
 @CrossOrigin("*")
@@ -15,11 +23,21 @@ public class NotificationAdminController {
     @Autowired
     private INotificationService notificationService;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @PostMapping
     public ResponseEntity<Notification> createNotification(@RequestBody Notification notification) {
-        Notification createdNotification = notificationService.saveNotification(notification);
-        return new ResponseEntity<>(createdNotification, HttpStatus.CREATED);
+        try {
+            Notification createdNotification = notificationService.saveNotification(notification);
+            // Chuyển toàn bộ đối tượng Notification thành JSON
+            String notificationMessage = new ObjectMapper().writeValueAsString(createdNotification.getTitle());
+            messagingTemplate.convertAndSend("/topic/notifications", notificationMessage);
+
+            return new ResponseEntity<>(createdNotification, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("/{id}")

@@ -30,4 +30,11 @@ public class StatisticController {
         List<StatisticDemandDTO> list = statisticService.findDemandByYear(year);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
+    @GetMapping("/demands/month")
+    @PermitAll
+    public ResponseEntity<?> getStatisticDemandByMonth(@RequestParam(required = false) Integer year,
+                                                       @RequestParam(required = false) Integer month) {
+        List<StatisticDemandDTO> list = statisticService.findDemandByMonth(year, month);
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
 }

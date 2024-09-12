@@ -38,7 +38,22 @@ public class StatisticService implements IStatisticService {
 
     @Override
     public List<StatisticDemandDTO> findDemandByMonth(Integer year, Integer month) {
-        return null;
+        List<Demand> demands = statisticRepository.findDemandByMonth(month, year);
+        return demands.stream().map(demand -> StatisticDemandDTO.builder()
+                .id(demand.getId())
+                .code(demand.getCode())
+                .title(demand.getTitle())
+                .nameBuyer(demand.getBuyer().getName())
+                .type(demand.getType())
+                .realEstateType(demand.getRealEstateType())
+                .region(demand.getRegion())
+                .minArea(demand.getMinArea())
+                .maxArea(demand.getMaxArea())
+                .createdAt(demand.getCreatedAt())
+                .notes(demand.getNotes())
+                .isVerify(demand.getIsVerify())
+                .isDeleted(demand.getIsDeleted())
+                .build()).collect(Collectors.toList());
     }
 
     @Override

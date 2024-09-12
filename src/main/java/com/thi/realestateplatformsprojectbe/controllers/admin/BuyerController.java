@@ -43,7 +43,7 @@ public class BuyerController {
     @GetMapping("/{id}")
     @PermitAll
     public ResponseEntity<?> getBuyerDetails(@PathVariable Long id) {
-        Buyer buyer = buyerService.getBuyerByAccountId(id);
+        Buyer buyer = buyerService.findByAccountId(id);
         if (buyer == null) {
             return ResponseEntity.status(404).body("Không tìm thấy người mua với ID: " + id);
         }
@@ -56,7 +56,7 @@ public class BuyerController {
             UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
             Account account = accountService.findByEmail(userPrinciple.getUsername());
             if (accountService.checkRoleBuyer(account)) {
-                Buyer buyer = buyerService.getBuyerByAccountId(account.getId());
+                Buyer buyer = buyerService.findByAccountId(account.getId());
                 return ResponseEntity.ok(buyer);
                 // neu k co
             } else {

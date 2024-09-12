@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -25,9 +26,9 @@ public interface IStatisticRepository extends JpaRepository<Demand, Long> {
 
     @Query("SELECT d " +
             "FROM Demand d " +
-            "WHERE DATE(d.createdAt) = :day " +
+            "WHERE d.createdAt BETWEEN :startDate AND :endDate " +
             "ORDER BY d.createdAt")
-    List<Demand> findDemandByDay(@Param("day") Date day);
+    List<Demand> findDemandByDay(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     @Query("SELECT t " +
             "FROM Transaction t " +

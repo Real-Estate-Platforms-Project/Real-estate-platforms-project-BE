@@ -20,13 +20,18 @@ public class BuyerService implements IBuyerService {
     }
 
     @Override
-    public Buyer getBuyerById(Long id) {
-        return buyerRepository.findById(id).orElse(null);
+    public Buyer getBuyerByAccountId(Long id) {
+        return buyerRepository.findBuyerByAccountId(id);
     }
 
     @Override
     public Buyer addBuyer(Buyer buyer) {
         return buyerRepository.save(buyer);
+    }
+
+    @Override
+    public Buyer getBuyerById(Long buyerId) {
+        return buyerRepository.findById(buyerId).orElse(null);
     }
 
 }

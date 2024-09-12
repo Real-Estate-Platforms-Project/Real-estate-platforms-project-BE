@@ -38,7 +38,16 @@ public class CustomerService implements ICustomerService {
     @Autowired
     private IBuyerRepository buyerRepository;
 
+    public boolean emailExists(String email) {
+        return accountRepository.existsByEmail(email);
+    }
+
+
     public void addNewCustomer(CustomerDTO customerDTO) throws MessagingException {
+        if (emailExists(customerDTO.getEmail())) {
+            throw new IllegalArgumentException("Email đã tồn tại. Vui lòng sử dụng email khác.");
+        }
+
         Account account = new Account();
         account.setEmail(customerDTO.getEmail());
         String tempPassword = generateRandomPassword();
@@ -58,12 +67,12 @@ public class CustomerService implements ICustomerService {
             seller.setAccount(account);
             seller.setName(customerDTO.getName());
             seller.setDob(customerDTO.getDob());
-            seller.setAddressLine(customerDTO.getAddress());
+            seller.setAddress(customerDTO.getAddress());
             seller.setEmail(customerDTO.getEmail());
             seller.setPhoneNumber(customerDTO.getPhoneNumber());
             seller.setGender(customerDTO.getGender());
-            seller.setIdNumber(customerDTO.getIdCard());
-            seller.setCode("SELLER" + generateRandomCode());
+            seller.setIdCard(customerDTO.getIdCard());
+            seller.setCode("MNB" + generateRandomCode());
             sellerRepository.save(seller);
         } else {
             Buyer buyer = new Buyer();
@@ -75,15 +84,18 @@ public class CustomerService implements ICustomerService {
             buyer.setPhoneNumber(customerDTO.getPhoneNumber());
             buyer.setGender(customerDTO.getGender());
             buyer.setIdCard(customerDTO.getIdCard());
-            buyer.setCode("BUYER" + generateRandomCode());
+            buyer.setCode("MNM" + generateRandomCode());
             buyerRepository.save(buyer);
         }
 
-        emailService.sendAccountCreationEmail(customerDTO.getEmail(), customerDTO.getName(), tempPassword);
+        emailService.sendAccountCreationEmail(customerDTO.getEmail(), customerDTO.getEmail(), tempPassword);
     }
+
+
     private String generateRandomPassword() {
         return RandomStringUtils.randomAlphanumeric(8);
     }
+
 
     private String generateRandomCode() {
         return RandomStringUtils.randomNumeric(4);

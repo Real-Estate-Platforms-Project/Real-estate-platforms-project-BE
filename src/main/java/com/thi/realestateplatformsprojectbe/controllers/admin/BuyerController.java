@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/admin/buyers")
 public class BuyerController {
@@ -43,7 +44,7 @@ public class BuyerController {
     @GetMapping("/{id}")
     @PermitAll
     public ResponseEntity<?> getBuyerDetails(@PathVariable Long id) {
-        Buyer buyer = buyerService.findByAccountId(id);
+        Buyer buyer = buyerService.getBuyerById(id);
         if (buyer == null) {
             return ResponseEntity.status(404).body("Không tìm thấy người mua với ID: " + id);
         }

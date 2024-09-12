@@ -126,18 +126,25 @@ public class DemandController {
             String userName = jwtService.getUsernameFromJwtToken(token);
             Account account = accountService.findByEmail(userName);
             if (account != null) {
+                Demand demand = demandService.findById(id);
                 for (Role role : account.getRoles()) {
                     if (role.getName().equals("ROLE_ADMIN") || role.getName().equals("ROLE_EMPLOYEE")) {
-                        Demand demand = demandService.findById(id);
-                        if(demand != null) {
+                        if (demand != null) {
                             demandService.delete(demand);
                             return new ResponseEntity<>(HttpStatus.OK);
                         }
                         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                     }
                 }
+
+                Buyer buyer = buyerService.getBuyerByAccountId(account.getId());
+                if (demand != null && demand.getBuyer().equals(buyer)) {
+                    demandService.delete(demand);
+                    return new ResponseEntity<>(HttpStatus.OK);
+                }
             }
         }
+
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
@@ -160,10 +167,24 @@ public class DemandController {
 
     }
 
-//    @PutMapping("{id}")
-//    public ResponseEntity<?> updateDemand(@PathVariable Long id, @RequestBody DemandDTO demandDTO) {
-//
-//        demandService.save(demandDTO);
-//        return new ResponseEntity<>(demandDTO, HttpStatus.OK);
-//    }
+    @PutMapping("{id}")
+    public ResponseEntity<?> updateDemand(@PathVariable Long id, @RequestBody DemandDTO demandDTO, HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.replace("Bearer ", "");
+
+            String userName = jwtService.getUsernameFromJwtToken(token);
+            Account account = accountService.findByEmail(userName);
+            if (account != null) {
+                Buyer buyer = buyerService.getBuyerByAccountId(account.getId());
+                Demand demand = demandService.findById(id);
+                if(demand != null && demand.getBuyer().equals(buyer)) {
+                    demandService.save(demandDTO, buyer);
+                    return new ResponseEntity<>(demandDTO, HttpStatus.OK);
+                }
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
 }

@@ -9,7 +9,6 @@ import jakarta.annotation.security.PermitAll;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,4 +66,6 @@ public class SellerController {
                     .body("Tài khoản này không phải là người bán (seller).");
         }
     }
+
+
 }

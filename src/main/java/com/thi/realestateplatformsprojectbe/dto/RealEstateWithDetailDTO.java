@@ -55,4 +55,7 @@ public class RealEstateWithDetailDTO {
 
     @NotNull(message = "Toilet không được để trống")
     private Integer toilet;
+
+    @NotNull(message = "Ảnh không được để trống")
+    private String imageUrl;
 }

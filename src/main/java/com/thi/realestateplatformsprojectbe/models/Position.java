@@ -1,9 +1,6 @@
 package com.thi.realestateplatformsprojectbe.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -23,4 +20,7 @@ public class Position {
     @Column(name = "name", nullable = false, length = 155)
     private String name;
 
+    @ManyToOne
+    @JoinColumn(name="employee_id")
+    private Employee employee;
 }

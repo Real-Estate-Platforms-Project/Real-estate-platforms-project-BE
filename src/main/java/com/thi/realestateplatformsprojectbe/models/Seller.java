@@ -46,7 +46,7 @@ public class Seller {
     @Size(max = 255)
     @NotNull
     @Column(name = "address", nullable = false)
-    private String addressLine;
+    private String address;
 
     @Size(max = 100)
     @NotNull
@@ -60,8 +60,8 @@ public class Seller {
 
     @Size(max = 12)
     @NotNull
-    @Column(name = "id_number", nullable = false, length = 12)
-    private String idNumber;
+    @Column(name = "id_card", nullable = false, length = 12)
+    private String idCard;
 
     @NotNull
     @OneToOne(fetch = FetchType.EAGER, optional = false)

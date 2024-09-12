@@ -38,7 +38,7 @@ public class BuyerController {
     @GetMapping("/{id}")
     @PermitAll
     public ResponseEntity<?> getBuyerDetails(@PathVariable Long id) {
-        Buyer buyer = buyerService.getBuyerByAccountId(id);
+        Buyer buyer = buyerService.getBuyerById(id);
         if (buyer == null) {
             return ResponseEntity.status(404).body("Không tìm thấy người mua với ID: " + id);
         }

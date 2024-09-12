@@ -61,7 +61,7 @@ public class AdminAccountCreationEmailService {
                 + "                                </tr>"
                 + "                                <tr>"
                 + "                                    <td align=\"center\">"
-                + "                                        <a href=\"http://yourdomain.com/login\" style=\"background-color: #FC650B; color: white; padding: 15px 25px; text-decoration: none; font-size: 16px; border-radius: 5px; font-family: Arial, sans-serif;\">Đăng nhập ngay</a>"
+                + "                                        <a href=\"http://localhost:3000\" style=\"background-color: #FC650B; color: white; padding: 15px 25px; text-decoration: none; font-size: 16px; border-radius: 5px; font-family: Arial, sans-serif;\">Đăng nhập ngay</a>"
                 + "                                    </td>"
                 + "                                </tr>"
                 + "                            </table>"

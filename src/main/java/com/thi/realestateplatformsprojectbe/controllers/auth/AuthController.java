@@ -228,19 +228,18 @@ public class AuthController {
 
     @GetMapping("/get-roles")
     public ResponseEntity<?> getAllRole(Authentication authentication) {
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        Account account = accountService.findByEmail(userPrinciple.getUsername());
-        // tra loi k phai seller
-        //xs
-        // check role seller is present?
-        if (account != null) {
-            Set<Role> roles = account.getRoles();
-            return ResponseEntity.ok(roles);
-            // neu k co
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Tài khoản này không có quyền truy cập");
-        }
+
+            UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+            Account account = accountService.findByEmail(userPrinciple.getUsername());
+
+            if (account != null) {
+                Set<Role> roles = account.getRoles();
+                return ResponseEntity.ok(roles);
+                // neu k co
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Tài khoản này không có quyền truy cập");
+            }
     }
 
 

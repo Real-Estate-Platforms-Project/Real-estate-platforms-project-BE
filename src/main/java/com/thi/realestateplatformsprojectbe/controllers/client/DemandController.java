@@ -62,9 +62,9 @@ public class DemandController {
     @GetMapping("/search")
     public ResponseEntity<List<Demand>> searchRealEstates(
             @RequestParam(required = false) String notes,
-            @RequestParam(required = false) String region,
+            @RequestParam(required = false) List<String> region,
             @RequestParam(required = false) String type,
-            @RequestParam(required = false) String realEstateType,
+            @RequestParam(required = false) List<String> realEstateType,
             @RequestParam(required = false) Integer minArea,
             @RequestParam(required = false) Integer maxArea,
             HttpServletRequest request
@@ -151,7 +151,7 @@ public class DemandController {
             String userName = jwtService.getUsernameFromJwtToken(token);
             Account account = accountService.findByEmail(userName);
             if (account != null) {
-                Buyer buyer = buyerService.getBuyerByAccountId(account.getId());
+                Buyer buyer = buyerService.findByAccountId(account.getId());
                 demandService.save(demandDTO,buyer);
                 return new ResponseEntity<>(demandDTO, HttpStatus.CREATED);
             }

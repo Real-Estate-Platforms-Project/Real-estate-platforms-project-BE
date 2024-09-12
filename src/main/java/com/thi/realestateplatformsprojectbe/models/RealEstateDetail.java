@@ -1,5 +1,6 @@
 package com.thi.realestateplatformsprojectbe.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -15,10 +16,12 @@ public class RealEstateDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @OneToOne(fetch = FetchType.EAGER, optional = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
     @JoinColumn(name = "real_estate_id", nullable = false)
+    @JsonBackReference
     private RealEstate realEstate;
+
 
     @NotNull
     @Column(name = "floor", nullable = false)

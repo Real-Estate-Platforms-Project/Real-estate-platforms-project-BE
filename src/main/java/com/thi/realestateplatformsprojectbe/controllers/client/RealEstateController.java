@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/api/real-estate")
@@ -45,4 +47,15 @@ public class  RealEstateController {
             return new ResponseEntity<>(realEstates, HttpStatus.OK);
         }
     }
+
+    @GetMapping
+    public ResponseEntity<List<RealEstate>> findAll() {
+        List<RealEstate> realEstates = realEstateService.findAll();
+        if (realEstates.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(realEstates, HttpStatus.OK);
+        }
+    }
+
 }

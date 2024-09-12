@@ -7,7 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface IRealEstateRepository extends JpaRepository<RealEstate, Long> {
+
     @Query("SELECT r FROM RealEstate r WHERE "
             + "(:minPrice IS NULL OR r.price >= :minPrice) AND "
             + "(:maxPrice IS NULL OR r.price <= :maxPrice) AND "

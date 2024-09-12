@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class RealEstateService implements IRealEstateService {
 
@@ -54,5 +56,11 @@ public class RealEstateService implements IRealEstateService {
     public Page<RealEstate> searchRealEstates(Double minPrice, Double maxPrice, String location, String type, Integer minArea, Integer maxArea, Pageable pageable) {
         return realEstateRepository.searchRealEstates(minPrice,maxPrice,location,type,minArea,maxArea,pageable);
     }
+
+    @Override
+    public List<RealEstate> findAll() {
+        return realEstateRepository.findAll();
+    }
+
 
 }

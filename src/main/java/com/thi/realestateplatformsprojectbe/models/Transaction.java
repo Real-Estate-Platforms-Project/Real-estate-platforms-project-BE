@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 public class Transaction {
     @Id
     @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Size(max = 10)
@@ -53,7 +55,7 @@ public class Transaction {
 
     @NotNull
     @Column(name = "commission_fee", nullable = false)
-    private Integer commissionFee;
+    private BigDecimal commissionFee;
 
     @Size(max = 255)
     @Column(name = "description")

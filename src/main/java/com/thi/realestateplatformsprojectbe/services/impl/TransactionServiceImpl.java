@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 
@@ -72,17 +73,32 @@ public class TransactionServiceImpl implements ITransactionService {
 
     @Override
     public Optional<Transaction> findById(Long id) {
-        return Optional.empty();
+        return transactionRepository.findById(id);
     }
 
     @Override
     public void deleteById(Long id) {
-
+        transactionRepository.deleteById(id);
     }
 
     @Override
     public ResponsePage save(TransactionRequest transactionRequest) {
-        return null;
+        LOGGER.info("TransactionService -> save invoked!!!");
+        Transaction transaction = transactionConverter.dtoToEntity(transactionRequest);
+        try {
+            transactionRepository.save(transaction);
+            return ResponsePage.builder()
+                    .data(null)
+                    .message("transaction created successfully")
+                    .status(HttpStatus.OK)
+                    .build();
+        }  catch (Exception e) {
+            return ResponsePage.builder()
+                    .data(null)
+                    .message(e.getMessage())
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build();
+        }
     }
 
     @Override

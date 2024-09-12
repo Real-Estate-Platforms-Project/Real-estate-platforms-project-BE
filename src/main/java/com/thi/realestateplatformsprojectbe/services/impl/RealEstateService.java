@@ -1,6 +1,7 @@
 package com.thi.realestateplatformsprojectbe.services.impl;
 
 import com.thi.realestateplatformsprojectbe.dto.RealEstateWithDetailDTO;
+import com.thi.realestateplatformsprojectbe.models.Image;
 import com.thi.realestateplatformsprojectbe.models.RealEstate;
 import com.thi.realestateplatformsprojectbe.models.RealEstateDetail;
 import com.thi.realestateplatformsprojectbe.repositories.*;
@@ -26,6 +27,7 @@ public class RealEstateService implements IRealEstateService {
     private final IDistrictRepository districtRepository;
     private final IWardRepository wardRepository;
     private final IRealEstateDetailRepository realEstateDetailRepository;
+    private final IImageRepository imageRepository;
 
     @Override
     public RealEstate addRealEstatePost(RealEstateWithDetailDTO realEstatePostDTO) {
@@ -50,6 +52,12 @@ public class RealEstateService implements IRealEstateService {
                 .code(generatedCode)
                 .build();
         RealEstate savedRealEstate = realEstateRepository.save(realEstate);
+        //Lưu ảnh vào db
+        Image image = Image.builder()
+                .name(realEstatePostDTO.getImageUrl())
+                .realEstate(savedRealEstate)
+                .build();
+        imageRepository.save(image);
         // Conditionally create and save RealEstateDetail if type is "Nhà ở"
         if ("Nhà ở".equals(realEstatePostDTO.getType())) {
             RealEstateDetail realEstateDetail = RealEstateDetail.builder()
@@ -63,7 +71,6 @@ public class RealEstateService implements IRealEstateService {
         return savedRealEstate;
     }
 
-
     @Override
     public List<RealEstate> getAll() {
         return realEstateRepository.findAll();
@@ -73,6 +80,11 @@ public class RealEstateService implements IRealEstateService {
     @Override
     public Page<RealEstate> searchRealEstates(String address,Double minPrice, Double maxPrice, String location, String type, Integer minArea, Integer maxArea, Pageable pageable) {
         return realEstateRepository.searchRealEstates(address,minPrice,maxPrice,location,type,minArea,maxArea,pageable);
+    }
+
+    @Override
+    public RealEstate findById(Long id) {
+        return realEstateRepository.findById(id).orElse(null);
     }
 
 }

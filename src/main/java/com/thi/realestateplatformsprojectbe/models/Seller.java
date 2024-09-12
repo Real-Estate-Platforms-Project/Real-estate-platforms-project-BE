@@ -20,6 +20,7 @@ import java.time.LocalDate;
 @Builder
 public class Seller {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 

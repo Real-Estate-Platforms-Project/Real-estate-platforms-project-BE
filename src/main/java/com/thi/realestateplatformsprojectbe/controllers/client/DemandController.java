@@ -1,5 +1,6 @@
 package com.thi.realestateplatformsprojectbe.controllers.client;
 
+import com.thi.realestateplatformsprojectbe.dto.DemandDTO;
 import com.thi.realestateplatformsprojectbe.models.Demand;
 import com.thi.realestateplatformsprojectbe.services.IDemandService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAnyRole;
-
-
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/api/demand")
@@ -21,14 +19,25 @@ public class DemandController {
     private IDemandService demandService;
 
 //    @PreAuthorize("hasAnyRole()")
+
+
     @GetMapping
-    public ResponseEntity<?> getAllDemand() {
+    public ResponseEntity<?> getAllVerifiedDemand(@RequestParam(value = "isVerify", defaultValue = "") Boolean isVerify) {
+        if (isVerify != null) {
+            List<Demand> demands = demandService.findAllVerifiedDemand(isVerify);
+            if (demands.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+            return new ResponseEntity<>(demands, HttpStatus.OK);
+        }
         List<Demand> demands = demandService.findAll();
         if (demands.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(demands, HttpStatus.OK);
     }
+
+
 // tai danh sach cac demand chua duoc verify cho admin duyet
     @GetMapping("/validate")
     public ResponseEntity<?> getInvalidatedDemand() {
@@ -36,26 +45,31 @@ public class DemandController {
         return new ResponseEntity<>(demands, HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping("/verify/id")
-    public boolean verifyDemand(@RequestParam Long id) {
+    @PutMapping("{id}/verify")
+    public boolean verifyDemand(@PathVariable Long id) {
         return demandService.verifyDemand(id);
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> deleteDemand(@RequestBody Demand demand) {
-        demandService.delete(demand);
-        return new ResponseEntity<>(demand, HttpStatus.OK);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteDemand(@PathVariable Long id) {
+        Demand demand = demandService.findById(id);
+        if (demand != null) {
+            demandService.delete(demand);
+            return new ResponseEntity<>(demand, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PostMapping
-    public ResponseEntity<Demand> addDemand(@RequestBody Demand demand) {
-        demandService.save(demand);
-        return new ResponseEntity<>(demand, HttpStatus.CREATED);
+    public ResponseEntity<DemandDTO> addDemand(@RequestBody DemandDTO demandDTO) {
+        demandService.save(demandDTO);
+        return new ResponseEntity<>(demandDTO, HttpStatus.CREATED);
     }
 
-    @PutMapping
-    public ResponseEntity<?> updateDemand(@RequestBody Demand demand) {
-        demandService.save(demand);
-        return new ResponseEntity<>(demand, HttpStatus.OK);
+    @PutMapping("{id}")
+    public ResponseEntity<?> updateDemand(@PathVariable Long id, @RequestBody DemandDTO demandDTO) {
+
+        demandService.save(demandDTO);
+        return new ResponseEntity<>(demandDTO, HttpStatus.OK);
     }
 }

@@ -21,7 +21,6 @@ public class StatisticService implements IStatisticService {
         List<Demand> demands = statisticRepository.findDemandByYear(year);
         return demands.stream().map(demand -> StatisticDemandDTO.builder()
                 .id(demand.getId())
-                .code(demand.getCode())
                 .title(demand.getTitle())
                 .nameBuyer(demand.getBuyer().getName())
                 .type(demand.getType())
@@ -41,7 +40,6 @@ public class StatisticService implements IStatisticService {
         List<Demand> demands = statisticRepository.findDemandByMonth(month, year);
         return demands.stream().map(demand -> StatisticDemandDTO.builder()
                 .id(demand.getId())
-                .code(demand.getCode())
                 .title(demand.getTitle())
                 .nameBuyer(demand.getBuyer().getName())
                 .type(demand.getType())

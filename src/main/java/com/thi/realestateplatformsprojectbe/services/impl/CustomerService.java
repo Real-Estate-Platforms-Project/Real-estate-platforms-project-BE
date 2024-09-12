@@ -38,7 +38,16 @@ public class CustomerService implements ICustomerService {
     @Autowired
     private IBuyerRepository buyerRepository;
 
+    public boolean emailExists(String email) {
+        return accountRepository.existsByEmail(email);
+    }
+
+
     public void addNewCustomer(CustomerDTO customerDTO) throws MessagingException {
+        if (emailExists(customerDTO.getEmail())) {
+            throw new IllegalArgumentException("Email đã tồn tại. Vui lòng sử dụng email khác.");
+        }
+
         Account account = new Account();
         account.setEmail(customerDTO.getEmail());
         String tempPassword = generateRandomPassword();
@@ -58,7 +67,7 @@ public class CustomerService implements ICustomerService {
             seller.setAccount(account);
             seller.setName(customerDTO.getName());
             seller.setDob(customerDTO.getDob());
-            seller.setAddressLine(customerDTO.getAddress());
+            seller.setAddress(customerDTO.getAddress());
             seller.setEmail(customerDTO.getEmail());
             seller.setPhoneNumber(customerDTO.getPhoneNumber());
             seller.setGender(customerDTO.getGender());

@@ -46,7 +46,7 @@ public class Seller implements IUser {
     @Size(max = 255)
     @NotNull
     @Column(name = "address", nullable = false)
-    private String addressLine;
+    private String address;
 
     @Size(max = 100)
     @NotNull

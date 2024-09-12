@@ -212,6 +212,9 @@ public class AuthController {
             if (role.getName().equals(RoleName.ROLE_EMPLOYEE.toString())) {
                 user = employeeService.findByAccountId(account.getId());
             }
+            if (role.getName().equals(RoleName.ROLE_ADMIN.toString())) {
+                user = employeeService.findByAccountId(account.getId());
+            }
         }
 
         if (user == null) {

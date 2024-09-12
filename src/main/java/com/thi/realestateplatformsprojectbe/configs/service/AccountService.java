@@ -2,6 +2,8 @@ package com.thi.realestateplatformsprojectbe.configs.service;
 
 import com.thi.realestateplatformsprojectbe.configs.UserPrinciple;
 import com.thi.realestateplatformsprojectbe.models.Account;
+import com.thi.realestateplatformsprojectbe.models.Role;
+import com.thi.realestateplatformsprojectbe.models.RoleName;
 import com.thi.realestateplatformsprojectbe.repositories.IAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,7 +28,25 @@ public class AccountService implements UserDetailsService {
     }
 
     public boolean existsByEmail(String email) {
-        return accountRepository.existsByEmail(email);    }
+        return accountRepository.existsByEmail(email);
+    }
 
+    public boolean checkRole(Account account) {
+        for (Role role : account.getRoles()) {
+            if (RoleName.valueOf(role.getName()) == RoleName.ROLE_SELLER) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean checkRoleBuyer(Account account) {
+        for (Role role : account.getRoles()) {
+            if (RoleName.valueOf(role.getName()) == RoleName.ROLE_BUYER) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

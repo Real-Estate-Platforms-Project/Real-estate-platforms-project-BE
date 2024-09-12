@@ -39,6 +39,11 @@ public class Transaction {
     private Buyer buyer;
 
     @NotNull
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "seller_id", nullable = false)
+    private Seller seller;
+
+    @NotNull
     @Column(name = "amount", nullable = false)
     private Integer amount;
 

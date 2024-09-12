@@ -1,15 +1,22 @@
 package com.thi.realestateplatformsprojectbe.models;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
 @Data
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "real_estates", schema = "real_estate_platform")
+@Builder
 public class RealEstate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -76,4 +83,13 @@ public class RealEstate {
     @ManyToOne
     @JoinColumn(name = "ward_code",nullable = false)
     private Ward ward;
+
+    @OneToOne(mappedBy = "realEstate", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private RealEstateDetail realEstateDetail;
+
+    @Size(max = 15)
+    @NotNull
+    @Column(name = "code", nullable = false, length = 15)
+    private String code;
 }

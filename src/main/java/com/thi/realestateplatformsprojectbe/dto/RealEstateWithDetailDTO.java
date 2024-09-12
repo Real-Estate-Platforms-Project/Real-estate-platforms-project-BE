@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
-public class RealEstateDTO {
+public class RealEstateWithDetailDTO {
 
     private Long sellerId;
 
@@ -46,4 +46,16 @@ public class RealEstateDTO {
 
     @NotBlank(message = "Mã phường/xã không được để trống")
     private String wardCode;
+
+    @NotNull(message = "Phòng không được để trống")
+    private Integer floor;
+
+    @NotNull(message = "Tầng không được để trống")
+    private Integer bedroom;
+
+    @NotNull(message = "Toilet không được để trống")
+    private Integer toilet;
+
+    @NotNull(message = "Ảnh không được để trống")
+    private String imageUrl;
 }

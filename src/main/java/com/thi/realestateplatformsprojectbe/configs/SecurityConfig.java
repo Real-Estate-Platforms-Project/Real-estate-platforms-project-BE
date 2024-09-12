@@ -82,7 +82,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
 //                                .requestMatchers("/api/admin/sellers/info").hasAnyRole("SELLER")
-                                .requestMatchers("**").permitAll()
+                                .requestMatchers("/api/auth/login", "/api/auth/register", "api/auth/confirm").permitAll()
                                 .anyRequest().authenticated()
 
                 )

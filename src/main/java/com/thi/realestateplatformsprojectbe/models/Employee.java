@@ -19,7 +19,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Table(name = "employees", schema = "real_estate_platform")
 @Builder
-public class Employee {
+public class Employee implements IUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

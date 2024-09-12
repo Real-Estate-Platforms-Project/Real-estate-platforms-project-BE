@@ -7,27 +7,29 @@ import com.thi.realestateplatformsprojectbe.configs.service.JwtService;
 import com.thi.realestateplatformsprojectbe.dto.AccountDTO;
 
 import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
+import com.thi.realestateplatformsprojectbe.dto.UserDTO;
 import com.thi.realestateplatformsprojectbe.models.*;
-import com.thi.realestateplatformsprojectbe.services.IBuyerService;
-import com.thi.realestateplatformsprojectbe.services.IEmployeeService;
-import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
-import com.thi.realestateplatformsprojectbe.services.impl.UserService;
+import com.thi.realestateplatformsprojectbe.services.impl.BuyerService;
+import com.thi.realestateplatformsprojectbe.services.impl.EmployeeService;
+import com.thi.realestateplatformsprojectbe.services.impl.SellerService;
 import com.thi.realestateplatformsprojectbe.services.role.IRoleService;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -45,14 +47,13 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final IVerificationTokenService verificationTokenService;
-    private final IBuyerService buyerService;
-    private final ISellerService sellerService;
-    private final IEmployeeService employeeService;
-    private final UserService userService;
+    private final BuyerService buyerService;
+    private final SellerService sellerService;
+    private final EmployeeService employeeService;
 
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Account account) {
+    public ResponseEntity<?> login(@RequestBody Account account, HttpServletResponse response) {
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
@@ -89,9 +90,9 @@ public class AuthController {
         String jwt = jwtService.generateTokenLogin(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        return ResponseEntity.ok(new JwtResponse(currentAccount.getId(), jwt, userDetails.getUsername(),
-                currentAccount.getName(), userDetails.getAuthorities()));
+        return ResponseEntity.ok(new JwtResponse(currentAccount.getId(), jwt, userDetails.getAuthorities()));
     }
+
 
 
     @PostMapping("/register")
@@ -114,12 +115,18 @@ public class AuthController {
 
         accountService.save(account);
 
-        User user = new User();
+        Buyer user = new Buyer();
         user.setAccount(account);
         user.setName(account.getName());
         user.setEmail(account.getEmail());
-        user.setCode(userService.generateBuyerCode());
-        userService.save(user);
+        user.setCode(buyerService.generateBuyerCode());
+        user.setAddress("");
+        user.setEnable(true);
+        user.setGender("");
+        user.setDob(LocalDate.of(2000,1,1));
+        user.setIdCard("");
+        user.setPhoneNumber("");
+        buyerService.save(user);
 
         VerificationToken token = verificationTokenService.createVerificationToken(account);
         String confirmationUrl = "http://localhost:3000/activation-success?token=" + token.getToken(); // Frontend URL
@@ -183,16 +190,28 @@ public class AuthController {
     public ResponseEntity<?> me(Authentication authentication) {
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
 
-        if (userPrinciple == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Chưa xác thực");
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+        IUser user = null;
+        for (Role role : account.getRoles()) {
+            if (role.getName().equals(RoleName.ROLE_BUYER.toString())) {
+                user = buyerService.findByAccountId(account.getId());
+            }
+            if (role.getName().equals(RoleName.ROLE_SELLER.toString())) {
+                user = sellerService.findByAccountId(account.getId());
+            }
+            if (role.getName().equals(RoleName.ROLE_EMPLOYEE.toString())) {
+                user = employeeService.findByAccountId(account.getId());
+            }
         }
 
-        User currentUser = userService.getByAccountId(userPrinciple.getAccountId());
-
-        if (currentUser == null) {
+        if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Người dùng không tồn tại");
         }
 
-        return new ResponseEntity<>(currentUser, HttpStatus.OK);
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUser(user);
+        userDTO.setRoles(account.getRoles());
+
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
     }
 }

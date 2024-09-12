@@ -1,19 +1,17 @@
 package com.thi.realestateplatformsprojectbe.services.impl;
 
 import com.thi.realestateplatformsprojectbe.dto.DemandDTO;
+import com.thi.realestateplatformsprojectbe.models.Buyer;
 import com.thi.realestateplatformsprojectbe.models.Demand;
-import com.thi.realestateplatformsprojectbe.models.RealEstate;
 import com.thi.realestateplatformsprojectbe.repositories.IDemandRepository;
 import com.thi.realestateplatformsprojectbe.services.IDemandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class DemandService implements IDemandService {
     @Autowired
     private IDemandRepository demandRepository;
@@ -21,11 +19,9 @@ public class DemandService implements IDemandService {
     @Autowired
     private BuyerService buyerService;
 
+
     @Override
-    public List<Demand> findAllVerifiedDemand(boolean isVerify) {
-        if(!isVerify) {
-            return demandRepository.findAllByIsDeletedAndIsVerify(false,false);
-        }
+    public List<Demand> findAllVerifiedDemand() {
         return demandRepository.findAllByIsDeletedAndIsVerify(false,true);
     }
 
@@ -46,24 +42,22 @@ public class DemandService implements IDemandService {
     }
 
     @Override
-    public boolean verifyDemand(Long id) {
+    public void verifyDemand(Long id) {
         if (demandRepository.findById(id).isPresent()) {
             Demand demand = demandRepository.findById(id).get();
             if (!demand.getIsVerify()) {
                 demand.setIsVerify(true);
                 demandRepository.save(demand);
-                return true;
             }
-            return false;
         }
-        return false;
     }
 
     @Override
-    public Demand save(DemandDTO demandDTO) {
+    public Demand save(DemandDTO demandDTO, Buyer buyer) {
         buyerService.getBuyerById(demandDTO.getBuyerId());
         Demand demand = Demand.builder()
-                .buyer(buyerService.getBuyerById(demandDTO.getBuyerId()))
+//                .buyer(buyerService.getBuyerById(demandDTO.getBuyerId()))
+                .buyer(buyer)
                 .region(demandDTO.getRegion())
                 .type(demandDTO.getType())
                 .realEstateType(demandDTO.getRealEstateType())
@@ -83,4 +77,19 @@ public class DemandService implements IDemandService {
     public Demand findById(Long id) {
         return demandRepository.findById(id).orElse(null);
     }
+
+    @Override
+    public List<Demand> searchVerifiedDemand(String notes, String region, String type, String realEstateType, Integer minArea, Integer maxArea, boolean isVerify) {
+        return demandRepository.searchVerifiedDemands(notes,region,type,realEstateType,minArea,maxArea,isVerify);
+    }
+
+    @Override
+    public List<Demand> searchDemand(String notes, String region, String type, String realEstateType, Integer minArea, Integer maxArea) {
+        return demandRepository.searchDemands(notes,region,type,realEstateType,minArea,maxArea);
+    }
+
+//    @Override
+//    public List<Demand> searchDemand(String notes, String region, String type, String realEstateType, Integer minArea, Integer maxArea,Boolean isVerify) {
+//        return demandRepository.searchDemands(notes,region,type,realEstateType,minArea,maxArea,isVerify);
+//    }
 }

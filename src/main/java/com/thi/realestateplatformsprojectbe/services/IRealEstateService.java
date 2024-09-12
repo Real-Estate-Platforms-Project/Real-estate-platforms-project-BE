@@ -12,4 +12,5 @@ public interface IRealEstateService {
     Page<RealEstate> searchRealEstates(String address,Double minPrice, Double maxPrice, List<String> location, List<String> demandType, Integer minArea, Integer maxArea, Pageable pageable);
 
     List<RealEstate> getAll();
+    RealEstate findById(Long id);
 }

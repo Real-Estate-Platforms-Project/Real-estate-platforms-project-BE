@@ -8,6 +8,4 @@ public interface IAccountRepository extends JpaRepository<Account, Long> {
     Account findByEmail(String email);
 
     boolean existsByEmail(String email);
-
-    void findAccountById(Long accountId);
 }

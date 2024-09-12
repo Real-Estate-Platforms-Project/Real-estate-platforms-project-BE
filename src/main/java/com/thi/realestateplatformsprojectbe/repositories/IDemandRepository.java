@@ -11,8 +11,8 @@ public interface IDemandRepository extends JpaRepository<Demand, Long> {
     @Query(nativeQuery = true, value = "select * from demands as s where s.isVerify = 0")
     List<Demand> findInvalidatedDemand();
 
-    List<Demand> findAllByIsDeleted(Boolean isDeleted);
-    List<Demand> findAllByIsDeletedAndIsVerify(Boolean isDeleted, Boolean isVerify);
+    List<Demand> findAllByIsDeletedOrderByIsVerifyAscCreatedAtDesc(Boolean isDeleted);
+    List<Demand> findAllByIsDeletedAndIsVerifyOrderByCreatedAtDesc(Boolean isDeleted, Boolean isVerify);
 
     @Query("SELECT r FROM Demand r WHERE "
             + "(r.isDeleted = false) AND "

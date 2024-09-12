@@ -22,12 +22,12 @@ public class DemandService implements IDemandService {
 
     @Override
     public List<Demand> findAllVerifiedDemand() {
-        return demandRepository.findAllByIsDeletedAndIsVerify(false,true);
+        return demandRepository.findAllByIsDeletedAndIsVerifyOrderByCreatedAtDesc(false,true);
     }
 
     @Override
     public  List<Demand> findAll(){
-        return demandRepository.findAllByIsDeleted(false);
+        return demandRepository.findAllByIsDeletedOrderByIsVerifyAscCreatedAtDesc(false);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class DemandService implements IDemandService {
 
     @Override
     public Demand save(DemandDTO demandDTO, Buyer buyer) {
-        buyerService.getBuyerById(demandDTO.getBuyerId());
+//        buyerService.getBuyerById(demandDTO.getBuyerId());
         Demand demand = Demand.builder()
 //                .buyer(buyerService.getBuyerById(demandDTO.getBuyerId()))
                 .buyer(buyer)
@@ -79,12 +79,12 @@ public class DemandService implements IDemandService {
     }
 
     @Override
-    public List<Demand> searchVerifiedDemand(String notes, String region, String type, String realEstateType, Integer minArea, Integer maxArea, boolean isVerify) {
+    public List<Demand> searchVerifiedDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea, boolean isVerify) {
         return demandRepository.searchVerifiedDemands(notes,region,type,realEstateType,minArea,maxArea,isVerify);
     }
 
     @Override
-    public List<Demand> searchDemand(String notes, String region, String type, String realEstateType, Integer minArea, Integer maxArea) {
+    public List<Demand> searchDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea) {
         return demandRepository.searchDemands(notes,region,type,realEstateType,minArea,maxArea);
     }
 

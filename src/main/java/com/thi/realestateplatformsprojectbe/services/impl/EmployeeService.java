@@ -133,6 +133,5 @@ public class EmployeeService implements IEmployeeService {
     public Iterable<Employee> searchEmployees(String code, String name, String email, Long positionId) {
         return employeeRepository.searchEmployees(code, name, email, positionId);
     }
-
-
 }
+

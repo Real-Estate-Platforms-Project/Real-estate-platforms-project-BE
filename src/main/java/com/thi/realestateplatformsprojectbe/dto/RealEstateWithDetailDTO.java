@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class RealEstateWithDetailDTO {
 
@@ -57,5 +59,5 @@ public class RealEstateWithDetailDTO {
     private Integer toilet;
 
     @NotNull(message = "Ảnh không được để trống")
-    private String imageUrl;
+    private List<String> imageUrls;
 }

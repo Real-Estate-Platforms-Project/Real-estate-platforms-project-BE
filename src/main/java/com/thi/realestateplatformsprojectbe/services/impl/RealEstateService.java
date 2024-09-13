@@ -13,8 +13,10 @@ import org.springframework.data.domain.Pageable;
 
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +36,16 @@ public class RealEstateService implements IRealEstateService {
         Random random = new Random();
         int randomNumber = 1000 + random.nextInt(9000);
         String generatedCode = "MBDS-" + randomNumber;
-        // Create the RealEstate object using the Builder pattern
+        Set<Image> images = new HashSet<>();
+        if (realEstatePostDTO.getImageUrls() != null) {
+            for (String imageUrl : realEstatePostDTO.getImageUrls()) {
+                Image image = Image.builder()
+                        .name(imageUrl)
+                        .build();
+                image = imageRepository.save(image);
+                images.add(image);
+            }
+        }
         RealEstate realEstate = RealEstate.builder()
                 .seller(sellerRepository.findById(realEstatePostDTO.getSellerId()).orElse(null))
                 .demandType(realEstatePostDTO.getDemandType())
@@ -50,14 +61,9 @@ public class RealEstateService implements IRealEstateService {
                 .district(districtRepository.findDistrictByCode(realEstatePostDTO.getDistrictCode()))
                 .ward(wardRepository.findWardByCode(realEstatePostDTO.getWardCode()))
                 .code(generatedCode)
+                .images(images) // Associate multiple images
                 .build();
         RealEstate savedRealEstate = realEstateRepository.save(realEstate);
-        //Lưu ảnh vào db
-        Image image = Image.builder()
-                .name(realEstatePostDTO.getImageUrl())
-                .realEstate(savedRealEstate)
-                .build();
-        imageRepository.save(image);
         // Conditionally create and save RealEstateDetail if type is "Nhà ở"
         if ("Nhà ở".equals(realEstatePostDTO.getType())) {
             RealEstateDetail realEstateDetail = RealEstateDetail.builder()
@@ -70,6 +76,7 @@ public class RealEstateService implements IRealEstateService {
         }
         return savedRealEstate;
     }
+
 
     @Override
     public List<RealEstate> getAll() {

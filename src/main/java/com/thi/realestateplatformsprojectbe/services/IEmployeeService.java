@@ -9,15 +9,15 @@ public interface IEmployeeService {
 
     Employee findByAccountId(Long accountId);
 
-    Optional<Employee> getEmployeeById(Long id);
-
-
-    Employee createEmployee(EmployeeDTO employee);
+    Optional<Employee> updateEmployee(Long id, EmployeeDTO employeeDTO);
 
     boolean deleteEmployee(Long id);
 
-
-    Optional<Employee> updateEmployee(Long id, EmployeeDTO employeeDTO);
+    Employee createEmployee(EmployeeDTO employeeDTO);
 
     Iterable<Employee> searchEmployees(String code, String name, String email, Long positionId);
+
+    Iterable<Employee> getAllEmployees();
+
+    Optional<Employee> getEmployeeById(Long id);
 }

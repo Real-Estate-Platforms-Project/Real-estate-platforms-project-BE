@@ -2,12 +2,20 @@ package com.thi.realestateplatformsprojectbe.services.impl;
 
 import com.thi.realestateplatformsprojectbe.dto.CustomerDTO;
 import com.thi.realestateplatformsprojectbe.models.*;
-import com.thi.realestateplatformsprojectbe.repositories.*;
+import com.thi.realestateplatformsprojectbe.repositories.IAccountRepository;
+import com.thi.realestateplatformsprojectbe.repositories.IBuyerRepository;
+import com.thi.realestateplatformsprojectbe.repositories.IRoleRepository;
+import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
 import com.thi.realestateplatformsprojectbe.services.ICustomerService;
+import com.thi.realestateplatformsprojectbe.services.email.AdminAccountCreationEmailService;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import jakarta.mail.MessagingException;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class CustomerService implements ICustomerService {
@@ -16,69 +24,80 @@ public class CustomerService implements ICustomerService {
     private IAccountRepository accountRepository;
 
     @Autowired
-    private IBuyerRepository buyerRepository;
+    private IRoleRepository roleRepository;
+
+    @Autowired
+    private AdminAccountCreationEmailService emailService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private ISellerRepository sellerRepository;
 
     @Autowired
-    private IRoleRepository roleRepository;
+    private IBuyerRepository buyerRepository;
 
-    @Transactional
-    public void addNewCustomer(CustomerDTO customerDTO) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String encodedPassword = passwordEncoder.encode(customerDTO.getPassword());
+    public boolean emailExists(String email) {
+        return accountRepository.existsByEmail(email);
+    }
+
+
+    public void addNewCustomer(CustomerDTO customerDTO) throws MessagingException {
+        if (emailExists(customerDTO.getEmail())) {
+            throw new IllegalArgumentException("Email đã tồn tại. Vui lòng sử dụng email khác.");
+        }
 
         Account account = new Account();
         account.setEmail(customerDTO.getEmail());
-        account.setPassword(encodedPassword);
+        String tempPassword = generateRandomPassword();
+        account.setPassword(passwordEncoder.encode(tempPassword));
+        account.setName(customerDTO.getName());
         account.setIsActive(true);
-        account.setIsDeleted(false);
-        account = accountRepository.save(account);
 
-        if ("BUYER".equalsIgnoreCase(customerDTO.getCustomerType())) {
+        Role role = roleRepository.findByName("seller".equalsIgnoreCase(customerDTO.getCustomerType()) ? "ROLE_SELLER" : "ROLE_BUYER");
+        Set<Role> roles = new HashSet<>();
+        roles.add(role);
+        account.setRoles(roles);
+
+        accountRepository.save(account);
+
+        if ("seller".equalsIgnoreCase(customerDTO.getCustomerType())) {
+            Seller seller = new Seller();
+            seller.setAccount(account);
+            seller.setName(customerDTO.getName());
+            seller.setDob(customerDTO.getDob());
+            seller.setAddress(customerDTO.getAddress());
+            seller.setEmail(customerDTO.getEmail());
+            seller.setPhoneNumber(customerDTO.getPhoneNumber());
+            seller.setGender(customerDTO.getGender());
+            seller.setIdCard(customerDTO.getIdCard());
+            seller.setCode("MNB" + generateRandomCode());
+            sellerRepository.save(seller);
+        } else {
             Buyer buyer = new Buyer();
-            buyer.setCode("BUYER_CODE");
+            buyer.setAccount(account);
             buyer.setName(customerDTO.getName());
             buyer.setDob(customerDTO.getDob());
-            buyer.setGender(customerDTO.getGender());
             buyer.setAddress(customerDTO.getAddress());
             buyer.setEmail(customerDTO.getEmail());
             buyer.setPhoneNumber(customerDTO.getPhoneNumber());
+            buyer.setGender(customerDTO.getGender());
             buyer.setIdCard(customerDTO.getIdCard());
-            buyer.setEnable(true);
-            buyer.setIsDeleted(false);
-            buyer.setAccount(account);
+            buyer.setCode("MNM" + generateRandomCode());
             buyerRepository.save(buyer);
-            linkRoleToAccount(account, RoleName.ROLE_BUYER);
-        } else if ("SELLER".equalsIgnoreCase(customerDTO.getCustomerType())) {
-            Seller seller = new Seller();
-            seller.setCode("SELLER_CODE");
-            seller.setName(customerDTO.getName());
-            seller.setDob(customerDTO.getDob());
-            seller.setGender(customerDTO.getGender());
-            seller.setAddressLine(customerDTO.getAddress());
-            seller.setEmail(customerDTO.getEmail());
-            seller.setPhoneNumber(customerDTO.getPhoneNumber());
-            seller.setIdNumber(customerDTO.getIdCard());
-            seller.setEnable(true);
-            seller.setIsDeleted(false);
-            seller.setAccount(account);
-            sellerRepository.save(seller);
-
-            linkRoleToAccount(account, RoleName.ROLE_SELLER);
-        } else {
-            throw new IllegalArgumentException("Invalid customer type");
         }
+
+        emailService.sendAccountCreationEmail(customerDTO.getEmail(), customerDTO.getEmail(), tempPassword);
     }
 
-    private void linkRoleToAccount(Account account, RoleName roleName) {
-        String roleNameString = roleName.name();
-        Role role = roleRepository.findByName(roleNameString);
-        if (role == null) {
-            throw new IllegalArgumentException("Role not found");
-        }
-        account.getRoles().add(role);
-        accountRepository.save(account);
+
+    private String generateRandomPassword() {
+        return RandomStringUtils.randomAlphanumeric(8);
+    }
+
+
+    private String generateRandomCode() {
+        return RandomStringUtils.randomNumeric(4);
     }
 }

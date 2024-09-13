@@ -16,8 +16,6 @@ public class DemandDTO {
     @NotNull(message = "Tiêu đề không được để trống")
     private String title;
 
-    private Long buyerId;
-
     @NotNull(message = "Loại nhu cầu không được để trống")
     private String type;
 

@@ -7,10 +7,17 @@ import com.thi.realestateplatformsprojectbe.configs.service.JwtService;
 import com.thi.realestateplatformsprojectbe.dto.AccountDTO;
 
 import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
+import com.thi.realestateplatformsprojectbe.dto.UserDTO;
 import com.thi.realestateplatformsprojectbe.models.*;
+import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
+import com.thi.realestateplatformsprojectbe.services.IBuyerService;
 import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
+import com.thi.realestateplatformsprojectbe.services.email.ConfirmEmail;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
+import com.thi.realestateplatformsprojectbe.services.impl.BuyerService;
+import com.thi.realestateplatformsprojectbe.services.impl.EmployeeService;
+import com.thi.realestateplatformsprojectbe.services.impl.SellerService;
 import com.thi.realestateplatformsprojectbe.services.role.IRoleService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +28,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,7 +43,6 @@ import java.util.Set;
 @CrossOrigin("*")
 public class AuthController {
 
-
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final AccountService accountService;
@@ -42,25 +50,51 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final IVerificationTokenService verificationTokenService;
-    private final ISellerService sellerService;
+    private final BuyerService buyerService;
+    private final SellerService sellerService;
+    private final EmployeeService employeeService;
+    private final ConfirmEmail confirmEmail;
 
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Account account) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(account.getEmail(), account.getPassword()));
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(account.getEmail(), account.getPassword())
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Thông tin đăng nhập không đúng!");
+        }
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         Account currentAccount = accountService.findByEmail(account.getEmail());
 
         if (!currentAccount.getIsActive()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email để kích hoạt tài khoản.");
+            VerificationToken token = verificationTokenService.getVerificationTokenByAccount(currentAccount);
+
+            if (token == null || token.getExpiryDate().isBefore(LocalDateTime.now().minusMinutes(5))) {
+                VerificationToken newToken = verificationTokenService.createVerificationToken(currentAccount);
+                String confirmationUrl = "http://localhost:3000/activation-success?token=" + newToken.getToken();
+                try {
+                    emailService.sendVerifyEmail(currentAccount.getEmail(), confirmationUrl);
+                } catch (MessagingException e) {
+                    throw new RuntimeException(e);
+                }
+
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Tài khoản chưa được kích hoạt! Email xác nhận đã được gửi lại. Vui lòng kiểm tra email.");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Tài khoản chưa được kích hoạt! Vui lòng kiểm tra email để kích hoạt tài khoản.");
+            }
         }
 
         String jwt = jwtService.generateTokenLogin(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        return ResponseEntity.ok(new JwtResponse(currentAccount.getId(), jwt, userDetails.getUsername(), currentAccount.getName(), userDetails.getAuthorities()));
+        return ResponseEntity.ok(new JwtResponse(currentAccount.getId(), jwt, userDetails.getAuthorities()));
     }
 
 
@@ -83,6 +117,19 @@ public class AuthController {
         account.setRoles(roles);
 
         accountService.save(account);
+
+        Buyer user = new Buyer();
+        user.setAccount(account);
+        user.setName(account.getName());
+        user.setEmail(account.getEmail());
+        user.setCode(buyerService.generateBuyerCode());
+        user.setAddress("");
+        user.setEnable(true);
+        user.setGender("");
+        user.setDob(LocalDate.of(2000, 1, 1));
+        user.setIdCard("");
+        user.setPhoneNumber("");
+        buyerService.save(user);
 
         VerificationToken token = verificationTokenService.createVerificationToken(account);
         String confirmationUrl = "http://localhost:3000/activation-success?token=" + token.getToken(); // Frontend URL
@@ -119,20 +166,25 @@ public class AuthController {
             @RequestBody UpdateAccount updateAccount
     ) {
 
-        // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
-        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
-            return new ResponseEntity<>("Nhập lại mật khẩu không đúng",HttpStatus.BAD_REQUEST);
-        }
-
         // Lấy thông tin tài khoảng hiện tại
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
         Account account1 = accountService.findByEmail(userPrinciple.getUsername());
 
-        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(),account1.getPassword());
-        if(!isTrue){
-            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng",HttpStatus.BAD_REQUEST);
+        // Xác định tài khoảng có tồn tại không
+        if (account1 == null) {
+            return new ResponseEntity<>("Tài khoảng không tồn tại", HttpStatus.NOT_FOUND);
         }
 
+        // Xác minh mật khẩu hiện tại nhập vào có đúng không
+        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(), account1.getPassword());
+        if (!isTrue) {
+            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng", HttpStatus.BAD_REQUEST);
+        }
+
+        // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
+        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
+            return new ResponseEntity<>("Nhập lại mật khẩu không đúng", HttpStatus.BAD_REQUEST);
+        }
 
 
         // Mã hoá encoder mật khẩu mới
@@ -144,21 +196,105 @@ public class AuthController {
         return new ResponseEntity<>("{}", HttpStatus.OK);
     }
 
-    @GetMapping("/seller-info")
-    public ResponseEntity<?> getMe(Authentication authentication) {
+    @GetMapping("/me")
+    public ResponseEntity<?> me(Authentication authentication) {
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+        IUser user = null;
+        for (Role role : account.getRoles()) {
+            if (role.getName().equals(RoleName.ROLE_BUYER.toString())) {
+                user = buyerService.findByAccountId(account.getId());
+            }
+            if (role.getName().equals(RoleName.ROLE_SELLER.toString())) {
+                user = sellerService.findByAccountId(account.getId());
+            }
+            if (role.getName().equals(RoleName.ROLE_EMPLOYEE.toString())) {
+                user = employeeService.findByAccountId(account.getId());
+            }
+            if (role.getName().equals(RoleName.ROLE_ADMIN.toString())) {
+                user = employeeService.findByAccountId(account.getId());
+            }
+        }
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Người dùng không tồn tại");
+        }
+
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUser(user);
+        userDTO.setRoles(account.getRoles());
+
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/get-roles")
+    public ResponseEntity<?> getAllRole(Authentication authentication) {
+
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
         Account account = accountService.findByEmail(userPrinciple.getUsername());
-        // tra loi k phai seller
-        //xs
-        // check role seller is present?
-        if (accountService.checkRole(account)) {
-            Seller seller = sellerService.findByAccountId(account.getId());
-            return ResponseEntity.ok(seller);
+
+        if (account != null) {
+            Set<Role> roles = account.getRoles();
+            return ResponseEntity.ok(roles);
             // neu k co
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("Tài khoản này không phải là người bán (seller).");
+                    .body("Tài khoản này không có quyền truy cập");
         }
     }
 
+
+    @PostMapping("/createToken/{email}")
+    public ResponseEntity<?> createToken(@PathVariable String email) throws MessagingException {
+        Account account = accountService.findByEmail(email);
+        VerificationToken token = verificationTokenService.createVerificationToken(account);
+        String confirmationUrl = "http://localhost:3000/confirm-email?token=" + token.getToken(); // Frontend URL
+        confirmEmail.sendVerifyEmail(account.getEmail(), confirmationUrl);
+        return ResponseEntity.ok(" Vui lòng kiểm tra email để kích hoạt tài khoản.");
+    }
+
+    @GetMapping("/confirmEmail")
+    public ResponseEntity<?> confirmEmail(@RequestParam("token") String token) {
+        VerificationToken verificationToken = verificationTokenService.getVerificationToken(token);
+
+        if (verificationToken == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ!");
+        }
+
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            verificationTokenService.deleteToken(verificationToken);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn! Vui lòng yêu cầu gửi lại email xác minh.");
+        }
+
+
+        return ResponseEntity.ok("Chuyển đến trang cập nhật mật khẩu!");
+    }
+
+    @PutMapping("/updateForgetPassword")
+    public ResponseEntity<?> updateForgetPassword(@RequestParam("token") String token,
+                                                  @RequestBody UpdateAccount updateAccount) {
+        System.out.println("*******************************************");
+        VerificationToken verificationToken = verificationTokenService.getVerificationToken(token);
+        if (verificationToken == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ!");
+        }
+
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            verificationTokenService.deleteToken(verificationToken);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn! Vui lòng yêu cầu gửi lại email xác minh.");
+        }
+        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
+            return new ResponseEntity<>("Nhập lại mật khẩu không đúng", HttpStatus.BAD_REQUEST);
+        }
+
+        Account account = verificationToken.getAccount();
+        String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
+        account.setPassword(pw);
+        accountService.save(account);
+
+        verificationTokenService.deleteToken(verificationToken);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

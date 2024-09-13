@@ -1,5 +1,6 @@
 package com.thi.realestateplatformsprojectbe.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -19,7 +20,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Table(name = "employees", schema = "real_estate_platform")
 @Builder
-public class Employee {
+public class Employee implements IUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -54,11 +55,6 @@ public class Employee {
     @Column(name = "email", nullable = false, length = 100)
     private String email;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "title_id", nullable = false)
-    private Position title;
-
     @Size(max = 10)
     @NotNull
     @Column(name = "phone_number", nullable = false, length = 10)
@@ -69,9 +65,11 @@ public class Employee {
     @Column(name = "is_admin", nullable = false)
     private Boolean isAdmin = false;
 
+
     @NotNull
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "account_id", nullable = false)
+    @JsonBackReference
     private Account account;
 
     @NotNull
@@ -79,4 +77,7 @@ public class Employee {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
+    @ManyToOne
+    @JoinColumn(name="position_id")
+    private Position position;
 }

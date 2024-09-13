@@ -9,8 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class
-SellerService implements ISellerService {
+public class SellerService implements ISellerService {
 
     @Autowired
     private ISellerRepository sellerRepository;
@@ -32,7 +31,6 @@ SellerService implements ISellerService {
 
     @Override
     public Seller findByAccountId(Long id) {
-      return  sellerRepository.findSellerByAccount_Id(id);
+        return  sellerRepository.findSellerByAccount_Id(id);
     }
-
 }

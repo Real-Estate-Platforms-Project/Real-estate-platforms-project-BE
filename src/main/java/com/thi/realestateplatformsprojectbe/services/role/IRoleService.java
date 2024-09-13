@@ -1,6 +1,6 @@
 package com.thi.realestateplatformsprojectbe.services.role;
 
-import com.thi.realestateplatformsprojectbe.models.DTO.GetNumberOfRole;
+import com.thi.realestateplatformsprojectbe.dto.GetNumberOfRole;
 import com.thi.realestateplatformsprojectbe.models.Role;
 
 import java.util.Optional;

@@ -20,6 +20,7 @@ public class RealEstateDetail {
     @JoinColumn(name = "real_estate_id", nullable = false)
     private RealEstate realEstate;
 
+
     @NotNull
     @Column(name = "front_side", nullable = false)
     private Integer frontSide;

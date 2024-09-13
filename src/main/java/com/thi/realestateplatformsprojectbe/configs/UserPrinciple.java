@@ -3,6 +3,7 @@ package com.thi.realestateplatformsprojectbe.configs;
 
 import com.thi.realestateplatformsprojectbe.models.Account;
 import com.thi.realestateplatformsprojectbe.models.Role;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,12 +16,15 @@ import java.util.List;
 public class UserPrinciple implements UserDetails {
     @Serial
     private static final long serialVersionUID = 1L;
+    @Getter
+    private final Long accountId;
     private final String email;
     private final String password;
     private final Collection<? extends GrantedAuthority> roles;
 
-    public UserPrinciple(String email, String password,
+    public UserPrinciple(Long accountId, String email, String password,
                          Collection<? extends GrantedAuthority> roles) {
+        this.accountId = accountId;
         this.email = email;
         this.password = password;
         this.roles = roles;
@@ -32,7 +36,7 @@ public class UserPrinciple implements UserDetails {
             authorities.add(new SimpleGrantedAuthority(role.getName()));
         }
 
-        return new UserPrinciple(account.getEmail(),
+        return new UserPrinciple(account.getId(), account.getEmail(),
                 account.getPassword(),authorities);
     }
 

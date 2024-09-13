@@ -10,18 +10,27 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/customers")
+@CrossOrigin(origins = "*")
 public class CustomerController {
 
     @Autowired
     private ICustomerService customerService;
+
+    @GetMapping("/check-email")
+    public ResponseEntity<Boolean> checkEmailExists(@RequestParam String email) {
+        boolean exists = customerService.emailExists(email);
+        return ResponseEntity.ok(exists);
+    }
 
     @PostMapping("/add")
     public ResponseEntity<String> addCustomer(@Valid @RequestBody CustomerDTO customerDTO) {
         try {
             customerService.addNewCustomer(customerDTO);
             return ResponseEntity.status(HttpStatus.OK).body("Customer added successfully");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid data: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Customer not added");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred: " + e.getMessage());
         }
     }
 }

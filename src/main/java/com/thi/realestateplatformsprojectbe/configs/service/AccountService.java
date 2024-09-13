@@ -39,4 +39,14 @@ public class AccountService implements UserDetailsService {
         }
         return false;
     }
+
+    public boolean checkRoleBuyer(Account account) {
+        for (Role role : account.getRoles()) {
+            if (RoleName.valueOf(role.getName()) == RoleName.ROLE_BUYER) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

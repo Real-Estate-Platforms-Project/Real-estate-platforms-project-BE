@@ -17,7 +17,5 @@ public interface IEmployeeService {
 
     Iterable<Employee> searchEmployees(String code, String name, String email, Long positionId);
 
-    Iterable<Employee> getAllEmployees();
-
     Optional<Employee> getEmployeeById(Long id);
 }

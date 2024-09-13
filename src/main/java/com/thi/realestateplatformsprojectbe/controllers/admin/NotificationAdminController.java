@@ -1,6 +1,7 @@
 package com.thi.realestateplatformsprojectbe.controllers.admin;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.thi.realestateplatformsprojectbe.dto.NotificationDTO;
 import com.thi.realestateplatformsprojectbe.models.Notification;
 import com.thi.realestateplatformsprojectbe.services.INotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,10 +31,9 @@ public class NotificationAdminController {
     public ResponseEntity<Notification> createNotification(@RequestBody Notification notification) {
         try {
             Notification createdNotification = notificationService.saveNotification(notification);
-            // Chuyển toàn bộ đối tượng Notification thành JSON
-            String notificationMessage = new ObjectMapper().writeValueAsString(createdNotification.getTitle());
+            NotificationDTO notificationDTO = new NotificationDTO(createdNotification.getEmployee().getId(), createdNotification.getTitle());
+            String notificationMessage = new ObjectMapper().writeValueAsString(notificationDTO);
             messagingTemplate.convertAndSend("/topic/notifications", notificationMessage);
-
             return new ResponseEntity<>(createdNotification, HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

@@ -88,8 +88,4 @@ public class DemandService implements IDemandService {
         return demandRepository.searchDemands(notes,region,type,realEstateType,minArea,maxArea);
     }
 
-//    @Override
-//    public List<Demand> searchDemand(String notes, String region, String type, String realEstateType, Integer minArea, Integer maxArea,Boolean isVerify) {
-//        return demandRepository.searchDemands(notes,region,type,realEstateType,minArea,maxArea,isVerify);
-//    }
 }

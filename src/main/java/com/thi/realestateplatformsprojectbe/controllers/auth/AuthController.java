@@ -55,7 +55,6 @@ public class AuthController {
 
     private final IBuyerService buyerService;
     private final EmployeeService employeeService;
-    private final ConfirmEmail confirmEmail;
 
 
     @PostMapping("/login")

@@ -1,5 +1,6 @@
 package com.thi.realestateplatformsprojectbe.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "notifications", schema = "real_estate_platform")
 @EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

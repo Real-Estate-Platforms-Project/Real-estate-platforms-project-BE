@@ -49,4 +49,106 @@ public class AccountService implements UserDetailsService {
         return false;
     }
 
+    public ResponseEntity<?> updatePassword(Authentication authentication, UpdateAccount updateAccount, PasswordEncoder passwordEncoder) {
+
+        // Lấy thông tin tài khoảng hiện tại
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account1 = findByEmail(userPrinciple.getUsername());
+
+        // Xác định tài khoảng có tồn tại không
+        if (account1 == null) {
+            return new ResponseEntity<>("Tài khoảng không tồn tại", HttpStatus.NOT_FOUND);
+        }
+        // Xác minh mật khẩu hiện tại nhập vào có đúng không
+        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(), account1.getPassword());
+        if (!isTrue) {
+            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng", HttpStatus.BAD_REQUEST);
+        }
+        // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
+        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
+            return new ResponseEntity<>("Nhập lại mật khẩu không đúng", HttpStatus.BAD_REQUEST);
+        }
+        // Mã hoá encoder mật khẩu mới
+        String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
+
+        // Lưu vào db
+        account1.setPassword(pw);
+        save(account1);
+        return new ResponseEntity<>("{}", HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> createToken(String email, IVerificationTokenService verificationTokenService, ConfirmEmailService confirmEmailService) throws MessagingException {
+        Account account = findByEmail(email);
+        VerificationToken token = verificationTokenService.createVerificationToken(account);
+        String confirmationUrl = "http://localhost:3000/confirm-email?token=" + token.getToken(); // Frontend URL
+        confirmEmailService.sendVerifyEmail(account.getEmail(), confirmationUrl);
+        return ResponseEntity.ok(" Vui lòng kiểm tra email để kích hoạt tài khoản.");
+    }
+
+    public ResponseEntity<?> confirmEmail(String token, IVerificationTokenService verificationTokenService) {
+        VerificationToken verificationToken = verificationTokenService.getVerificationToken(token);
+
+        if (verificationToken == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ!");
+        }
+
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            verificationTokenService.deleteToken(verificationToken);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn! Vui lòng yêu cầu gửi lại email xác minh.");
+        }
+
+
+        return ResponseEntity.ok("Chuyển đến trang cập nhật mật khẩu!");
+    }
+
+    public ResponseEntity<?> updateForgetPassword(IVerificationTokenService verificationTokenService, String token,
+                                                  UpdateAccount updateAccount, PasswordEncoder passwordEncoder) {
+        VerificationToken verificationToken = verificationTokenService.getVerificationToken(token);
+        if (verificationToken == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ!");
+        }
+
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            verificationTokenService.deleteToken(verificationToken);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn! Vui lòng yêu cầu gửi lại email xác minh.");
+        }
+        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
+            return new ResponseEntity<>("Nhập lại mật khẩu không đúng", HttpStatus.BAD_REQUEST);
+        }
+        Account account = verificationToken.getAccount();
+        String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
+        account.setPassword(pw);
+        save(account);
+
+        verificationTokenService.deleteToken(verificationToken);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
+
+//    public boolean checkExpiryDate(String email) {
+//        Account account = findByEmail(email);
+//        if (LocalDateTime.now().isAfter(account.getExpiryDate())
+//                && LocalDateTime.now().isBefore(account.getExpiryDate().plusDays(5))) {
+//            return true;
+//        }
+//        return false;
+//    }
+
+//    new ResponseEntity<>(" Tài khoản còn 5 ngày hoạt động, đổi mật khẩu để tiếp tục sử dụng", HttpStatus.OK);
+
+//    new ResponseEntity<>("Tài khoản hết hạn", HttpStatus.OK);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

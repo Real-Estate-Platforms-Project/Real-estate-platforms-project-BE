@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "notifications", schema = "real_estate_platform")
 @EntityListeners(AuditingEntityListener.class)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

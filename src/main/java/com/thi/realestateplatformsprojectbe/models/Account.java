@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Getter
@@ -44,6 +45,8 @@ public class Account {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
+    private LocalDateTime updateDay;
+    private LocalDateTime expiryDate;
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
 }

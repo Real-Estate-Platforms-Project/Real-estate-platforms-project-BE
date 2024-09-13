@@ -8,15 +8,15 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ConfirmEmailService {
+public class EmployeeAccountCreationEmailService {
     private final JavaMailSender javaMailSender;
 
     @Autowired
-    public ConfirmEmailService(JavaMailSender javaMailSender) {
+    public EmployeeAccountCreationEmailService(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
     }
 
-    public void sendVerifyEmail(String to, String confirmationUrl) throws MessagingException {
+    public void sendAccountCreationEmail(String to, String temporaryPassword) throws MessagingException {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
@@ -26,46 +26,46 @@ public class ConfirmEmailService {
                 + "    <meta charset=\"UTF-8\">"
                 + "    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">"
                 + "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
-                + "    <title>Xác Nhận Tài Khoản</title>"
+                + "    <title>Tài Khoản Được Tạo</title>"
                 + "</head>"
                 + "<body style=\"margin: 0; padding: 0; background-color: #f4f4f4;\">"
                 + "    <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">"
                 + "        <tr>"
                 + "            <td style=\"padding: 20px 0 30px 0;\">"
                 + "                <table align=\"center\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" style=\"border-collapse: collapse;\">"
-                + "                    <!-- Header -->"
                 + "                    <tr>"
                 + "                        <td align=\"center\" bgcolor=\"#FC650B\" style=\"padding: 40px 0 30px 0;\">"
+                + "                            <h2 style=\"color: white;\">Thông tin tài khoản của bạn</h2>"
                 + "                        </td>"
                 + "                    </tr>"
-                + "                    <!-- Body -->"
                 + "                    <tr>"
                 + "                        <td bgcolor=\"#ffffff\" style=\"padding: 40px 30px 40px 30px;\">"
                 + "                            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">"
                 + "                                <tr>"
-                + "                                    <td style=\"color: #333333; text-align: center; font-family: Arial, sans-serif; font-size: 24px;\">"
-                + "                                        <b style=\"margin-bottom: 30px;\"> Real Estate Platform. Lấy lại mật khẩu tài khoản!</b>"
+                + "                                    <td style=\"color: #333333; font-family: Arial, sans-serif; font-size: 16px; line-height: 24px;\">"
+                + "                                        Chào bạn, <br/>"
+                + "                                        Tài khoản của bạn đã được tạo thành công bởi quản trị viên. Dưới đây là thông tin đăng nhập:"
                 + "                                    </td>"
                 + "                                </tr>"
                 + "                                <tr>"
-                + "                                    <td style=\"padding: 20px 0 30px 0; color: #555555; font-family: Arial, sans-serif; font-size: 16px; line-height: 24px;\">"
-                + "                                        Để lấy lại tài khoản yêu quý của bạn, vui lòng nhấn vào nút dưới đây để xác nhận rằng bạn chủ nhân tài khoản:"
+                + "                                    <td style=\"padding: 20px 0 10px 0; color: #555555; font-family: Arial, sans-serif; font-size: 16px;\">"
+                + "                                        <b>Tên đăng nhập:</b> " + to + "<br/>"
+                + "                                        <b>Mật khẩu tạm thời:</b> " + temporaryPassword
+                + "                                    </td>"
+                + "                                </tr>"
+                + "                                <tr>"
+                + "                                    <td style=\"padding: 10px 0 30px 0; color: #777777; font-family: Arial, sans-serif; font-size: 14px; line-height: 20px;\">"
+                + "                                        Vui lòng đăng nhập và thay đổi mật khẩu của bạn sớm nhất có thể để đảm bảo an toàn."
                 + "                                    </td>"
                 + "                                </tr>"
                 + "                                <tr>"
                 + "                                    <td align=\"center\">"
-                + "                                        <a href=\"" + confirmationUrl + "\" style=\"background-color: #FC650B; color: white; padding: 15px 25px; text-decoration: none; font-size: 16px; border-radius: 5px; font-family: Arial, sans-serif;\">Xác minh tài khoản</a>"
-                + "                                    </td>"
-                + "                                </tr>"
-                + "                                <tr>"
-                + "                                    <td style=\"padding: 30px 0 0 0; color: #777777; font-family: Arial, sans-serif; font-size: 14px; line-height: 20px;\">"
-                + "                                        Nếu việc lấy lại mật khẩu là không cần thiết, vui lòng bỏ qua email này hoặc <a href=\"mailto:support@realestateplatform.com\" style=\"color: #FC650B; text-decoration: none;\">liên hệ với chúng tôi</a>."
+                + "                                        <a href=\"http://yourdomain.com/login\" style=\"background-color: #FC650B; color: white; padding: 15px 25px; text-decoration: none; font-size: 16px; border-radius: 5px; font-family: Arial, sans-serif;\">Đăng nhập ngay</a>"
                 + "                                    </td>"
                 + "                                </tr>"
                 + "                            </table>"
                 + "                        </td>"
                 + "                    </tr>"
-                + "                    <!-- Footer -->"
                 + "                    <tr>"
                 + "                        <td bgcolor=\"#FC650B\" style=\"padding: 30px 30px 30px 30px;\">"
                 + "                            <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">"
@@ -85,7 +85,7 @@ public class ConfirmEmailService {
                 + "</html>";
 
         helper.setTo(to);
-        helper.setSubject("Real Estate Platforms");
+        helper.setSubject("Thông tin tài khoản mới từ Real Estate Platform");
         helper.setText(htmlContent, true);
 
         javaMailSender.send(message);

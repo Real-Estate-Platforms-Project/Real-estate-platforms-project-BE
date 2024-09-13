@@ -37,7 +37,6 @@ public class EmployeeService implements IEmployeeService {
     public Employee findByAccountId(Long accountId) {
         return employeeRepository.findByAccountId(accountId);
     }
-
     public Optional<Employee> getEmployeeById(Long id) {
         return employeeRepository.findById(id);
     }
@@ -134,6 +133,5 @@ public class EmployeeService implements IEmployeeService {
     public Iterable<Employee> searchEmployees(String code, String name, String email, Long positionId) {
         return employeeRepository.searchEmployees(code, name, email, positionId);
     }
-
-
 }
+

@@ -1,11 +1,12 @@
 package com.thi.realestateplatformsprojectbe.services;
-
 import com.thi.realestateplatformsprojectbe.dto.EmployeeDTO;
 import com.thi.realestateplatformsprojectbe.models.Employee;
 
 import java.util.Optional;
 
 public interface IEmployeeService {
+    Iterable<Employee> getAllEmployees();
+
     Employee findByAccountId(Long accountId);
 
     Optional<Employee> updateEmployee(Long id, EmployeeDTO employeeDTO);

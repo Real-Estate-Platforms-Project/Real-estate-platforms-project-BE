@@ -8,11 +8,11 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ConfirmEmail {
+public class ConfirmEmailService {
     private final JavaMailSender javaMailSender;
 
     @Autowired
-    public ConfirmEmail(JavaMailSender javaMailSender) {
+    public ConfirmEmailService(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
     }
 
@@ -49,7 +49,7 @@ public class ConfirmEmail {
                 + "                                </tr>"
                 + "                                <tr>"
                 + "                                    <td style=\"padding: 20px 0 30px 0; color: #555555; font-family: Arial, sans-serif; font-size: 16px; line-height: 24px;\">"
-                + "                                        Để lấy lại mật khẩu yêu quý của bạn, vui lòng nhấn vào nút dưới đây để xác nhận rằng bạn chủ nhân tài khoản:"
+                + "                                        Để lấy lại tài khoản yêu quý của bạn, vui lòng nhấn vào nút dưới đây để xác nhận rằng bạn chủ nhân tài khoản:"
                 + "                                    </td>"
                 + "                                </tr>"
                 + "                                <tr>"

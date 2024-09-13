@@ -24,4 +24,10 @@ public interface IDemandService {
     List<Demand> searchDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea);
 
     List<Demand> searchVerifiedDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea, boolean isVerify);
+
+    List<Demand> findAllByBuyer(Buyer buyer);
+
+    List<Demand> searchAccountDemand(Long buyerId, String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea);
+
+    void edit(Demand demand);
 }

@@ -54,9 +54,8 @@ public class DemandService implements IDemandService {
 
     @Override
     public Demand save(DemandDTO demandDTO, Buyer buyer) {
-//        buyerService.getBuyerById(demandDTO.getBuyerId());
+
         Demand demand = Demand.builder()
-//                .buyer(buyerService.getBuyerById(demandDTO.getBuyerId()))
                 .buyer(buyer)
                 .region(demandDTO.getRegion())
                 .type(demandDTO.getType())
@@ -69,7 +68,11 @@ public class DemandService implements IDemandService {
                 .isDeleted(false)
                 .isVerify(false)
                 .build();
-        demandRepository.save(demand);
+        if (demandDTO.getId() == null) {
+            demandRepository.save(demand);
+        } else {
+            demand.setId(demandDTO.getId());
+        }
         return demand;
     }
 
@@ -81,6 +84,21 @@ public class DemandService implements IDemandService {
     @Override
     public List<Demand> searchVerifiedDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea, boolean isVerify) {
         return demandRepository.searchVerifiedDemands(notes,region,type,realEstateType,minArea,maxArea,isVerify);
+    }
+
+    @Override
+    public List<Demand> findAllByBuyer(Buyer buyer) {
+        return demandRepository.findAllByBuyer(buyer);
+    }
+
+    @Override
+    public List<Demand> searchAccountDemand(Long buyer, String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea) {
+        return demandRepository.searchDemandBuyer(buyer, notes, region, type, realEstateType,minArea,maxArea);
+    }
+
+    @Override
+    public void edit(Demand demand) {
+        demandRepository.save(demand);
     }
 
     @Override

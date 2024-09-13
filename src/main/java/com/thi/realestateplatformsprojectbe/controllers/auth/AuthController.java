@@ -208,8 +208,6 @@ public class AuthController {
     @GetMapping("/get-roles")
     public ResponseEntity<?> getAllRole(Authentication authentication) {
 
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        Account account = accountService.findByEmail(userPrinciple.getUsername());
             UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
             Account account = accountService.findByEmail(userPrinciple.getUsername());
 

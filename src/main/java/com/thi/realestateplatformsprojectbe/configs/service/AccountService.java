@@ -1,19 +1,31 @@
 package com.thi.realestateplatformsprojectbe.configs.service;
 
 import com.thi.realestateplatformsprojectbe.configs.UserPrinciple;
+import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
 import com.thi.realestateplatformsprojectbe.models.Account;
 import com.thi.realestateplatformsprojectbe.models.Role;
 import com.thi.realestateplatformsprojectbe.models.RoleName;
+import com.thi.realestateplatformsprojectbe.models.VerificationToken;
 import com.thi.realestateplatformsprojectbe.repositories.IAccountRepository;
+import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
+import com.thi.realestateplatformsprojectbe.services.email.ConfirmEmailService;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class AccountService implements UserDetailsService {
     @Autowired
     private IAccountRepository accountRepository;
+
 
     public Account findByEmail(String email) {
         return accountRepository.findByEmail(email);
@@ -137,7 +149,6 @@ public class AccountService implements UserDetailsService {
 //    new ResponseEntity<>(" Tài khoản còn 5 ngày hoạt động, đổi mật khẩu để tiếp tục sử dụng", HttpStatus.OK);
 
 //    new ResponseEntity<>("Tài khoản hết hạn", HttpStatus.OK);
-
 
 
 

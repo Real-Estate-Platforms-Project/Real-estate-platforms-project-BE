@@ -264,9 +264,14 @@ public class AuthController {
     }
     @GetMapping("/checkIsDeleted/{email}")
     public ResponseEntity<?> checkIsDeleted(@PathVariable String email) {
-        Account account = accountService.findByEmail(email);
-        boolean isDeleted = account.getIsDeleted();
-        return new ResponseEntity<>(isDeleted,HttpStatus.OK);
+
+                Account account = accountService.findByEmail(email);
+                boolean isDeleted = account.getIsDeleted();
+                if(isDeleted){
+                    return new ResponseEntity<>(true,HttpStatus.OK);
+                }
+                return new ResponseEntity<>(false,HttpStatus.OK);
+
     }
 
 }

@@ -187,9 +187,6 @@ public class AuthController {
             if (role.getName().equals(RoleName.ROLE_EMPLOYEE.toString())) {
                 user = employeeService.findByAccountId(account.getId());
             }
-            if (role.getName().equals(RoleName.ROLE_ADMIN.toString())) {
-                user = employeeService.findByAccountId(account.getId());
-            }
         }
 
         if (user == null) {
@@ -264,9 +261,14 @@ public class AuthController {
     }
     @GetMapping("/checkIsDeleted/{email}")
     public ResponseEntity<?> checkIsDeleted(@PathVariable String email) {
-        Account account = accountService.findByEmail(email);
-        boolean isDeleted = account.getIsDeleted();
-        return new ResponseEntity<>(isDeleted,HttpStatus.OK);
+
+                Account account = accountService.findByEmail(email);
+                boolean isDeleted = account.getIsDeleted();
+                if(isDeleted){
+                    return new ResponseEntity<>(true,HttpStatus.OK);
+                }
+                return new ResponseEntity<>(false,HttpStatus.OK);
+
     }
 
 }

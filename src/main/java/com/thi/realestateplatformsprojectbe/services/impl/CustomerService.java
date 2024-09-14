@@ -71,8 +71,8 @@ public class CustomerService implements ICustomerService {
             seller.setEmail(customerDTO.getEmail());
             seller.setPhoneNumber(customerDTO.getPhoneNumber());
             seller.setGender(customerDTO.getGender());
-            seller.setIdCard(customerDTO.getIdCard());
-            seller.setCode("MNB" + generateRandomCode());
+            seller.setIdNumber(customerDTO.getIdCard());
+            seller.setCode("SELLER" + generateRandomCode());
             sellerRepository.save(seller);
         } else {
             Buyer buyer = new Buyer();
@@ -84,18 +84,15 @@ public class CustomerService implements ICustomerService {
             buyer.setPhoneNumber(customerDTO.getPhoneNumber());
             buyer.setGender(customerDTO.getGender());
             buyer.setIdCard(customerDTO.getIdCard());
-            buyer.setCode("MNM" + generateRandomCode());
+            buyer.setCode("BUYER" + generateRandomCode());
             buyerRepository.save(buyer);
         }
 
-        emailService.sendAccountCreationEmail(customerDTO.getEmail(), customerDTO.getEmail(), tempPassword);
+        emailService.sendAccountCreationEmail(customerDTO.getEmail(), customerDTO.getName(), tempPassword);
     }
-
-
     private String generateRandomPassword() {
         return RandomStringUtils.randomAlphanumeric(8);
     }
-
 
     private String generateRandomCode() {
         return RandomStringUtils.randomNumeric(4);

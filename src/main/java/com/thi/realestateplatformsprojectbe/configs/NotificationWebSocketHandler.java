@@ -23,7 +23,7 @@ public class NotificationWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
         sessions.remove(session);
     }
-    // phục vụ chức năng hiển thị thao client
+
     public void sendNotification(String message) {
         synchronized (sessions) {
             for (WebSocketSession session : sessions) {

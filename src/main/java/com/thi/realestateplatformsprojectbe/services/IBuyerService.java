@@ -15,4 +15,6 @@ public interface IBuyerService {
     void save(Buyer user);
 
     Buyer findByAccountId(Long id);
+
+    Buyer getBuyerByAccountId(Long id);
 }

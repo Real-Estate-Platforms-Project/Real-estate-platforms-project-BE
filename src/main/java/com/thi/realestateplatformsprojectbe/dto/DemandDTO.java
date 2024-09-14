@@ -13,6 +13,8 @@ import java.time.LocalDate;
 @Data
 public class DemandDTO {
 
+    private Long id;
+
     @NotNull(message = "Tiêu đề không được để trống")
     private String title;
 

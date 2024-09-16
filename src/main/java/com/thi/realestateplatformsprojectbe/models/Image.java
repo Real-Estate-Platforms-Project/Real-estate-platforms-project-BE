@@ -17,8 +17,4 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-
-    @ManyToOne
-    @JoinColumn(name = "real_estate_id")
-    private RealEstate realEstate;
 }

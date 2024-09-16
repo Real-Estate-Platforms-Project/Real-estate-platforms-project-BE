@@ -78,6 +78,7 @@ public class Employee implements IUser {
     private Boolean isDeleted = false;
 
     @ManyToOne
-    @JoinColumn(name="position_id")
+    @JoinColumn(name = "position_id")
     private Position position;
 }
+

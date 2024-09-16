@@ -11,6 +11,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.util.Set;
+
 @Data
 @Entity
 @AllArgsConstructor
@@ -21,6 +23,10 @@ public class RealEstate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotNull
+    @Column(name = "title")
+    private String title;
 
     @Size(max = 15)
     @NotNull
@@ -35,7 +41,7 @@ public class RealEstate {
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "seller_id", nullable = false)
-    @JsonBackReference
+//    @JsonBackReference
     private Seller seller;
 
     @NotNull
@@ -92,4 +98,8 @@ public class RealEstate {
     @NotNull
     @Column(name = "code", nullable = false, length = 15)
     private String code;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false, name = "real_estate_id")
+    private Set<Image> images;
 }

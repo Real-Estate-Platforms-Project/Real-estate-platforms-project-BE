@@ -60,8 +60,8 @@ public class Seller implements IUser {
 
     @Size(max = 12)
     @NotNull
-    @Column(name = "id_card", nullable = false, length = 12)
-    private String idCard;
+    @Column(name = "id_number", nullable = false, length = 12)
+    private String idNumber;
 
     @NotNull
     @OneToOne(fetch = FetchType.EAGER, optional = false)

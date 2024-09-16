@@ -9,11 +9,10 @@ import com.thi.realestateplatformsprojectbe.dto.AccountDTO;
 import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
 import com.thi.realestateplatformsprojectbe.dto.UserDTO;
 import com.thi.realestateplatformsprojectbe.models.*;
-import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
 import com.thi.realestateplatformsprojectbe.services.IBuyerService;
 import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
-import com.thi.realestateplatformsprojectbe.services.email.ConfirmEmail;
+import com.thi.realestateplatformsprojectbe.services.email.ConfirmEmailService;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
 import com.thi.realestateplatformsprojectbe.services.impl.BuyerService;
 import com.thi.realestateplatformsprojectbe.services.impl.EmployeeService;
@@ -28,7 +27,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,10 +48,13 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final IVerificationTokenService verificationTokenService;
-    private final BuyerService buyerService;
-    private final SellerService sellerService;
+
+    private final ISellerService sellerService;
+
+    private final ConfirmEmailService confirmEmailService;
+
+    private final IBuyerService buyerService;
     private final EmployeeService employeeService;
-    private final ConfirmEmail confirmEmail;
 
 
     @PostMapping("/login")
@@ -108,6 +109,8 @@ public class AuthController {
         }
 
         Account account = new Account();
+        account.setUpdateDay(LocalDateTime.now());
+        account.setExpiryDate(account.getUpdateDay().plusDays(30));
         account.setEmail(accountDTO.getEmail());
         account.setPassword(passwordEncoder.encode(accountDTO.getPassword()));
         account.setName(accountDTO.getName());
@@ -165,35 +168,7 @@ public class AuthController {
             Authentication authentication,
             @RequestBody UpdateAccount updateAccount
     ) {
-
-        // Lấy thông tin tài khoảng hiện tại
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        Account account1 = accountService.findByEmail(userPrinciple.getUsername());
-
-        // Xác định tài khoảng có tồn tại không
-        if (account1 == null) {
-            return new ResponseEntity<>("Tài khoảng không tồn tại", HttpStatus.NOT_FOUND);
-        }
-
-        // Xác minh mật khẩu hiện tại nhập vào có đúng không
-        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(), account1.getPassword());
-        if (!isTrue) {
-            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng", HttpStatus.BAD_REQUEST);
-        }
-
-        // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
-        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
-            return new ResponseEntity<>("Nhập lại mật khẩu không đúng", HttpStatus.BAD_REQUEST);
-        }
-
-
-        // Mã hoá encoder mật khẩu mới
-        String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
-
-        // Lưu vào db
-        account1.setPassword(pw);
-        accountService.save(account1);
-        return new ResponseEntity<>("{}", HttpStatus.OK);
+        return accountService.updatePassword(authentication, updateAccount, passwordEncoder);
     }
 
     @GetMapping("/me")
@@ -210,9 +185,6 @@ public class AuthController {
                 user = sellerService.findByAccountId(account.getId());
             }
             if (role.getName().equals(RoleName.ROLE_EMPLOYEE.toString())) {
-                user = employeeService.findByAccountId(account.getId());
-            }
-            if (role.getName().equals(RoleName.ROLE_ADMIN.toString())) {
                 user = employeeService.findByAccountId(account.getId());
             }
         }
@@ -248,53 +220,58 @@ public class AuthController {
 
     @PostMapping("/createToken/{email}")
     public ResponseEntity<?> createToken(@PathVariable String email) throws MessagingException {
-        Account account = accountService.findByEmail(email);
-        VerificationToken token = verificationTokenService.createVerificationToken(account);
-        String confirmationUrl = "http://localhost:3000/confirm-email?token=" + token.getToken(); // Frontend URL
-        confirmEmail.sendVerifyEmail(account.getEmail(), confirmationUrl);
-        return ResponseEntity.ok(" Vui lòng kiểm tra email để kích hoạt tài khoản.");
+        return accountService.createToken(email, verificationTokenService, confirmEmailService);
     }
 
     @GetMapping("/confirmEmail")
     public ResponseEntity<?> confirmEmail(@RequestParam("token") String token) {
-        VerificationToken verificationToken = verificationTokenService.getVerificationToken(token);
-
-        if (verificationToken == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ!");
-        }
-
-        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            verificationTokenService.deleteToken(verificationToken);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn! Vui lòng yêu cầu gửi lại email xác minh.");
-        }
-
-
-        return ResponseEntity.ok("Chuyển đến trang cập nhật mật khẩu!");
+        return accountService.confirmEmail(token, verificationTokenService);
     }
 
     @PutMapping("/updateForgetPassword")
     public ResponseEntity<?> updateForgetPassword(@RequestParam("token") String token,
                                                   @RequestBody UpdateAccount updateAccount) {
-        System.out.println("*******************************************");
-        VerificationToken verificationToken = verificationTokenService.getVerificationToken(token);
-        if (verificationToken == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ!");
-        }
-
-        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            verificationTokenService.deleteToken(verificationToken);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn! Vui lòng yêu cầu gửi lại email xác minh.");
-        }
-        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
-            return new ResponseEntity<>("Nhập lại mật khẩu không đúng", HttpStatus.BAD_REQUEST);
-        }
-
-        Account account = verificationToken.getAccount();
-        String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
-        account.setPassword(pw);
-        accountService.save(account);
-
-        verificationTokenService.deleteToken(verificationToken);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return accountService.updateForgetPassword(verificationTokenService, token, updateAccount, passwordEncoder);
     }
+
+    @GetMapping("/checkExpiryDate/{email}")
+    public ResponseEntity<?> checkExpiryDate(@PathVariable String email) {
+        Account account = accountService.findByEmail(email);
+        if (LocalDateTime.now().isAfter(account.getExpiryDate())
+                && LocalDateTime.now().isBefore(account.getExpiryDate().plusDays(5))) {
+            return new ResponseEntity<>(true,HttpStatus.OK);
+        }
+        return new ResponseEntity<>(false,HttpStatus.OK);
+    }
+    @GetMapping("/checkDateToChangePassword/{email}")
+    public ResponseEntity<?> checkDateToChangePassword(@PathVariable String email){
+        Account account = accountService.findByEmail(email);
+        boolean isTrue = LocalDateTime.now().isAfter(account.getExpiryDate());
+        if(isTrue){
+            return new ResponseEntity<>(true,HttpStatus.OK);
+        }
+        return new ResponseEntity<>(false,HttpStatus.OK);
+    }
+    @GetMapping("/isDeleted/{email}")
+    public ResponseEntity<?> updateForgetPassword(@PathVariable String email) {
+        Account account = accountService.findByEmail(email);
+        account.setIsDeleted(false);
+        accountService.save(account);
+        return new ResponseEntity<>(account,HttpStatus.OK);
+    }
+    @GetMapping("/checkIsDeleted/{email}")
+    public ResponseEntity<?> checkIsDeleted(@PathVariable String email) {
+
+                Account account = accountService.findByEmail(email);
+                boolean isDeleted = account.getIsDeleted();
+                if(isDeleted){
+                    return new ResponseEntity<>(true,HttpStatus.OK);
+                }
+                return new ResponseEntity<>(false,HttpStatus.OK);
+
+    }
+
 }
+
+
+

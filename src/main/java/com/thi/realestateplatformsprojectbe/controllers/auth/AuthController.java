@@ -67,7 +67,7 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(account.getEmail(), account.getPassword())
             );
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Thông tin đăng nhập không đúng!");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Thông tin đăng nhập không chính xác!");
         }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -153,7 +153,7 @@ public class AuthController {
 
         if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             verificationTokenService.deleteToken(verificationToken);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn! Vui lòng yêu cầu gửi lại email xác minh.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn!");
         }
 
         Account account = verificationToken.getAccount();
@@ -186,7 +186,7 @@ public class AuthController {
             if (role.getName().equals(RoleName.ROLE_SELLER.toString())) {
                 user = sellerService.findByAccountId(account.getId());
             }
-            if (role.getName().equals(RoleName.ROLE_EMPLOYEE.toString())) {
+            if (role.getName().equals(RoleName.ROLE_EMPLOYEE.toString()) || role.getName().equals(RoleName.ROLE_ADMIN.toString())) {
                 user = employeeService.findByAccountId(account.getId());
             }
         }

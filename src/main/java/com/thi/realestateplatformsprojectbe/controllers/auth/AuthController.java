@@ -184,7 +184,7 @@ public class AuthController {
             if (role.getName().equals(RoleName.ROLE_SELLER.toString())) {
                 user = sellerService.findByAccountId(account.getId());
             }
-            if (role.getName().equals(RoleName.ROLE_EMPLOYEE.toString())) {
+            if (role.getName().equals(RoleName.ROLE_EMPLOYEE.toString()) || role.getName().equals(RoleName.ROLE_ADMIN.toString())) {
                 user = employeeService.findByAccountId(account.getId());
             }
         }

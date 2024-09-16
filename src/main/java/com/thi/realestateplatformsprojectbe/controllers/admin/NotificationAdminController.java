@@ -57,5 +57,4 @@ public class NotificationAdminController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
-
 }

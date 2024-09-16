@@ -9,6 +9,7 @@ import com.thi.realestateplatformsprojectbe.models.Demand;
 import com.thi.realestateplatformsprojectbe.models.Role;
 import com.thi.realestateplatformsprojectbe.services.IDemandService;
 import com.thi.realestateplatformsprojectbe.services.impl.BuyerService;
+import com.thi.realestateplatformsprojectbe.services.impl.SellerService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,8 @@ public class DemandController {
     private BuyerService buyerService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private SellerService sellerService;
 
 
     @GetMapping
@@ -52,15 +55,63 @@ public class DemandController {
                 }
             }
         }
-            List<Demand> demands = demandService.findAllVerifiedDemand();
-            if (demands.isEmpty()) {
+        List<Demand> demands = demandService.findAllVerifiedDemand();
+        if (demands.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(demands, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getDemand(@PathVariable Long id, HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.replace("Bearer ", "");
+            String userName = jwtService.getUsernameFromJwtToken(token);
+            Account account = accountService.findByEmail(userName);
+
+            if (account != null) {
+                Buyer buyer = buyerService.getBuyerById(account.getId());
+                Demand demand = demandService.findById(id);
+                for (Role role : account.getRoles()) {
+                    if (demand != null) {
+                        if (role.getName().equals("ROLE_ADMIN") || role.getName().equals("ROLE_EMPLOYEE")) {
+                            return new ResponseEntity<>(demand, HttpStatus.OK);
+                        }
+                        if (buyer.equals(demand.getBuyer())) {
+                            return new ResponseEntity<>(demand, HttpStatus.OK);
+                        }
+                    }
+                }
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            return new ResponseEntity<>(demands, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+
+    @GetMapping("/account")
+    public ResponseEntity<?> getAccountDemand(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.replace("Bearer ", "");
+
+            String userName = jwtService.getUsernameFromJwtToken(token);
+            Account account = accountService.findByEmail(userName);
+            if (account != null) {
+                Buyer buyer = buyerService.findByAccountId(account.getId());
+                if (buyer != null) {
+                    List<Demand> demands = demandService.findAllByBuyer(buyer);
+                    return new ResponseEntity<>(demands, HttpStatus.OK);
+                }
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Demand>> searchRealEstates(
+    public ResponseEntity<List<Demand>> searchDemands(
             @RequestParam(required = false) String notes,
             @RequestParam(required = false) List<String> region,
             @RequestParam(required = false) String type,
@@ -68,7 +119,7 @@ public class DemandController {
             @RequestParam(required = false) Integer minArea,
             @RequestParam(required = false) Integer maxArea,
             HttpServletRequest request
-            ) {
+    ) {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -79,7 +130,7 @@ public class DemandController {
             if (account != null) {
                 for (Role role : account.getRoles()) {
                     if (role.getName().equals("ROLE_ADMIN") || role.getName().equals("ROLE_EMPLOYEE")) {
-                        List<Demand> demands = demandService.searchDemand(notes,region, type,realEstateType, minArea, maxArea);
+                        List<Demand> demands = demandService.searchDemand(notes, region, type, realEstateType, minArea, maxArea);
                         if (demands.isEmpty()) {
                             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                         }
@@ -89,7 +140,7 @@ public class DemandController {
             }
         }
 
-        List<Demand> demands = demandService.searchVerifiedDemand(notes,region, type,realEstateType, minArea, maxArea,true);
+        List<Demand> demands = demandService.searchVerifiedDemand(notes, region, type, realEstateType, minArea, maxArea, true);
         if (demands.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
@@ -97,8 +148,40 @@ public class DemandController {
         }
     }
 
+    @GetMapping("/account/search")
+    public ResponseEntity<List<Demand>> searchAccountDemands(
+            @RequestParam(required = false) String notes,
+            @RequestParam(required = false) List<String> region,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) List<String> realEstateType,
+            @RequestParam(required = false) Integer minArea,
+            @RequestParam(required = false) Integer maxArea,
+            HttpServletRequest request
+    ) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.replace("Bearer ", "");
+
+            String userName = jwtService.getUsernameFromJwtToken(token);
+            Account account = accountService.findByEmail(userName);
+            if (account != null) {
+                Buyer buyer = buyerService.findByAccountId(account.getId());
+                if (buyer != null) {
+                    List<Demand> demands = demandService.searchAccountDemand(buyer.getId(), notes, region, type, realEstateType, minArea, maxArea);
+                    if (demands.isEmpty()) {
+                        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                    }
+                    return new ResponseEntity<>(demands, HttpStatus.OK);
+                }
+
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @PutMapping("{id}/verify")
-    public ResponseEntity<?> verifyDemand(@PathVariable Long id,HttpServletRequest request) {
+    public ResponseEntity<?> verifyDemand(@PathVariable Long id, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.replace("Bearer ", "");
@@ -109,7 +192,7 @@ public class DemandController {
                 for (Role role : account.getRoles()) {
                     if (role.getName().equals("ROLE_ADMIN") || role.getName().equals("ROLE_EMPLOYEE")) {
                         demandService.verifyDemand(id);
-                        return new ResponseEntity<>( HttpStatus.OK);
+                        return new ResponseEntity<>(HttpStatus.OK);
                     }
                 }
             }
@@ -118,7 +201,7 @@ public class DemandController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteDemand(@PathVariable Long id,HttpServletRequest request) {
+    public ResponseEntity<?> deleteDemand(@PathVariable Long id, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.replace("Bearer ", "");
@@ -126,18 +209,25 @@ public class DemandController {
             String userName = jwtService.getUsernameFromJwtToken(token);
             Account account = accountService.findByEmail(userName);
             if (account != null) {
+                Demand demand = demandService.findById(id);
                 for (Role role : account.getRoles()) {
                     if (role.getName().equals("ROLE_ADMIN") || role.getName().equals("ROLE_EMPLOYEE")) {
-                        Demand demand = demandService.findById(id);
-                        if(demand != null) {
+                        if (demand != null) {
                             demandService.delete(demand);
                             return new ResponseEntity<>(HttpStatus.OK);
                         }
                         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                     }
                 }
+
+                Buyer buyer = buyerService.getBuyerByAccountId(account.getId());
+                if (demand != null && demand.getBuyer().equals(buyer)) {
+                    demandService.delete(demand);
+                    return new ResponseEntity<>(HttpStatus.OK);
+                }
             }
         }
+
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
@@ -152,7 +242,7 @@ public class DemandController {
             Account account = accountService.findByEmail(userName);
             if (account != null) {
                 Buyer buyer = buyerService.findByAccountId(account.getId());
-                demandService.save(demandDTO,buyer);
+                demandService.save(demandDTO, buyer);
                 return new ResponseEntity<>(demandDTO, HttpStatus.CREATED);
             }
         }
@@ -160,10 +250,46 @@ public class DemandController {
 
     }
 
-//    @PutMapping("{id}")
-//    public ResponseEntity<?> updateDemand(@PathVariable Long id, @RequestBody DemandDTO demandDTO) {
-//
-//        demandService.save(demandDTO);
-//        return new ResponseEntity<>(demandDTO, HttpStatus.OK);
-//    }
+    @PutMapping("{id}")
+    public ResponseEntity<?> verifyDemand(@PathVariable Long id, @RequestBody DemandDTO demandDTO, HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.replace("Bearer ", "");
+
+            String userName = jwtService.getUsernameFromJwtToken(token);
+            Account account = accountService.findByEmail(userName);
+            if (account != null) {
+                Buyer buyer = buyerService.getBuyerByAccountId(account.getId());
+                Demand demand = demandService.findById(id);
+                if (demand != null && demand.getBuyer().equals(buyer)) {
+                    demandService.save(demandDTO, buyer);
+                    return new ResponseEntity<>(demandDTO, HttpStatus.OK);
+                }
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+
+    @PutMapping("{id}/edit")
+    public ResponseEntity<?> updateDemand(@PathVariable Long id, @RequestBody Demand demand, HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.replace("Bearer ", "");
+
+            String userName = jwtService.getUsernameFromJwtToken(token);
+            Account account = accountService.findByEmail(userName);
+            if (account != null) {
+                Buyer buyer = buyerService.getBuyerByAccountId(account.getId());
+                if (demand.getBuyer().getId() == buyer.getId()) {
+                    demandService.edit(demand);
+                    return new ResponseEntity<>(demand, HttpStatus.OK);
+                }
+            }
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
 }
+
+

@@ -112,7 +112,7 @@ public class AuthController {
 
         Account account = new Account();
         account.setUpdateDay(LocalDateTime.now());
-        account.setExpiryDate(account.getUpdateDay().plusDays(30));
+        account.setExpiryDate(account.getUpdateDay().plusDays(45));
         account.setEmail(accountDTO.getEmail());
         account.setPassword(passwordEncoder.encode(accountDTO.getPassword()));
         account.setName(accountDTO.getName());
@@ -244,13 +244,13 @@ public class AuthController {
         return new ResponseEntity<>(account.getExpiryDate(), HttpStatus.OK);
     }
 
-    @GetMapping("/checkDateToChangePassword/{email}")
+    @GetMapping("/checkDateToChangePassword")
     public ResponseEntity<?> checkDateToChangePassword(Authentication authentication) {
         // Lấy thông tin tài khoảng hiện tại
         UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
         Account account = accountService.findByEmail(userPrinciple.getUsername());
 
-        boolean isTrue = LocalDateTime.now().isAfter(account.getExpiryDate());
+        boolean isTrue = LocalDateTime.now().isAfter(account.getUpdateDay().plusDays(30));
         if (isTrue) {
             return new ResponseEntity<>(true, HttpStatus.OK);
         }
@@ -280,17 +280,13 @@ public class AuthController {
 
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(cron = "0 0 0 * * ?")
     public void checkAndUpdateExpiredAccounts() {
         List<Account> expiredAccounts = accountService.checkAndUpdateExpiredAccounts();
         expiredAccounts.forEach(account -> {
             account.setIsDeleted(true);
             accountService.save(account);
         });
-
-        if (!expiredAccounts.isEmpty()) {
-            System.out.println("Đã cập nhật " + expiredAccounts.size() + " tài khoản hết hạn.");
-        }
     }
 
 

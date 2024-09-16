@@ -106,6 +106,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody AccountDTO accountDTO) throws MessagingException {
+        System.out.println("******************************************");
         if (accountService.existsByEmail(accountDTO.getEmail())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email đã tồn tại!");
         }
@@ -137,6 +138,7 @@ public class AuthController {
         user.setDob(LocalDate.of(2000, 1, 1));
         user.setIdCard("");
         user.setPhoneNumber("");
+        user.setImageUrl("");
         buyerService.save(user);
 
         VerificationToken token = verificationTokenService.createVerificationToken(account);

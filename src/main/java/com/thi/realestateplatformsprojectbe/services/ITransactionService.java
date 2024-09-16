@@ -21,5 +21,5 @@ public interface ITransactionService {
 
     ResponsePage save(TransactionRequest transactionRequest);
 
-    Page<Transaction> searchTransaction(String keyword, Pageable pageable);
+    Page<TransactionResponse> searchTransaction(String keyword, Pageable pageable);
 }

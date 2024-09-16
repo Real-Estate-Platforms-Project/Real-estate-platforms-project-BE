@@ -84,12 +84,22 @@ public class TransactionServiceImpl implements ITransactionService {
     @Override
     public ResponsePage save(TransactionRequest transactionRequest) {
         LOGGER.info("TransactionService -> save invoked!!!");
+
+        Optional<Transaction> existingTransaction = transactionRepository.findByCode(transactionRequest.getCode());
+        if (existingTransaction.isPresent()) {
+            return ResponsePage.builder()
+                    .data(null)
+                    .message("Mã giao dịch đã tồn tại!")
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build();
+        }
+
         Transaction transaction = transactionConverter.dtoToEntity(transactionRequest);
         try {
             transactionRepository.save(transaction);
             return ResponsePage.builder()
                     .data(null)
-                    .message("transaction created successfully")
+                    .message("giao dịch đã được tạo thành công")
                     .status(HttpStatus.OK)
                     .build();
         }  catch (Exception e) {
@@ -102,7 +112,21 @@ public class TransactionServiceImpl implements ITransactionService {
     }
 
     @Override
-    public Page<Transaction> searchTransaction(String keyword, Pageable pageable) {
-        return null;
+    public Page<TransactionResponse> searchTransaction(String keyword, Pageable pageable) {
+        Page<Transaction> transactionPage = transactionRepository.searchTransactionByCodeAndDescription(keyword, pageable);
+        return transactionPage.map(transaction -> TransactionResponse.builder()
+                .id(transaction.getId())
+                .code(transaction.getCode())
+                .realEstate(transaction.getRealEstate().getCode())
+                .employee(transaction.getEmployee().getCode())
+                .buyer(transaction.getBuyer().getName())
+                .seller(transaction.getSeller().getName())
+                .amount(transaction.getAmount())
+                .createAt(transaction.getCreateAt())
+                .commissionFee(transaction.getCommissionFee())
+                .description(transaction.getDescription())
+                .status(transaction.getStatus())
+                .isDeleted(transaction.getIsDeleted())
+                .build());
     }
 }

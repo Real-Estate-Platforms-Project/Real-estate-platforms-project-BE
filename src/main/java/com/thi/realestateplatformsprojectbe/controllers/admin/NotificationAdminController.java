@@ -10,11 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
-
-import org.springframework.web.socket.WebSocketSession;
-
-import java.util.Map;
 
 @RestController
 @CrossOrigin("*")

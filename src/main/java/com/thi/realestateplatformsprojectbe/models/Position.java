@@ -19,8 +19,4 @@ public class Position {
     @NotNull
     @Column(name = "name", nullable = false, length = 155)
     private String name;
-
-    @ManyToOne
-    @JoinColumn(name="employee_id")
-    private Employee employee;
 }

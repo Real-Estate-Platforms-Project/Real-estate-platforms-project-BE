@@ -1,15 +1,10 @@
 package com.thi.realestateplatformsprojectbe.controllers.admin;
 
-import com.thi.realestateplatformsprojectbe.configs.UserPrinciple;
-import com.thi.realestateplatformsprojectbe.configs.service.AccountService;
-import com.thi.realestateplatformsprojectbe.models.Account;
 import com.thi.realestateplatformsprojectbe.models.Buyer;
 import com.thi.realestateplatformsprojectbe.services.IBuyerService;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +16,6 @@ public class BuyerController {
 
     @Autowired
     private IBuyerService buyerService;
-
-    @Autowired
-    private AccountService accountService;
 
     @GetMapping
     @PermitAll
@@ -51,20 +43,17 @@ public class BuyerController {
         return ResponseEntity.ok(buyer);
     }
 
-    @GetMapping("/info")
-    public ResponseEntity<?> getBuyer(Authentication authentication) {
-        if(authentication != null) {
-            UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-            Account account = accountService.findByEmail(userPrinciple.getUsername());
-            if (accountService.checkRoleBuyer(account)) {
-                Buyer buyer = buyerService.findByAccountId(account.getId());
-                return ResponseEntity.ok(buyer);
-                // neu k co
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("Tài khoản này không phải là người mua (buyer).");
-            }
+    @GetMapping("/search")
+    @PermitAll
+    public ResponseEntity<?> searchBuyers(
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String phoneNumber) {
+        List<Buyer> buyers = buyerService.searchBuyers(code, name, email, phoneNumber);
+        if (buyers.isEmpty()) {
+            return ResponseEntity.status(404).body("Không có người mua nào khớp với tiêu chí tìm kiếm.");
         }
-        return  ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.ok(buyers);
     }
 }

@@ -9,9 +9,11 @@ import com.thi.realestateplatformsprojectbe.models.Demand;
 import com.thi.realestateplatformsprojectbe.models.Role;
 import com.thi.realestateplatformsprojectbe.services.IDemandService;
 import com.thi.realestateplatformsprojectbe.services.impl.BuyerService;
-import com.thi.realestateplatformsprojectbe.services.impl.SellerService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,37 +32,6 @@ public class DemandController {
     private BuyerService buyerService;
     @Autowired
     private AccountService accountService;
-    @Autowired
-    private SellerService sellerService;
-
-
-    @GetMapping
-    public ResponseEntity<?> getAllDemand(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.replace("Bearer ", "");
-
-            String userName = jwtService.getUsernameFromJwtToken(token);
-            Account account = accountService.findByEmail(userName);
-            if (account != null) {
-                for (Role role : account.getRoles()) {
-                    if (role.getName().equals("ROLE_ADMIN") || role.getName().equals("ROLE_EMPLOYEE")) {
-                        List<Demand> demands = demandService.findAll();
-                        if (demands.isEmpty()) {
-                            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-                        }
-                        return new ResponseEntity<>(demands, HttpStatus.OK);
-                    }
-                }
-            }
-        }
-        List<Demand> demands = demandService.findAllVerifiedDemand();
-        if (demands.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(demands, HttpStatus.OK);
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getDemand(@PathVariable Long id, HttpServletRequest request) {
@@ -90,36 +61,19 @@ public class DemandController {
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
-    @GetMapping("/account")
-    public ResponseEntity<?> getAccountDemand(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.replace("Bearer ", "");
-
-            String userName = jwtService.getUsernameFromJwtToken(token);
-            Account account = accountService.findByEmail(userName);
-            if (account != null) {
-                Buyer buyer = buyerService.findByAccountId(account.getId());
-                if (buyer != null) {
-                    List<Demand> demands = demandService.findAllByBuyer(buyer);
-                    return new ResponseEntity<>(demands, HttpStatus.OK);
-                }
-            }
-        }
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
     @GetMapping("/search")
-    public ResponseEntity<List<Demand>> searchDemands(
+    public ResponseEntity<Page<Demand>> searchDemands(
             @RequestParam(required = false) String notes,
             @RequestParam(required = false) List<String> region,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) List<String> realEstateType,
             @RequestParam(required = false) Integer minArea,
             @RequestParam(required = false) Integer maxArea,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "3") int size,
             HttpServletRequest request
     ) {
+        Pageable pageable = PageRequest.of(page, size);
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -130,7 +84,7 @@ public class DemandController {
             if (account != null) {
                 for (Role role : account.getRoles()) {
                     if (role.getName().equals("ROLE_ADMIN") || role.getName().equals("ROLE_EMPLOYEE")) {
-                        List<Demand> demands = demandService.searchDemand(notes, region, type, realEstateType, minArea, maxArea);
+                        Page<Demand> demands = demandService.searchDemand(notes, region, type, realEstateType, minArea, maxArea, pageable);
                         if (demands.isEmpty()) {
                             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                         }
@@ -140,7 +94,7 @@ public class DemandController {
             }
         }
 
-        List<Demand> demands = demandService.searchVerifiedDemand(notes, region, type, realEstateType, minArea, maxArea, true);
+        Page<Demand> demands = demandService.searchVerifiedDemand(notes, region, type, realEstateType, minArea, maxArea, true, pageable);
         if (demands.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
@@ -149,15 +103,18 @@ public class DemandController {
     }
 
     @GetMapping("/account/search")
-    public ResponseEntity<List<Demand>> searchAccountDemands(
+    public ResponseEntity<Page<Demand>> searchAccountDemands(
             @RequestParam(required = false) String notes,
             @RequestParam(required = false) List<String> region,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) List<String> realEstateType,
             @RequestParam(required = false) Integer minArea,
             @RequestParam(required = false) Integer maxArea,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "3") int size,
             HttpServletRequest request
     ) {
+        Pageable pageable = PageRequest.of(page, size);
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -168,7 +125,7 @@ public class DemandController {
             if (account != null) {
                 Buyer buyer = buyerService.findByAccountId(account.getId());
                 if (buyer != null) {
-                    List<Demand> demands = demandService.searchAccountDemand(buyer.getId(), notes, region, type, realEstateType, minArea, maxArea);
+                    Page<Demand> demands = demandService.searchAccountDemand(buyer.getId(), notes, region, type, realEstateType, minArea, maxArea, pageable);
                     if (demands.isEmpty()) {
                         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                     }
@@ -291,5 +248,3 @@ public class DemandController {
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 }
-
-

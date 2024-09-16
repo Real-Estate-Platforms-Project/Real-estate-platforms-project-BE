@@ -23,6 +23,10 @@ public class RealEstate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
+    @Column(name = "title")
+    private String title;
+
     @Size(max = 15)
     @NotNull
     @Column(name = "type", nullable = false, length = 15)
@@ -36,7 +40,7 @@ public class RealEstate {
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "seller_id", nullable = false)
-    @JsonBackReference
+//    @JsonBackReference
     private Seller seller;
 
     @NotNull

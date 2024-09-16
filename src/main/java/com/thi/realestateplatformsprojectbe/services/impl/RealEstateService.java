@@ -48,6 +48,7 @@ public class RealEstateService implements IRealEstateService {
         }
         RealEstate realEstate = RealEstate.builder()
                 .seller(sellerRepository.findById(realEstatePostDTO.getSellerId()).orElse(null))
+                .title(realEstatePostDTO.getTitle())
                 .demandType(realEstatePostDTO.getDemandType())
                 .type(realEstatePostDTO.getType())
                 .address(realEstatePostDTO.getAddress())

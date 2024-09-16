@@ -45,4 +45,7 @@ public class CustomerDTO {
     @NotNull(message = "Loại khách hàng không được để trống")
     @Pattern(regexp = "^(seller|buyer)$", message = "Loại khách hàng phải là ROLE_SELLER hoặc ROLE_BUYER")
     private String customerType;
+
+    @Size(max = 255, message = "URL của ảnh không được vượt quá 255 ký tự")
+    private String imageUrl;
 }

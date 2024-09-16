@@ -1,7 +1,10 @@
 package com.thi.realestateplatformsprojectbe.services.impl;
 
 import com.thi.realestateplatformsprojectbe.dto.CustomerDTO;
-import com.thi.realestateplatformsprojectbe.models.*;
+import com.thi.realestateplatformsprojectbe.models.Account;
+import com.thi.realestateplatformsprojectbe.models.Buyer;
+import com.thi.realestateplatformsprojectbe.models.Role;
+import com.thi.realestateplatformsprojectbe.models.Seller;
 import com.thi.realestateplatformsprojectbe.repositories.IAccountRepository;
 import com.thi.realestateplatformsprojectbe.repositories.IBuyerRepository;
 import com.thi.realestateplatformsprojectbe.repositories.IRoleRepository;
@@ -14,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.MessagingException;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -41,7 +45,6 @@ public class CustomerService implements ICustomerService {
     public boolean emailExists(String email) {
         return accountRepository.existsByEmail(email);
     }
-
 
     public void addNewCustomer(CustomerDTO customerDTO) throws MessagingException {
         if (emailExists(customerDTO.getEmail())) {
@@ -73,6 +76,7 @@ public class CustomerService implements ICustomerService {
             seller.setGender(customerDTO.getGender());
             seller.setIdCard(customerDTO.getIdCard());
             seller.setCode("MNB" + generateRandomCode());
+            seller.setImageUrl(customerDTO.getImageUrl());
             sellerRepository.save(seller);
         } else {
             Buyer buyer = new Buyer();
@@ -85,17 +89,16 @@ public class CustomerService implements ICustomerService {
             buyer.setGender(customerDTO.getGender());
             buyer.setIdCard(customerDTO.getIdCard());
             buyer.setCode("MNM" + generateRandomCode());
+            buyer.setImageUrl(customerDTO.getImageUrl());
             buyerRepository.save(buyer);
         }
 
         emailService.sendAccountCreationEmail(customerDTO.getEmail(), customerDTO.getEmail(), tempPassword);
     }
 
-
     private String generateRandomPassword() {
         return RandomStringUtils.randomAlphanumeric(8);
     }
-
 
     private String generateRandomCode() {
         return RandomStringUtils.randomNumeric(4);

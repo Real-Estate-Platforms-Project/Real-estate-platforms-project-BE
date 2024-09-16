@@ -15,4 +15,7 @@ public interface IBuyerService {
     void save(Buyer user);
 
     Buyer findByAccountId(Long id);
+
+    List<Buyer> searchBuyers(String code, String name, String email, String phoneNumber);
+
 }

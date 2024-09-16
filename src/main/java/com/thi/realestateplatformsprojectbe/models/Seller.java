@@ -79,4 +79,9 @@ public class Seller implements IUser {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
+    @NotNull
+    @Size(max = 255)
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;
+
 }

@@ -82,7 +82,13 @@ public class HomeTransactionController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(transactionResponses, HttpStatus.OK);
-
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Optional<Transaction>> findByIdProduct(@PathVariable Long id) {
+        Optional<Transaction> productOptional = transactionService.findById(id);
+        return new ResponseEntity<>(productOptional, HttpStatus.OK);
+    }
+
 
 }

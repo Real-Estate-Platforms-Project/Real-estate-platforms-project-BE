@@ -67,5 +67,19 @@ public class SellerController {
         }
     }
 
+    @GetMapping("/search")
+    @PermitAll
+    public ResponseEntity<?> searchSellers(
+            @RequestParam(required = false) String code,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String phoneNumber) {
+        List<Seller> sellers = sellerService.searchSellers(code, name, email, phoneNumber);
+        if (sellers.isEmpty()) {
+            return ResponseEntity.status(404).body("Không có người mua nào khớp với tiêu chí tìm kiếm.");
+        }
+        return ResponseEntity.ok(sellers);
+    }
+
 
 }

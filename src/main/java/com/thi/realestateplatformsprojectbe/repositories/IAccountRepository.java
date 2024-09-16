@@ -13,4 +13,5 @@ public interface IAccountRepository extends JpaRepository<Account, Long> {
     boolean existsByEmail(String email);
 
     List<Account> findAllByExpiryDateBefore(LocalDateTime now);
+    List<Account> findAllByExpiryDateAfter(LocalDateTime now);
 }

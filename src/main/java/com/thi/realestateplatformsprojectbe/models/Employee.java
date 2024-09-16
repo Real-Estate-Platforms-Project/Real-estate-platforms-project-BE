@@ -28,7 +28,7 @@ public class Employee implements IUser {
 
     @Size(max = 55)
     @NotNull
-    @Column(name = "code", nullable = false, length = 55)
+    @Column(name = "code", nullable = false, length = 55, unique = true)
     private String code;
 
     @Size(max = 255)
@@ -65,7 +65,6 @@ public class Employee implements IUser {
     @Column(name = "is_admin", nullable = false)
     private Boolean isAdmin = false;
 
-
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "account_id", nullable = false)
@@ -81,4 +80,3 @@ public class Employee implements IUser {
     @JoinColumn(name = "position_id")
     private Position position;
 }
-

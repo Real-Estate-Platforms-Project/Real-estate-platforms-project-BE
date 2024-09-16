@@ -60,8 +60,8 @@ public class Seller implements IUser {
 
     @Size(max = 12)
     @NotNull
-    @Column(name = "id_number", nullable = false, length = 12)
-    private String idNumber;
+    @Column(name = "id_Card", nullable = false, length = 12)
+    private String idCard;
 
     @NotNull
     @OneToOne(fetch = FetchType.EAGER, optional = false)
@@ -78,5 +78,10 @@ public class Seller implements IUser {
     @ColumnDefault("1")
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
+
+    @NotNull
+    @Size(max = 255)
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;
 
 }

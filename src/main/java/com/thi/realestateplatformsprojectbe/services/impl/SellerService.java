@@ -1,5 +1,6 @@
 package com.thi.realestateplatformsprojectbe.services.impl;
 
+import com.thi.realestateplatformsprojectbe.models.Buyer;
 import com.thi.realestateplatformsprojectbe.models.Seller;
 import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
 import com.thi.realestateplatformsprojectbe.services.ISellerService;
@@ -32,5 +33,10 @@ public class SellerService implements ISellerService {
     @Override
     public Seller findByAccountId(Long id) {
         return  sellerRepository.findSellerByAccount_Id(id);
+    }
+
+    @Override
+    public List<Seller> searchSellers(String code, String name, String email, String phoneNumber) {
+        return sellerRepository.searchSellers(code, name, email, phoneNumber);
     }
 }

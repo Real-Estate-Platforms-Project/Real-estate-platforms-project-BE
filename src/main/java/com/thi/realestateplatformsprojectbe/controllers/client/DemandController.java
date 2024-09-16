@@ -105,7 +105,6 @@ public class DemandController {
         }
     }
 
-    @PreAuthorize(hasAnyRole("ADMIN","EMPLOYEE"))
     @GetMapping("/account/search")
     public ResponseEntity<Page<Demand>> searchAccountDemands(
             @RequestParam(required = false) String notes,

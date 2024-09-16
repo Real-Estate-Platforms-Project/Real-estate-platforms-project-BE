@@ -5,8 +5,10 @@ import com.thi.realestateplatformsprojectbe.services.ICustomerService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -22,15 +24,15 @@ public class CustomerController {
         return ResponseEntity.ok(exists);
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<String> addCustomer(@Valid @RequestBody CustomerDTO customerDTO) {
+    @PostMapping(value = "/add")
+    public ResponseEntity<?> addCustomer(@RequestBody CustomerDTO customerDTO) {
         try {
             customerService.addNewCustomer(customerDTO);
-            return ResponseEntity.status(HttpStatus.OK).body("Customer added successfully");
+            return ResponseEntity.ok("Khách hàng đã được thêm thành công!");
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid data: " + e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi khi thêm khách hàng.");
         }
     }
 }

@@ -15,7 +15,9 @@ public interface IEmployeeService {
 
     Employee createEmployee(EmployeeDTO employeeDTO);
 
-    Iterable<Employee> searchEmployees(String code, String name, String email, Long positionId);
+    Iterable<Employee> searchEmployees(String code, String name, String email, String position);
 
     Optional<Employee> getEmployeeById(Long id);
+
+    boolean emailExists(String email);
 }

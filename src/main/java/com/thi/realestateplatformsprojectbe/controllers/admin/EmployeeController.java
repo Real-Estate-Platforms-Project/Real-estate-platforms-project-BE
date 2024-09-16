@@ -39,8 +39,12 @@ public class EmployeeController {
 
     @PostMapping
     public ResponseEntity<?> createEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) {
-        Employee createdEmployee = employeeService.createEmployee(employeeDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdEmployee);
+        try {
+            Employee createdEmployee = employeeService.createEmployee(employeeDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdEmployee);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -52,6 +56,7 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Nhân viên không tồn tại.");
         }
     }
+
     @PutMapping("/{id}")
     public ResponseEntity<?> updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDTO employeeDTO) {
         Optional<Employee> updatedEmployee = employeeService.updateEmployee(id, employeeDTO);
@@ -64,12 +69,20 @@ public class EmployeeController {
 
     @GetMapping("/search")
     public ResponseEntity<?> searchEmployees(
-            @RequestParam(required = false) String code,
-            @RequestParam(value = "name_like",defaultValue = "") String name,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Long positionId) {
-        Iterable<Employee> employees = employeeService.searchEmployees(code, name, email, positionId);
+            @RequestParam(value = "code", required = false) String code,
+            @RequestParam(value = "name", defaultValue = "") String name,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "position", required = false) String position) {
+        Iterable<Employee> employees = employeeService.searchEmployees(code, name, email, position);
         return ResponseEntity.ok(employees);
     }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<Boolean> checkEmailExists(@RequestParam String email) {
+        boolean exists = employeeService.emailExists(email);
+        return ResponseEntity.ok(exists);
+    }
 }
+
+
 

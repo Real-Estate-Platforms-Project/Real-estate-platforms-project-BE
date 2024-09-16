@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -37,53 +38,75 @@ public class EmployeeService implements IEmployeeService {
     public Employee findByAccountId(Long accountId) {
         return employeeRepository.findByAccountId(accountId);
     }
+
     public Optional<Employee> getEmployeeById(Long id) {
         return employeeRepository.findById(id);
     }
 
     @Override
-    public Employee createEmployee(EmployeeDTO employee) {
-        // tự tạo password
+    public boolean emailExists(String email) {
+        return accountRepository.existsByEmail(email);
+    }
+
+    @Override
+    public Employee createEmployee(EmployeeDTO employeeDTO) {
+        String employeeCode = generateNextEmployeeCode();
+
         String password = generateRandomPassword();
         String passwordEn = passwordEncoder.encode(password);
 
-        // tim possion
-        Position position = positionRepository.findById(employee.getPositionId())
-                .orElseThrow(() -> new RuntimeException("Position not found"));
+        Position position = positionRepository.findById(employeeDTO.getPositionId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy chức vụ"));
+        if (emailExists(employeeDTO.getEmail())) {
+            throw new IllegalArgumentException("Email đã tồn tại. Vui lòng sử dụng email khác.");
+        }
 
-        // cretae account
         Account newAccount = Account.builder()
-                .name(employee.getName())
-                .email(employee.getEmail())
+                .name(employeeDTO.getName())
+                .email(employeeDTO.getEmail())
                 .isActive(true)
                 .isDeleted(false)
                 .password(passwordEn).build();
         newAccount = accountRepository.save(newAccount);
 
-        // create employeee
         Employee newEmployee = Employee.builder()
-                .code(employee.getCode())
-                .name(employee.getName())
-                .dob(employee.getDob())
-                .gender(employee.getGender())
-                .phoneNumber(employee.getPhoneNumber())
-                .email(employee.getEmail())
-                .address(employee.getAddress())
+                .code(employeeCode)
+                .name(employeeDTO.getName())
+                .dob(employeeDTO.getDob())
+                .gender(employeeDTO.getGender())
+                .phoneNumber(employeeDTO.getPhoneNumber())
+                .email(employeeDTO.getEmail())
+                .address(employeeDTO.getAddress())
                 .account(newAccount)
                 .position(position)
                 .isDeleted(false)
-                .isAdmin(employee.getRole().equals("Admin"))
+                .isAdmin(employeeDTO.getRole().equals("Admin"))
                 .build();
 
         newEmployee = employeeRepository.save(newEmployee);
 
         try {
-            emailService.sendAccountCreationEmail(employee.getEmail(), password);
+            emailService.sendAccountCreationEmail(employeeDTO.getEmail(), password);
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
         return newEmployee;
     }
+
+    private String generateNextEmployeeCode() {
+        String maxCode = employeeRepository.findMaxEmployeeCodeNumber();
+
+        if (maxCode == null) {
+            return "MNV-" + maxCode;
+        }
+
+        int currentNumber = Integer.parseInt(maxCode);
+
+        int nextNumber = currentNumber + 1;
+
+        return String.format("MNV-%03d", nextNumber);
+    }
+
 
     private String generateRandomPassword() {
         return RandomStringUtils.randomAlphanumeric(8);
@@ -106,7 +129,7 @@ public class EmployeeService implements IEmployeeService {
         if (existingEmployeeOpt.isPresent()) {
             Employee existingEmployee = existingEmployeeOpt.get();
 
-            existingEmployee.setCode(employeeDTO.getCode());
+
             existingEmployee.setName(employeeDTO.getName());
             existingEmployee.setDob(employeeDTO.getDob());
             existingEmployee.setGender(employeeDTO.getGender());
@@ -114,11 +137,9 @@ public class EmployeeService implements IEmployeeService {
             existingEmployee.setEmail(employeeDTO.getEmail());
             existingEmployee.setAddress(employeeDTO.getAddress());
 
-
             Position position = positionRepository.findById(employeeDTO.getPositionId())
-                    .orElseThrow(() -> new RuntimeException("Position not found"));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy chức vụ"));
             existingEmployee.setPosition(position);
-
 
             existingEmployee.setIsAdmin(employeeDTO.getRole().equals("Admin"));
 
@@ -130,8 +151,10 @@ public class EmployeeService implements IEmployeeService {
     }
 
     @Override
-    public Iterable<Employee> searchEmployees(String code, String name, String email, Long positionId) {
-        return employeeRepository.searchEmployees(code, name, email, positionId);
+    public Iterable<Employee> searchEmployees(String code, String name, String email, String position) {
+        return employeeRepository.searchEmployees(code, name, email, position);
     }
 }
+
+
 

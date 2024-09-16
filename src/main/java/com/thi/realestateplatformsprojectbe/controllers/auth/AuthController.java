@@ -22,6 +22,7 @@ import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -110,7 +112,7 @@ public class AuthController {
 
         Account account = new Account();
         account.setUpdateDay(LocalDateTime.now());
-        account.setExpiryDate(account.getUpdateDay().plusDays(30));
+        account.setExpiryDate(account.getUpdateDay().plusDays(45));
         account.setEmail(accountDTO.getEmail());
         account.setPassword(passwordEncoder.encode(accountDTO.getPassword()));
         account.setName(accountDTO.getName());
@@ -204,17 +206,17 @@ public class AuthController {
     @GetMapping("/get-roles")
     public ResponseEntity<?> getAllRole(Authentication authentication) {
 
-            UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-            Account account = accountService.findByEmail(userPrinciple.getUsername());
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
 
-            if (account != null) {
-                Set<Role> roles = account.getRoles();
-                return ResponseEntity.ok(roles);
-                // neu k co
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("Tài khoản này không có quyền truy cập");
-            }
+        if (account != null) {
+            Set<Role> roles = account.getRoles();
+            return ResponseEntity.ok(roles);
+            // neu k co
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Tài khoản này không có quyền truy cập");
+        }
     }
 
 
@@ -234,41 +236,60 @@ public class AuthController {
         return accountService.updateForgetPassword(verificationTokenService, token, updateAccount, passwordEncoder);
     }
 
-    @GetMapping("/checkExpiryDate/{email}")
-    public ResponseEntity<?> checkExpiryDate(@PathVariable String email) {
-        Account account = accountService.findByEmail(email);
-        if (LocalDateTime.now().isAfter(account.getExpiryDate())
-                && LocalDateTime.now().isBefore(account.getExpiryDate().plusDays(5))) {
-            return new ResponseEntity<>(true,HttpStatus.OK);
-        }
-        return new ResponseEntity<>(false,HttpStatus.OK);
+    @GetMapping("/getExpiryDate")
+    public ResponseEntity<?> getExpiryDate(Authentication authentication) {
+        // Lấy thông tin tài khoảng hiện tại
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+        return new ResponseEntity<>(account.getExpiryDate(), HttpStatus.OK);
     }
-    @GetMapping("/checkDateToChangePassword/{email}")
-    public ResponseEntity<?> checkDateToChangePassword(@PathVariable String email){
-        Account account = accountService.findByEmail(email);
-        boolean isTrue = LocalDateTime.now().isAfter(account.getExpiryDate());
-        if(isTrue){
-            return new ResponseEntity<>(true,HttpStatus.OK);
+
+    @GetMapping("/checkDateToChangePassword")
+    public ResponseEntity<?> checkDateToChangePassword(Authentication authentication) {
+        // Lấy thông tin tài khoảng hiện tại
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+
+        boolean isTrue = LocalDateTime.now().isAfter(account.getUpdateDay().plusDays(30));
+        if (isTrue) {
+            return new ResponseEntity<>(true, HttpStatus.OK);
         }
-        return new ResponseEntity<>(false,HttpStatus.OK);
+        return new ResponseEntity<>(false, HttpStatus.OK);
     }
+
+
     @GetMapping("/isDeleted/{email}")
     public ResponseEntity<?> updateForgetPassword(@PathVariable String email) {
         Account account = accountService.findByEmail(email);
         account.setIsDeleted(false);
         accountService.save(account);
-        return new ResponseEntity<>(account,HttpStatus.OK);
+        return new ResponseEntity<>(account, HttpStatus.OK);
     }
-    @GetMapping("/checkIsDeleted/{email}")
-    public ResponseEntity<?> checkIsDeleted(@PathVariable String email) {
 
-                Account account = accountService.findByEmail(email);
-                boolean isDeleted = account.getIsDeleted();
-                if(isDeleted){
-                    return new ResponseEntity<>(true,HttpStatus.OK);
-                }
-                return new ResponseEntity<>(false,HttpStatus.OK);
+    @GetMapping("/checkIsDeleted")
+    public ResponseEntity<?> checkIsDeleted( Authentication authentication) {
+        // Lấy thông tin tài khoảng hiện tại
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+
+        boolean isDeleted = account.getIsDeleted();
+        if (isDeleted) {
+            return new ResponseEntity<>(true, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(false, HttpStatus.OK);
 
     }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void checkAndUpdateExpiredAccounts() {
+        List<Account> expiredAccounts = accountService.checkAndUpdateExpiredAccounts();
+        expiredAccounts.forEach(account -> {
+            account.setIsDeleted(true);
+            accountService.save(account);
+        });
+    }
+
 
 }
+
+

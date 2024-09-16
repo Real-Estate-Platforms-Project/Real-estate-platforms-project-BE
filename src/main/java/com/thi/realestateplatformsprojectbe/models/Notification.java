@@ -8,8 +8,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -29,6 +29,11 @@ public class Notification {
     @CreatedDate
     @Column(name = "create_at", nullable = false)
     private LocalDateTime createAt;
+
+    @NotNull
+    @LastModifiedDate
+    @Column(name = "update_at", nullable = false)
+    private LocalDateTime updateAt;
 
     @Size(max = 255)
     @NotNull

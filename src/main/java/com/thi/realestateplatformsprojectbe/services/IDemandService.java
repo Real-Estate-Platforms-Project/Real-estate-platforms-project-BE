@@ -3,17 +3,16 @@ package com.thi.realestateplatformsprojectbe.services;
 import com.thi.realestateplatformsprojectbe.dto.DemandDTO;
 import com.thi.realestateplatformsprojectbe.models.Buyer;
 import com.thi.realestateplatformsprojectbe.models.Demand;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface IDemandService {
-    List<Demand> findAllVerifiedDemand();
 
-    List<Demand> findAll();
+    Page<Demand> findAll(Integer page);
 
     void delete(Demand demand);
-
-    List<Demand> findInvalidatedDemand();
 
     void verifyDemand(Long id);
 
@@ -21,7 +20,11 @@ public interface IDemandService {
 
     Demand findById(Long id);
 
-    List<Demand> searchDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea);
+    Page<Demand> searchDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea, Pageable pageable);
 
-    List<Demand> searchVerifiedDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea, boolean isVerify);
+    Page<Demand> searchVerifiedDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea, boolean isVerify, Pageable pageable);
+
+    Page<Demand> searchAccountDemand(Long buyerId, String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea, Pageable pageable);
+
+    void edit(Demand demand);
 }

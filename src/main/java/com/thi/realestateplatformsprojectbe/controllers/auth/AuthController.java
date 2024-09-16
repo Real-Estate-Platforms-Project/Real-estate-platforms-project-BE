@@ -14,6 +14,7 @@ import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
 import com.thi.realestateplatformsprojectbe.services.email.ConfirmEmailService;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
+import com.thi.realestateplatformsprojectbe.services.email.NotifyEmailToChangePasswordService;
 import com.thi.realestateplatformsprojectbe.services.impl.BuyerService;
 import com.thi.realestateplatformsprojectbe.services.impl.EmployeeService;
 import com.thi.realestateplatformsprojectbe.services.impl.SellerService;
@@ -22,6 +23,7 @@ import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,7 +34,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -55,6 +59,7 @@ public class AuthController {
 
     private final IBuyerService buyerService;
     private final EmployeeService employeeService;
+    private final NotifyEmailToChangePasswordService notifyEmailToChangePasswordService;
 
 
     @PostMapping("/login")
@@ -65,7 +70,7 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(account.getEmail(), account.getPassword())
             );
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Thông tin đăng nhập không đúng!");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Thông tin đăng nhập không chính xác!");
         }
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -110,7 +115,7 @@ public class AuthController {
 
         Account account = new Account();
         account.setUpdateDay(LocalDateTime.now());
-        account.setExpiryDate(account.getUpdateDay().plusDays(30));
+        account.setExpiryDate(account.getUpdateDay().plusDays(45));
         account.setEmail(accountDTO.getEmail());
         account.setPassword(passwordEncoder.encode(accountDTO.getPassword()));
         account.setName(accountDTO.getName());
@@ -151,7 +156,7 @@ public class AuthController {
 
         if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             verificationTokenService.deleteToken(verificationToken);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn! Vui lòng yêu cầu gửi lại email xác minh.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn!");
         }
 
         Account account = verificationToken.getAccount();
@@ -184,10 +189,7 @@ public class AuthController {
             if (role.getName().equals(RoleName.ROLE_SELLER.toString())) {
                 user = sellerService.findByAccountId(account.getId());
             }
-            if (role.getName().equals(RoleName.ROLE_EMPLOYEE.toString())) {
-                user = employeeService.findByAccountId(account.getId());
-            }
-            if (role.getName().equals(RoleName.ROLE_ADMIN.toString())) {
+            if (role.getName().equals(RoleName.ROLE_EMPLOYEE.toString()) || role.getName().equals(RoleName.ROLE_ADMIN.toString())) {
                 user = employeeService.findByAccountId(account.getId());
             }
         }
@@ -207,17 +209,17 @@ public class AuthController {
     @GetMapping("/get-roles")
     public ResponseEntity<?> getAllRole(Authentication authentication) {
 
-            UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-            Account account = accountService.findByEmail(userPrinciple.getUsername());
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
 
-            if (account != null) {
-                Set<Role> roles = account.getRoles();
-                return ResponseEntity.ok(roles);
-                // neu k co
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("Tài khoản này không có quyền truy cập");
-            }
+        if (account != null) {
+            Set<Role> roles = account.getRoles();
+            return ResponseEntity.ok(roles);
+            // neu k co
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Tài khoản này không có quyền truy cập");
+        }
     }
 
 
@@ -237,37 +239,74 @@ public class AuthController {
         return accountService.updateForgetPassword(verificationTokenService, token, updateAccount, passwordEncoder);
     }
 
-    @GetMapping("/checkExpiryDate/{email}")
-    public ResponseEntity<?> checkExpiryDate(@PathVariable String email) {
-        Account account = accountService.findByEmail(email);
-        if (LocalDateTime.now().isAfter(account.getExpiryDate())
-                && LocalDateTime.now().isBefore(account.getExpiryDate().plusDays(5))) {
-            return new ResponseEntity<>(true,HttpStatus.OK);
-        }
-        return new ResponseEntity<>(false,HttpStatus.OK);
+    @GetMapping("/getExpiryDate")
+    public ResponseEntity<?> getExpiryDate(Authentication authentication) {
+        // Lấy thông tin tài khoảng hiện tại
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+        return new ResponseEntity<>(account.getExpiryDate(), HttpStatus.OK);
     }
-    @GetMapping("/checkDateToChangePassword/{email}")
-    public ResponseEntity<?> checkDateToChangePassword(@PathVariable String email){
-        Account account = accountService.findByEmail(email);
-        boolean isTrue = LocalDateTime.now().isAfter(account.getExpiryDate());
-        if(isTrue){
-            return new ResponseEntity<>(true,HttpStatus.OK);
+
+    @GetMapping("/checkDateToChangePassword")
+    public ResponseEntity<?> checkDateToChangePassword(Authentication authentication) {
+        // Lấy thông tin tài khoảng hiện tại
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+
+        boolean isTrue = LocalDateTime.now().isAfter(account.getUpdateDay().plusDays(30));
+        if (isTrue) {
+            return new ResponseEntity<>(true, HttpStatus.OK);
         }
-        return new ResponseEntity<>(false,HttpStatus.OK);
+        return new ResponseEntity<>(false, HttpStatus.OK);
     }
+
+
     @GetMapping("/isDeleted/{email}")
     public ResponseEntity<?> updateForgetPassword(@PathVariable String email) {
         Account account = accountService.findByEmail(email);
         account.setIsDeleted(false);
         accountService.save(account);
-        return new ResponseEntity<>(account,HttpStatus.OK);
+        return new ResponseEntity<>(account, HttpStatus.OK);
     }
-    @GetMapping("/checkIsDeleted/{email}")
-    public ResponseEntity<?> checkIsDeleted(@PathVariable String email) {
-        Account account = accountService.findByEmail(email);
+
+    @GetMapping("/checkIsDeleted")
+    public ResponseEntity<?> checkIsDeleted(Authentication authentication) {
+        // Lấy thông tin tài khoảng hiện tại
+        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
+        Account account = accountService.findByEmail(userPrinciple.getUsername());
+
         boolean isDeleted = account.getIsDeleted();
-        return new ResponseEntity<>(isDeleted,HttpStatus.OK);
+        if (isDeleted) {
+            return new ResponseEntity<>(true, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(false, HttpStatus.OK);
+
     }
+
+    //    @Scheduled(fixedDelay = 60000)
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void checkAndUpdateExpiredAccounts() {
+        List<Account> expiredAccounts = accountService.findAllByExpiryDateBefore();
+        expiredAccounts.forEach(account -> {
+            account.setIsDeleted(true);
+            accountService.save(account);
+        });
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void NotifyEmailToChangePassword() throws MessagingException {
+        List<Account> expiredAccounts = accountService.accountsWhichOver30DayPassHaveNotChangePassword();
+        LocalDateTime now = LocalDateTime.now();
+        long daysBetween;
+        for (Account item : expiredAccounts) {
+            daysBetween = ChronoUnit.DAYS.between(now, item.getExpiryDate());
+            if (daysBetween <= 15) {
+                notifyEmailToChangePasswordService.sendNotiFyEmailChangePassword(item.getEmail(), daysBetween);
+            }
+        }
+    }
+
+
 
 }
 

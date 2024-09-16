@@ -51,4 +51,10 @@ public class BuyerService implements IBuyerService {
     public List<Buyer> searchBuyers(String code, String name, String email, String phoneNumber) {
         return buyerRepository.searchBuyers(code, name, email, phoneNumber);
     }
+    @Override
+    public Buyer getBuyerByAccountId(Long id) {
+        return buyerRepository.findBuyerByAccount_Id(id);
+    }
+
+
 }

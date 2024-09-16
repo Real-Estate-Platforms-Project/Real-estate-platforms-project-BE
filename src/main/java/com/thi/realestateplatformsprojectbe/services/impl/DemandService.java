@@ -6,8 +6,10 @@ import com.thi.realestateplatformsprojectbe.models.Demand;
 import com.thi.realestateplatformsprojectbe.repositories.IDemandRepository;
 import com.thi.realestateplatformsprojectbe.services.IDemandService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -16,29 +18,17 @@ public class DemandService implements IDemandService {
     @Autowired
     private IDemandRepository demandRepository;
 
-    @Autowired
-    private BuyerService buyerService;
-
 
     @Override
-    public List<Demand> findAllVerifiedDemand() {
-        return demandRepository.findAllByIsDeletedAndIsVerifyOrderByCreatedAtDesc(false,true);
-    }
-
-    @Override
-    public  List<Demand> findAll(){
-        return demandRepository.findAllByIsDeletedOrderByIsVerifyAscCreatedAtDesc(false);
+    public Page<Demand> findAll(Integer page) {
+        Pageable pages = PageRequest.of(page, 6);
+        return demandRepository.findAllByIsDeletedOrderByIsVerifyAscCreatedAtDesc(false, pages);
     }
 
     @Override
     public void delete(Demand demand) {
         demand.setIsDeleted(true);
         demandRepository.save(demand);
-    }
-
-    @Override
-    public List<Demand> findInvalidatedDemand() {
-        return demandRepository.findInvalidatedDemand();
     }
 
     @Override
@@ -54,9 +44,8 @@ public class DemandService implements IDemandService {
 
     @Override
     public Demand save(DemandDTO demandDTO, Buyer buyer) {
-//        buyerService.getBuyerById(demandDTO.getBuyerId());
+
         Demand demand = Demand.builder()
-//                .buyer(buyerService.getBuyerById(demandDTO.getBuyerId()))
                 .buyer(buyer)
                 .region(demandDTO.getRegion())
                 .type(demandDTO.getType())
@@ -69,7 +58,11 @@ public class DemandService implements IDemandService {
                 .isDeleted(false)
                 .isVerify(false)
                 .build();
-        demandRepository.save(demand);
+        if (demandDTO.getId() == null) {
+            demandRepository.save(demand);
+        } else {
+            demand.setId(demandDTO.getId());
+        }
         return demand;
     }
 
@@ -79,17 +72,23 @@ public class DemandService implements IDemandService {
     }
 
     @Override
-    public List<Demand> searchVerifiedDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea, boolean isVerify) {
-        return demandRepository.searchVerifiedDemands(notes,region,type,realEstateType,minArea,maxArea,isVerify);
+    public Page<Demand> searchVerifiedDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea, boolean isVerify, Pageable pageable) {
+        return demandRepository.searchVerifiedDemands(notes, region, type, realEstateType, minArea, maxArea, isVerify, pageable);
     }
 
     @Override
-    public List<Demand> searchDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea) {
-        return demandRepository.searchDemands(notes,region,type,realEstateType,minArea,maxArea);
+    public Page<Demand> searchAccountDemand(Long buyer, String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea, Pageable pageable) {
+        return demandRepository.searchDemandBuyer(buyer, notes, region, type, realEstateType, minArea, maxArea, pageable);
     }
 
-//    @Override
-//    public List<Demand> searchDemand(String notes, String region, String type, String realEstateType, Integer minArea, Integer maxArea,Boolean isVerify) {
-//        return demandRepository.searchDemands(notes,region,type,realEstateType,minArea,maxArea,isVerify);
-//    }
+    @Override
+    public void edit(Demand demand) {
+        demandRepository.save(demand);
+    }
+
+    @Override
+    public Page<Demand> searchDemand(String notes, List<String> region, String type, List<String> realEstateType, Integer minArea, Integer maxArea, Pageable pageable) {
+        return demandRepository.searchDemands(notes, region, type, realEstateType, minArea, maxArea, pageable);
+    }
+
 }

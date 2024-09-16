@@ -12,6 +12,9 @@ public class RealEstateWithDetailDTO {
 
     private Long sellerId;
 
+    @NotBlank(message = "Tiêu đề không được để trống")
+    private String title;
+
     @NotBlank(message = "Loại nhu cầu không được để trống")
     private String demandType;
 

@@ -18,4 +18,6 @@ public interface IBuyerService {
 
     List<Buyer> searchBuyers(String code, String name, String email, String phoneNumber);
 
+
+    Buyer getBuyerByAccountId(Long id);
 }

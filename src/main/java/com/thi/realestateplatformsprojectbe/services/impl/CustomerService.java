@@ -46,6 +46,7 @@ public class CustomerService implements ICustomerService {
         return accountRepository.existsByEmail(email);
     }
 
+
     public void addNewCustomer(CustomerDTO customerDTO) throws MessagingException {
         if (emailExists(customerDTO.getEmail())) {
             throw new IllegalArgumentException("Email đã tồn tại. Vui lòng sử dụng email khác.");
@@ -74,6 +75,7 @@ public class CustomerService implements ICustomerService {
             seller.setEmail(customerDTO.getEmail());
             seller.setPhoneNumber(customerDTO.getPhoneNumber());
             seller.setGender(customerDTO.getGender());
+            seller.setCode("SELLER" + generateRandomCode());
             seller.setIdCard(customerDTO.getIdCard());
             seller.setCode("MNB" + generateRandomCode());
             seller.setImageUrl(customerDTO.getImageUrl());
@@ -96,9 +98,11 @@ public class CustomerService implements ICustomerService {
         emailService.sendAccountCreationEmail(customerDTO.getEmail(), customerDTO.getEmail(), tempPassword);
     }
 
+
     private String generateRandomPassword() {
         return RandomStringUtils.randomAlphanumeric(8);
     }
+
 
     private String generateRandomCode() {
         return RandomStringUtils.randomNumeric(4);

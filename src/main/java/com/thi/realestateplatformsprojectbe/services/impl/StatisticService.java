@@ -1,6 +1,7 @@
 package com.thi.realestateplatformsprojectbe.services.impl;
 
 import com.thi.realestateplatformsprojectbe.dto.statisticDTO.StatisticDemandDTO;
+import com.thi.realestateplatformsprojectbe.dto.statisticDTO.StatisticTransactionDTO;
 import com.thi.realestateplatformsprojectbe.models.Demand;
 import com.thi.realestateplatformsprojectbe.models.Transaction;
 import com.thi.realestateplatformsprojectbe.repositories.IStatisticRepository;
@@ -77,13 +78,40 @@ public class StatisticService implements IStatisticService {
     }
 
     @Override
-    public List<Transaction> findTransactionByYear(Integer year) {
+    public List<StatisticTransactionDTO> findTransactionByYear(Integer year) {
         List<Transaction> transactions = statisticRepository.findTransactionByYear(year);
-        return transactions;
+        return transactions.stream().map(transaction -> StatisticTransactionDTO.builder()
+                .id(transaction.getId())
+                .code(transaction.getCode())
+                .nameEmployee(transaction.getEmployee().getName())
+                .titleRealEstate(transaction.getRealEstate().getTitle())
+                .nameBuyer(transaction.getBuyer().getName())
+                .nameSeller(transaction.getSeller().getName())
+                .amount(transaction.getAmount())
+                .createdAt(transaction.getCreateAt())
+                .commissionFee(transaction.getCommissionFee())
+                .description(transaction.getDescription())
+                .status(transaction.getStatus())
+                .isDeleted(transaction.getIsDeleted())
+                .build()).collect(Collectors.toList());
     }
 
     @Override
-    public List<Transaction> findTransactionByMonth(Integer year, Integer month) {
-        return statisticRepository.findTransactionByMonth(year, month);
+    public List<StatisticTransactionDTO> findTransactionByMonth(Integer year, Integer month) {
+        List<Transaction> transactions = statisticRepository.findTransactionByMonth(month, year);
+        return transactions.stream().map(transaction -> StatisticTransactionDTO.builder()
+                .id(transaction.getId())
+                .code(transaction.getCode())
+                .nameEmployee(transaction.getEmployee().getName())
+                .titleRealEstate(transaction.getRealEstate().getTitle())
+                .nameBuyer(transaction.getBuyer().getName())
+                .nameSeller(transaction.getSeller().getName())
+                .amount(transaction.getAmount())
+                .createdAt(transaction.getCreateAt())
+                .commissionFee(transaction.getCommissionFee())
+                .description(transaction.getDescription())
+                .status(transaction.getStatus())
+                .isDeleted(transaction.getIsDeleted())
+                .build()).collect(Collectors.toList());
     }
 }

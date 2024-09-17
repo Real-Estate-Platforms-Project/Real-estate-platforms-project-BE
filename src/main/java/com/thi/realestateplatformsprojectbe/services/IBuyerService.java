@@ -20,4 +20,6 @@ public interface IBuyerService {
 
 
     Buyer getBuyerByAccountId(Long id);
+
+
 }

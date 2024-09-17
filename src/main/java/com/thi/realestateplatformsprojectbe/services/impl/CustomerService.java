@@ -75,9 +75,8 @@ public class CustomerService implements ICustomerService {
             seller.setEmail(customerDTO.getEmail());
             seller.setPhoneNumber(customerDTO.getPhoneNumber());
             seller.setGender(customerDTO.getGender());
-            seller.setCode("SELLER" + generateRandomCode());
             seller.setIdCard(customerDTO.getIdCard());
-            seller.setCode("MNB" + generateRandomCode());
+            seller.setCode("REP-" + generateRandomCode());
             seller.setImageUrl(customerDTO.getImageUrl());
             sellerRepository.save(seller);
         } else {
@@ -90,7 +89,7 @@ public class CustomerService implements ICustomerService {
             buyer.setPhoneNumber(customerDTO.getPhoneNumber());
             buyer.setGender(customerDTO.getGender());
             buyer.setIdCard(customerDTO.getIdCard());
-            buyer.setCode("MNM" + generateRandomCode());
+            buyer.setCode("REP-" + generateRandomCode());
             buyer.setImageUrl(customerDTO.getImageUrl());
             buyerRepository.save(buyer);
         }
@@ -100,11 +99,88 @@ public class CustomerService implements ICustomerService {
 
 
     private String generateRandomPassword() {
-        return RandomStringUtils.randomAlphanumeric(8);
+        return RandomStringUtils.randomAlphanumeric(5);
     }
 
 
     private String generateRandomCode() {
         return RandomStringUtils.randomNumeric(4);
+    }
+
+
+    @Override
+    public void updateCustomerRole(Long accountId, String newRole) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với ID: " + accountId));
+
+        Role role = roleRepository.findByName("ROLE_" + newRole.toUpperCase());
+        if (role == null) {
+            throw new IllegalArgumentException("Vai trò không hợp lệ.");
+        }
+
+        Set<Role> currentRoles = account.getRoles();
+        boolean hasRole = currentRoles.stream().anyMatch(r -> r.getName().equals(role.getName()));
+
+        if (hasRole) {
+            throw new IllegalArgumentException("Tài khoản đã ở vai trò này rồi.");
+        }
+
+        account.getRoles().clear();
+        account.getRoles().add(role);
+        accountRepository.save(account);
+
+        if (newRole.equalsIgnoreCase("seller")) {
+            moveBuyerToSeller(account);
+        } else if (newRole.equalsIgnoreCase("buyer")) {
+            moveSellerToBuyer(account);
+        }
+    }
+
+    private void moveBuyerToSeller(Account account) {
+        Buyer buyer = buyerRepository.findByAccount(account);
+        if (buyer != null) {
+            String existingCode = buyer.getCode();
+
+            // Xóa Buyer
+            buyerRepository.delete(buyer);
+
+            // Tạo Seller mới
+            Seller seller = new Seller();
+            seller.setAccount(account);
+            seller.setName(buyer.getName());
+            seller.setDob(buyer.getDob());
+            seller.setAddress(buyer.getAddress());
+            seller.setEmail(buyer.getEmail());
+            seller.setPhoneNumber(buyer.getPhoneNumber());
+            seller.setGender(buyer.getGender());
+            seller.setIdCard(buyer.getIdCard());
+            seller.setCode(existingCode != null ? existingCode : "REP-" + generateRandomCode());
+            seller.setImageUrl(buyer.getImageUrl());
+            sellerRepository.save(seller);
+        }
+    }
+
+    private void moveSellerToBuyer(Account account) {
+        Seller seller = sellerRepository.findByAccount(account);
+        if (seller != null) {
+            String existingCode = seller.getCode();
+
+            // Xóa Seller
+            sellerRepository.delete(seller);
+
+            // Tạo Buyer mới
+            Buyer buyer = new Buyer();
+            buyer.setAccount(account);
+            buyer.setName(seller.getName());
+            buyer.setDob(seller.getDob());
+            buyer.setAddress(seller.getAddress());
+            buyer.setEmail(seller.getEmail());
+            buyer.setPhoneNumber(seller.getPhoneNumber());
+            buyer.setGender(seller.getGender());
+            buyer.setIdCard(seller.getIdCard());
+            buyer.setCode(existingCode != null ? existingCode : "REP-" + generateRandomCode());
+            buyer.setImageUrl(seller.getImageUrl());
+            buyerRepository.save(buyer);
+        }
     }
 }

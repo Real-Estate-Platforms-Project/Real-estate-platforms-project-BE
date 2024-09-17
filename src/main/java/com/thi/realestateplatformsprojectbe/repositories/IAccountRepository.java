@@ -9,7 +9,6 @@ import java.util.List;
 @Repository
 public interface IAccountRepository extends JpaRepository<Account, Long> {
     Account findByEmail(String email);
-
     boolean existsByEmail(String email);
 
     List<Account> findAllByExpiryDateBefore(LocalDateTime now);

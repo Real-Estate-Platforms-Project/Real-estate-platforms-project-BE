@@ -1,7 +1,11 @@
 package com.thi.realestateplatformsprojectbe.services.impl;
 
+import com.thi.realestateplatformsprojectbe.models.Account;
 import com.thi.realestateplatformsprojectbe.models.Buyer;
+import com.thi.realestateplatformsprojectbe.models.Role;
+import com.thi.realestateplatformsprojectbe.repositories.IAccountRepository;
 import com.thi.realestateplatformsprojectbe.repositories.IBuyerRepository;
+import com.thi.realestateplatformsprojectbe.repositories.IRoleRepository;
 import com.thi.realestateplatformsprojectbe.services.IBuyerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +18,14 @@ public class BuyerService implements IBuyerService {
 
     @Autowired
     private IBuyerRepository buyerRepository;
+
+
+    @Autowired
+    private IAccountRepository accountRepository;
+
+    @Autowired
+    private IRoleRepository roleRepository;
+
 
     @Override
     public List<Buyer> getAllBuyers() {
@@ -55,6 +67,7 @@ public class BuyerService implements IBuyerService {
     public Buyer getBuyerByAccountId(Long id) {
         return buyerRepository.findBuyerByAccount_Id(id);
     }
+
 
 
 }

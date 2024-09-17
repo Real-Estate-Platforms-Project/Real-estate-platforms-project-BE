@@ -14,12 +14,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -72,4 +70,18 @@ public class CustomerController {
         }
         return ResponseEntity.ok("Cập nhật thông tin thành công.");
     }
+
+    @PutMapping("/update-role/{accountId}")
+    public ResponseEntity<?> updateRole(@PathVariable Long accountId, @RequestParam String newRole) {
+        try {
+            customerService.updateCustomerRole(accountId, newRole);
+            return ResponseEntity.ok("Cập nhật vai trò thành công!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã xảy ra lỗi khi cập nhật vai trò.");
+        }
+    }
+
+
 }

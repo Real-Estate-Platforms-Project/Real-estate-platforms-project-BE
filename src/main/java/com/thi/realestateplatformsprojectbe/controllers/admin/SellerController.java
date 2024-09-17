@@ -24,6 +24,7 @@ public class SellerController {
     private final ISellerService sellerService;
     private final AccountService accountService;
 
+
     @GetMapping
     @PermitAll
     public ResponseEntity<?> getAllSellers() {
@@ -80,6 +81,7 @@ public class SellerController {
         }
         return ResponseEntity.ok(sellers);
     }
+
 
 
 }

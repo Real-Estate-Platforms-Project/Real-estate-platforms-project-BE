@@ -56,4 +56,5 @@ public class BuyerController {
         }
         return ResponseEntity.ok(buyers);
     }
+
 }

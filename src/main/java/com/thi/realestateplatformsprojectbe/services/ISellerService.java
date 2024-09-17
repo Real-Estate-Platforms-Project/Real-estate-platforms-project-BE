@@ -1,7 +1,6 @@
 package com.thi.realestateplatformsprojectbe.services;
 
 import com.thi.realestateplatformsprojectbe.dto.CustomerUpdateDTO;
-import com.thi.realestateplatformsprojectbe.models.Buyer;
 import com.thi.realestateplatformsprojectbe.models.Seller;
 import java.util.List;
 

@@ -66,7 +66,6 @@ public class Seller implements IUser {
     @NotNull
     @OneToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "account_id", nullable = false)
-    @JsonBackReference
     private Account account;
 
     @NotNull

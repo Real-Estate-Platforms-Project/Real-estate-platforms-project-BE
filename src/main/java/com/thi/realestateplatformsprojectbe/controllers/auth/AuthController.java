@@ -276,7 +276,7 @@ public class AuthController {
 
     }
 
-    //    @Scheduled(fixedDelay = 60000)
+
     @Scheduled(cron = "0 0 0 * * ?")
     public void checkAndUpdateExpiredAccounts() {
         List<Account> expiredAccounts = accountService.findAllByExpiryDateBefore();
@@ -286,6 +286,8 @@ public class AuthController {
         });
     }
 
+
+    //    @Scheduled(fixedDelay = 60000)
     @Scheduled(cron = "0 0 0 * * ?")
     public void NotifyEmailToChangePassword() throws MessagingException {
         List<Account> expiredAccounts = accountService.accountsWhichOver30DayPassHaveNotChangePassword();
@@ -298,7 +300,6 @@ public class AuthController {
             }
         }
     }
-
 
 
 }

@@ -44,8 +44,8 @@ public interface IStatisticRepository extends JpaRepository<Demand, Long> {
 
     @Query("SELECT t " +
             "FROM Transaction t " +
-            "WHERE DATE(t.createAt) = :day " +
+            "WHERE t.createAt BETWEEN :startDate AND :endDate " +
             "ORDER BY t.createAt")
-    List<Transaction> findTransactionByDay(@Param("day") Date day);
+    List<Transaction> findTransactionByDay(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }
 

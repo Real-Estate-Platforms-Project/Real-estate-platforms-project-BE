@@ -1,6 +1,6 @@
 package com.thi.realestateplatformsprojectbe.models;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -70,7 +70,7 @@ public class RealEstate {
     private String status;
 
     @Lob
-    @Column(name = "note")
+    @Column(name = "note",length = 999999999)
     private String note;
 
     @NotNull
@@ -102,4 +102,9 @@ public class RealEstate {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "real_estate_id")
     private Set<Image> images;
+
+    @NotNull
+    @ColumnDefault("0")
+    @Column(name= "is_active", nullable = false)
+    private boolean isActive = false;
 }

@@ -68,7 +68,6 @@ public class Buyer implements IUser {
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "account_id", nullable = false)
-    @JsonBackReference
     private Account account;
 
     @NotNull
@@ -81,7 +80,6 @@ public class Buyer implements IUser {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
-    @NotNull
     @Size(max = 255)
     @Column(name = "image_url", length = 255)
     private String imageUrl;

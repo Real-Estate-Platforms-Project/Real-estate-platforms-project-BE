@@ -1,6 +1,7 @@
 package com.thi.realestateplatformsprojectbe.controllers.admin;
 
 import com.thi.realestateplatformsprojectbe.dto.statisticDTO.StatisticDemandDTO;
+import com.thi.realestateplatformsprojectbe.dto.statisticDTO.StatisticTransactionDTO;
 import com.thi.realestateplatformsprojectbe.models.Transaction;
 import com.thi.realestateplatformsprojectbe.services.IStatisticService;
 import jakarta.annotation.security.PermitAll;
@@ -55,7 +56,7 @@ public class StatisticController {
     @GetMapping("/transactions/year")
     @PermitAll
     public ResponseEntity<?> getStatisticTransactionByYear(@RequestParam(required = false) Integer year) {
-        List<Transaction> list = statisticService.findTransactionByYear(year);
+        List<StatisticTransactionDTO> list = statisticService.findTransactionByYear(year);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
@@ -63,7 +64,7 @@ public class StatisticController {
     @PermitAll
     public ResponseEntity<?> getStatisticTransactionByMonth(@RequestParam(required = false) Integer year,
                                                        @RequestParam(required = false) Integer month) {
-        List<Transaction> list = statisticService.findTransactionByMonth(year, month);
+        List<StatisticTransactionDTO> list = statisticService.findTransactionByMonth(year, month);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 }

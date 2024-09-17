@@ -1,7 +1,8 @@
 package com.thi.realestateplatformsprojectbe.services;
 
+import com.thi.realestateplatformsprojectbe.dto.CustomerUpdateDTO;
+import com.thi.realestateplatformsprojectbe.models.Account;
 import com.thi.realestateplatformsprojectbe.models.Buyer;
-import com.thi.realestateplatformsprojectbe.models.IUser;
 
 import java.util.List;
 
@@ -20,4 +21,10 @@ public interface IBuyerService {
 
 
     Buyer getBuyerByAccountId(Long id);
+
+    void createBuyerRegister(Account account);
+
+    void update(Long id, CustomerUpdateDTO customer);
+
+
 }

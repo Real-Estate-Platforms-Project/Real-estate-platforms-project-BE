@@ -141,10 +141,8 @@ public class CustomerService implements ICustomerService {
         if (buyer != null) {
             String existingCode = buyer.getCode();
 
-            // Xóa Buyer
             buyerRepository.delete(buyer);
 
-            // Tạo Seller mới
             Seller seller = new Seller();
             seller.setAccount(account);
             seller.setName(buyer.getName());
@@ -165,10 +163,8 @@ public class CustomerService implements ICustomerService {
         if (seller != null) {
             String existingCode = seller.getCode();
 
-            // Xóa Seller
             sellerRepository.delete(seller);
 
-            // Tạo Buyer mới
             Buyer buyer = new Buyer();
             buyer.setAccount(account);
             buyer.setName(seller.getName());

@@ -1,11 +1,7 @@
 package com.thi.realestateplatformsprojectbe.services.impl;
 
-import com.thi.realestateplatformsprojectbe.models.Account;
-import com.thi.realestateplatformsprojectbe.models.Buyer;
-import com.thi.realestateplatformsprojectbe.models.Role;
+import com.thi.realestateplatformsprojectbe.dto.CustomerUpdateDTO;
 import com.thi.realestateplatformsprojectbe.models.Seller;
-import com.thi.realestateplatformsprojectbe.repositories.IAccountRepository;
-import com.thi.realestateplatformsprojectbe.repositories.IRoleRepository;
 import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
 import com.thi.realestateplatformsprojectbe.services.ISellerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +14,6 @@ public class SellerService implements ISellerService {
 
     @Autowired
     private ISellerRepository sellerRepository;
-
-    @Autowired
-    private IAccountRepository accountRepository;
-
-    @Autowired
-    private IRoleRepository roleRepository;
 
     @Override
     public List<Seller> getAllSellers() {
@@ -48,6 +38,22 @@ public class SellerService implements ISellerService {
     @Override
     public List<Seller> searchSellers(String code, String name, String email, String phoneNumber) {
         return sellerRepository.searchSellers(code, name, email, phoneNumber);
+    }
+
+    @Override
+    public void update(Long id, CustomerUpdateDTO customer) {
+        Seller seller = sellerRepository.findSellerByAccount_Id(id);
+        if(customer.getImageUrl() != null) {
+            seller.setImageUrl(customer.getImageUrl());
+        } else {
+            seller.setName(customer.getName());
+            seller.setDob(customer.getDob());
+            seller.setAddress(customer.getAddress());
+            seller.setPhoneNumber(customer.getPhoneNumber());
+            seller.setIdCard(customer.getIdCard());
+            seller.setGender(customer.getGender());
+        }
+        sellerRepository.save(seller);
     }
 
 }

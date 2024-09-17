@@ -106,7 +106,6 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody AccountDTO accountDTO) throws MessagingException {
-        System.out.println("******************************************");
         if (accountService.existsByEmail(accountDTO.getEmail())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email đã tồn tại!");
         }
@@ -142,7 +141,7 @@ public class AuthController {
         buyerService.save(user);
 
         VerificationToken token = verificationTokenService.createVerificationToken(account);
-        String confirmationUrl = "http://localhost:3000/activation-success?token=" + token.getToken(); // Frontend URL
+        String confirmationUrl = "http://localhost:3000/activation-success?token=" + token.getToken();
         emailService.sendVerifyEmail(account.getEmail(), confirmationUrl);
 
         return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.");

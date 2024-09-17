@@ -41,6 +41,10 @@ public class Notification {
     private String title;
 
     @NotNull
+    @Column(name = "date_start", nullable = false)
+    private LocalDateTime dateStart;
+
+    @NotNull
     @Lob
     @Column(name = "contend", nullable = false)
     private String contend;

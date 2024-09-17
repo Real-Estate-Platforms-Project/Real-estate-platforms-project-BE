@@ -137,6 +137,7 @@ public class AuthController {
         user.setDob(LocalDate.of(2000, 1, 1));
         user.setIdCard("");
         user.setPhoneNumber("");
+        user.setImageUrl("");
         buyerService.save(user);
 
         VerificationToken token = verificationTokenService.createVerificationToken(account);

@@ -19,5 +19,6 @@ public interface IStatisticService {
 
     List<StatisticTransactionDTO> findTransactionByMonth(Integer year, Integer month);
 
+    List<StatisticTransactionDTO> findTransactionByDay(LocalDate startDate, LocalDate endDate);
 
 }

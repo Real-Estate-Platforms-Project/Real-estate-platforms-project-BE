@@ -129,7 +129,7 @@ public class AuthController {
         buyerService.createBuyerRegister(account);
 
         VerificationToken token = verificationTokenService.createVerificationToken(account);
-        String confirmationUrl = "http://localhost:3000/activation-success?token=" + token.getToken(); // Frontend URL
+        String confirmationUrl = "http://localhost:3000/activation-success?token=" + token.getToken();
         emailService.sendVerifyEmail(account.getEmail(), confirmationUrl);
 
         return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.");

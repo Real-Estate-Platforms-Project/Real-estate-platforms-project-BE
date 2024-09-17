@@ -1,5 +1,6 @@
 package com.thi.realestateplatformsprojectbe.repositories;
 
+import com.thi.realestateplatformsprojectbe.models.Account;
 import com.thi.realestateplatformsprojectbe.models.Buyer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,9 @@ import java.util.List;
 @Repository
 public interface IBuyerRepository extends JpaRepository<Buyer, Long> {
     Buyer findBuyerByAccount_Id(Long id);
+
+    Buyer findByAccount(Account account);
+
 
     @Query("SELECT b FROM Buyer b WHERE " +
             "(:code IS NULL OR b.code LIKE %:code%) AND " +

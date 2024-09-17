@@ -1,7 +1,6 @@
 package com.thi.realestateplatformsprojectbe.services.impl;
 
 import com.thi.realestateplatformsprojectbe.dto.CustomerUpdateDTO;
-import com.thi.realestateplatformsprojectbe.models.Buyer;
 import com.thi.realestateplatformsprojectbe.models.Seller;
 import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
 import com.thi.realestateplatformsprojectbe.services.ISellerService;
@@ -56,4 +55,5 @@ public class SellerService implements ISellerService {
         }
         sellerRepository.save(seller);
     }
+
 }

@@ -37,7 +37,7 @@ public class RealEstateService implements IRealEstateService {
     private final IRealEstateDetailRepository realEstateDetailRepository;
     private final IImageRepository imageRepository;
     private final RealEstateCreationEmailService emailService;
-    private final SimpMessagingTemplate messagingTemplate;
+
 
     @Override
     public RealEstate addRealEstatePost(RealEstateWithDetailDTO realEstatePostDTO)  {
@@ -96,13 +96,7 @@ public class RealEstateService implements IRealEstateService {
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
-        String notificationMessage = null;
-        try {
-            notificationMessage = new ObjectMapper().writeValueAsString(realEstatePostDTO);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-        messagingTemplate.convertAndSend("/topic/seller-notifications", notificationMessage);
+
         return savedRealEstate;
     }
 

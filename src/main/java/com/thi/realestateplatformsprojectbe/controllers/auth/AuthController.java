@@ -188,7 +188,7 @@ public class AuthController {
         }
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Người dùng không tồn tại");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Người dùng không tồn tại");
         }
 
         UserDTO userDTO = new UserDTO();

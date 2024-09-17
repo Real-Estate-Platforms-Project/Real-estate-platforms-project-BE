@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,9 +31,9 @@ public class RealEstateController {
     @Autowired
     private IAccountNotificationService accountNotificationService;
 
+    @PreAuthorize("hasAnyRole('SELLER', 'EMPLOYEE', 'ADMIN')")
     @PostMapping
     public ResponseEntity<RealEstate> addRealEstatePost(@Valid @RequestBody RealEstateWithDetailDTO realEstatePostDTO) {
-
         RealEstate post = realEstateService.addRealEstatePost(realEstatePostDTO);
         accountNotificationService.addNotification(realEstatePostDTO);
         return ResponseEntity.ok(post);

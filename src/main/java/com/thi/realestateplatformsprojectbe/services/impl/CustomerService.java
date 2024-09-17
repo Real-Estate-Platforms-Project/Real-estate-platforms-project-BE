@@ -99,7 +99,7 @@ public class CustomerService implements ICustomerService {
 
 
     private String generateRandomPassword() {
-        return RandomStringUtils.randomAlphanumeric(5);
+        return RandomStringUtils.randomAlphanumeric(6);
     }
 
 

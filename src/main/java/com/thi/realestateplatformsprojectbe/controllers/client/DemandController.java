@@ -34,7 +34,7 @@ public class DemandController {
     @Autowired
     private AccountService accountService;
 
-    @PreAuthorize("hasAnyRole('ADMIN','BUYER')")
+    @PreAuthorize("hasAnyRole('ADMIN','BUYER','EMPLOYEE')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getDemand(@PathVariable Long id, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -45,7 +45,7 @@ public class DemandController {
             Account account = accountService.findByEmail(userName);
 
             if (account != null) {
-                Buyer buyer = buyerService.getBuyerById(account.getId());
+                Buyer buyer = buyerService.findByAccountId(account.getId());
                 Demand demand = demandService.findById(id);
                 for (Role role : account.getRoles()) {
                     if (demand != null) {

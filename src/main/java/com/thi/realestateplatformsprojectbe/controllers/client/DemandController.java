@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasAnyRole;
-
 @RestController
 @CrossOrigin("*")
 @RequestMapping("/api/demand")
@@ -36,6 +34,7 @@ public class DemandController {
     @Autowired
     private AccountService accountService;
 
+    @PreAuthorize("hasAnyRole('ADMIN','BUYER')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getDemand(@PathVariable Long id, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -105,6 +104,7 @@ public class DemandController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('BUYER')")
     @GetMapping("/account/search")
     public ResponseEntity<Page<Demand>> searchAccountDemands(
             @RequestParam(required = false) String notes,
@@ -140,6 +140,7 @@ public class DemandController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PutMapping("{id}/verify")
     public ResponseEntity<?> verifyDemand(@PathVariable Long id, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -160,6 +161,7 @@ public class DemandController {
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','BUYER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteDemand(@PathVariable Long id, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -191,6 +193,7 @@ public class DemandController {
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
+    @PreAuthorize("hasAnyRole('BUYER')")
     @PostMapping
     public ResponseEntity<DemandDTO> addDemand(@RequestBody DemandDTO demandDTO, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -210,27 +213,7 @@ public class DemandController {
 
     }
 
-    @PutMapping("{id}")
-    public ResponseEntity<?> verifyDemand(@PathVariable Long id, @RequestBody DemandDTO demandDTO, HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.replace("Bearer ", "");
-
-            String userName = jwtService.getUsernameFromJwtToken(token);
-            Account account = accountService.findByEmail(userName);
-            if (account != null) {
-                Buyer buyer = buyerService.getBuyerByAccountId(account.getId());
-                Demand demand = demandService.findById(id);
-                if (demand != null && demand.getBuyer().equals(buyer)) {
-                    demandService.save(demandDTO, buyer);
-                    return new ResponseEntity<>(demandDTO, HttpStatus.OK);
-                }
-            }
-        }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
-
+    @PreAuthorize("hasAnyRole('BUYER')")
     @PutMapping("{id}/edit")
     public ResponseEntity<?> updateDemand(@PathVariable Long id, @RequestBody Demand demand, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");

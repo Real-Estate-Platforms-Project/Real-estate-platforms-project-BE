@@ -31,7 +31,7 @@ public class TransactionRequest {
 
     Long seller;
 
-    Integer amount;
+    Double amount;
 
     LocalDate createAt;
 

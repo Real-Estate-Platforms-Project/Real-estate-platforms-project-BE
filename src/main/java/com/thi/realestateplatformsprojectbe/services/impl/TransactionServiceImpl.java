@@ -1,177 +1,218 @@
-package com.thi.realestateplatformsprojectbe.configs.service;
+package com.thi.realestateplatformsprojectbe.services.impl;
 
-import com.thi.realestateplatformsprojectbe.configs.UserPrinciple;
-import com.thi.realestateplatformsprojectbe.dto.UpdateAccount;
-import com.thi.realestateplatformsprojectbe.models.Account;
-import com.thi.realestateplatformsprojectbe.models.Role;
-import com.thi.realestateplatformsprojectbe.models.RoleName;
-import com.thi.realestateplatformsprojectbe.models.VerificationToken;
-import com.thi.realestateplatformsprojectbe.repositories.IAccountRepository;
-import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
-import com.thi.realestateplatformsprojectbe.services.email.ConfirmEmailService;
-import jakarta.mail.MessagingException;
+import com.thi.realestateplatformsprojectbe.converter.ITransactionConverter;
+import com.thi.realestateplatformsprojectbe.dto.request.TransactionRequest;
+import com.thi.realestateplatformsprojectbe.dto.response.ResponsePage;
+import com.thi.realestateplatformsprojectbe.dto.response.TransactionResponse;
+import com.thi.realestateplatformsprojectbe.models.Buyer;
+import com.thi.realestateplatformsprojectbe.models.Employee;
+import com.thi.realestateplatformsprojectbe.models.RealEstate;
+import com.thi.realestateplatformsprojectbe.models.Seller;
+import com.thi.realestateplatformsprojectbe.models.Transaction;
+import com.thi.realestateplatformsprojectbe.repositories.ITransactionRepository;
+import com.thi.realestateplatformsprojectbe.services.ITransactionService;
+import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.Optional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
-public class AccountService implements UserDetailsService {
+public class TransactionServiceImpl implements ITransactionService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionServiceImpl.class);
+
     @Autowired
-    private IAccountRepository accountRepository;
+    private ITransactionConverter transactionConverter;
+
+    @Autowired
+    private ITransactionRepository transactionRepository;
+
+    @Autowired
+    private EmployeeService employeeService;
+
+    @Autowired
+    private SellerService sellerService;
+
+    @Autowired
+    private BuyerService buyerService;
+
+    @Autowired
+    private RealEstateService realEstateService;
 
 
-    public Account findByEmail(String email) {
-        return accountRepository.findByEmail(email);
+    @Override
+    public Page<TransactionResponse> findByCode(String keyword, Pageable pageable) {
+        Page<Transaction> transactionPage = transactionRepository.findByCode(keyword, pageable);
+        return transactionPage.map(transaction -> TransactionResponse.builder()
+                .id(transaction.getId())
+                .code(transaction.getCode())
+                .realEstate(transaction.getBuyer().getCode())
+                .employee(transaction.getEmployee().getName())
+                .buyer(transaction.getBuyer().getName())
+                .seller(transaction.getSeller().getName())
+                .amount(transaction.getAmount())
+                .createAt(transaction.getCreateAt())
+                .commissionFee(transaction.getCommissionFee())
+                .description(transaction.getDescription())
+                .status(transaction.getStatus())
+                .isDeleted(transaction.getIsDeleted())
+                .build());
     }
 
-    public UserDetails loadUserByUsername(String email) {
-        return UserPrinciple.build(accountRepository.findByEmail(email));
+    @Override
+    public Page<TransactionResponse> findAll(Pageable pageable) {
+        Page<Transaction> transactionPage = transactionRepository.findAll(pageable);
+        Page<TransactionResponse> transactionPageResponse = transactionPage.map(transaction -> TransactionResponse.builder()
+                .id(transaction.getId())
+                .code(transaction.getCode())
+                .realEstate(transaction.getRealEstate().getCode())
+                .employee(transaction.getEmployee().getCode())
+                .buyer(transaction.getBuyer().getName())
+                .seller(transaction.getSeller().getName())
+                .amount(transaction.getAmount())
+                .createAt(transaction.getCreateAt())
+                .commissionFee(transaction.getCommissionFee())
+                .description(transaction.getDescription())
+                .status(transaction.getStatus())
+                .isDeleted(transaction.getIsDeleted())
+                .build());
+
+        return transactionPageResponse;
     }
 
-    public void save(Account account) {
-        accountRepository.save(account);
+
+
+    @Override
+    public Optional<Transaction> findById(Long id) {
+        return transactionRepository.findById(id);
     }
 
-    public boolean existsByEmail(String email) {
-        return accountRepository.existsByEmail(email);
+    @Override
+    public void deleteById(Long id) {
+        transactionRepository.deleteById(id);
     }
 
-    public boolean checkRole(Account account) {
-        for (Role role : account.getRoles()) {
-            if (RoleName.valueOf(role.getName()) == RoleName.ROLE_SELLER) {
-                return true;
-            }
-        }
-        return false;
-    }
+    @Override
+    public ResponsePage save(TransactionRequest transactionRequest) {
+        LOGGER.info("TransactionService -> save invoked!!!");
 
-    public boolean checkRoleBuyer(Account account) {
-        for (Role role : account.getRoles()) {
-            if (RoleName.valueOf(role.getName()) == RoleName.ROLE_BUYER) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public ResponseEntity<?> updatePassword(Authentication authentication, UpdateAccount updateAccount, PasswordEncoder passwordEncoder) {
-
-        // Lấy thông tin tài khoảng hiện tại
-        UserPrinciple userPrinciple = (UserPrinciple) authentication.getPrincipal();
-        Account account1 = findByEmail(userPrinciple.getUsername());
-
-        // Xác định tài khoảng có tồn tại không
-        if (account1 == null) {
-            return new ResponseEntity<>("Tài khoảng không tồn tại", HttpStatus.NOT_FOUND);
-        }
-        // Xác minh mật khẩu hiện tại nhập vào có đúng không
-        boolean isTrue = passwordEncoder.matches(updateAccount.getRecentPassWord(), account1.getPassword());
-        if (!isTrue) {
-            return new ResponseEntity<>("Mật khẩu hiện tại nhập không đúng", HttpStatus.BAD_REQUEST);
-        }
-        // xác minh mật khẩu nhập lại có trùng với mật khẩu nhập mới không
-        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
-            return new ResponseEntity<>("Nhập lại mật khẩu không đúng", HttpStatus.BAD_REQUEST);
-        }
-        // Mã hoá encoder mật khẩu mới
-        String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
-
-        // Lưu vào db
-        account1.setPassword(pw);
-        save(account1);
-        return new ResponseEntity<>("{}", HttpStatus.OK);
-    }
-
-    public ResponseEntity<?> createToken(String email, IVerificationTokenService verificationTokenService, ConfirmEmailService confirmEmailService) throws MessagingException {
-        Account account = findByEmail(email);
-        VerificationToken token = verificationTokenService.createVerificationToken(account);
-        String confirmationUrl = "http://localhost:3000/confirm-email?token=" + token.getToken(); // Frontend URL
-        confirmEmailService.sendVerifyEmail(account.getEmail(), confirmationUrl);
-        return ResponseEntity.ok(" Vui lòng kiểm tra email để kích hoạt tài khoản.");
-    }
-
-    public ResponseEntity<?> confirmEmail(String token, IVerificationTokenService verificationTokenService) {
-        VerificationToken verificationToken = verificationTokenService.getVerificationToken(token);
-
-        if (verificationToken == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ!");
-        }
-
-        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            verificationTokenService.deleteToken(verificationToken);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn! Vui lòng yêu cầu gửi lại email xác minh.");
+        Optional<Transaction> existingTransaction = transactionRepository.findByCode(transactionRequest.getCode());
+        if (existingTransaction.isPresent()) {
+            return ResponsePage.builder()
+                    .data(null)
+                    .message("Mã giao dịch đã tồn tại!")
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build();
         }
 
-
-        return ResponseEntity.ok("Chuyển đến trang cập nhật mật khẩu!");
+        Transaction transaction = transactionConverter.dtoToEntity(transactionRequest);
+        try {
+            transactionRepository.save(transaction);
+            return ResponsePage.builder()
+                    .data(null)
+                    .message("giao dịch đã được tạo thành công")
+                    .status(HttpStatus.OK)
+                    .build();
+        }  catch (Exception e) {
+            return ResponsePage.builder()
+                    .data(null)
+                    .message(e.getMessage())
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build();
+        }
     }
 
-    public ResponseEntity<?> updateForgetPassword(IVerificationTokenService verificationTokenService, String token,
-                                                  UpdateAccount updateAccount, PasswordEncoder passwordEncoder) {
-        VerificationToken verificationToken = verificationTokenService.getVerificationToken(token);
-        if (verificationToken == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token không hợp lệ!");
+    @Override
+    public ResponsePage update(TransactionRequest transactionRequest) {
+        LOGGER.info("TransactionService -> update invoked!!!");
+
+        Optional<Transaction> transactionOptional = transactionRepository.findById(transactionRequest.getId());
+        if (transactionOptional.isEmpty()) {
+            return ResponsePage.builder()
+                    .data(null)
+                    .message("Giao dịch không tồn tại!")
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
         }
 
-        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            verificationTokenService.deleteToken(verificationToken);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Token đã hết hạn! Vui lòng yêu cầu gửi lại email xác minh.");
-        }
-        if (!updateAccount.getNewPassWord().equals(updateAccount.getReEnterPassWord())) {
-            return new ResponseEntity<>("Nhập lại mật khẩu không đúng", HttpStatus.BAD_REQUEST);
-        }
-        Account account = verificationToken.getAccount();
-        String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
-        account.setPassword(pw);
-        save(account);
+        Transaction transaction = transactionOptional.get();
 
-        verificationTokenService.deleteToken(verificationToken);
-        return new ResponseEntity<>(HttpStatus.OK);
+        transaction.setCode(transactionRequest.getCode());
+        transaction.setAmount(transactionRequest.getAmount());
+        transaction.setCreateAt(transactionRequest.getCreateAt());
+        transaction.setCommissionFee(transactionRequest.getCommissionFee());
+        transaction.setDescription(transactionRequest.getDescription());
+        transaction.setStatus(transactionRequest.getStatus());
+        transaction.setIsDeleted(transactionRequest.getIsDeleted());
+
+        Optional<Employee> employeeOptional = employeeService.getEmployeeById(transactionRequest.getEmployee());
+        if (employeeOptional.isPresent()) {
+            transaction.setEmployee(employeeOptional.get());
+        } else {
+            throw new EntityNotFoundException("Employee not found");
+        }
+
+        RealEstate realEstate = realEstateService.findById(transactionRequest.getRealEstate());
+        if (realEstate == null) {
+            throw new EntityNotFoundException("Real Estate not found");
+        } else {
+            transaction.setRealEstate(realEstate);
+        }
+
+        Buyer buyer = buyerService.getBuyerById(transactionRequest.getBuyer());
+        if (buyer == null) {
+            throw new EntityNotFoundException("Buyer not found");
+        } else {
+            transaction.setBuyer(buyer);
+        }
+
+        Seller seller = sellerService.getSellerById(transactionRequest.getSeller());
+        if (seller == null) {
+            throw new EntityNotFoundException("Seller not found");
+        } else {
+            transaction.setSeller(seller);
+        }
+
+        // Lưu transaction sau khi cập nhật
+        try {
+            transactionRepository.save(transaction);
+            return ResponsePage.builder()
+                    .data(null)
+                    .message("Cập nhật giao dịch thành công")
+                    .status(HttpStatus.OK)
+                    .build();
+        } catch (Exception e) {
+            return ResponsePage.builder()
+                    .data(null)
+                    .message(e.getMessage())
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build();
+        }
     }
 
-    public List<Account> findAllByExpiryDateBefore(){
-        return accountRepository.findAllByExpiryDateBefore(LocalDateTime.now());
-    }
 
-
-    public List<Account> accountsWhichOver30DayPassHaveNotChangePassword() {
-        return accountRepository.findAllByExpiryDateAfter(LocalDateTime.now());
+    @Override
+    public Page<TransactionResponse> searchTransaction(String keyword, Pageable pageable) {
+        Page<Transaction> transactionPage = transactionRepository.searchTransactionByCodeAndDescription(keyword, pageable);
+        return transactionPage.map(transaction -> TransactionResponse.builder()
+                .id(transaction.getId())
+                .code(transaction.getCode())
+                .realEstate(transaction.getRealEstate().getCode())
+                .employee(transaction.getEmployee().getCode())
+                .buyer(transaction.getBuyer().getName())
+                .seller(transaction.getSeller().getName())
+                .amount(transaction.getAmount())
+                .createAt(transaction.getCreateAt())
+                .commissionFee(transaction.getCommissionFee())
+                .description(transaction.getDescription())
+                .status(transaction.getStatus())
+                .isDeleted(transaction.getIsDeleted())
+                .build());
     }
 }
-
-//    public boolean checkExpiryDate(String email) {
-//        Account account = findByEmail(email);
-//        if (LocalDateTime.now().isAfter(account.getExpiryDate())
-//                && LocalDateTime.now().isBefore(account.getExpiryDate().plusDays(5))) {
-//            return true;
-//        }
-//        return false;
-//    }
-
-//    new ResponseEntity<>(" Tài khoản còn 5 ngày hoạt động, đổi mật khẩu để tiếp tục sử dụng", HttpStatus.OK);
-
-//    new ResponseEntity<>("Tài khoản hết hạn", HttpStatus.OK);
-
-
-
-
-
-
-
-
-
-
-
-
-
-

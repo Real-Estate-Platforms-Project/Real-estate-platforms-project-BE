@@ -29,7 +29,7 @@ public class TransactionRequest {
 
     Long buyer;
 
-    Long Seller;
+    Long seller;
 
     Integer amount;
 

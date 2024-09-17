@@ -13,13 +13,16 @@ import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class AccountService implements UserDetailsService {
@@ -135,6 +138,13 @@ public class AccountService implements UserDetailsService {
         verificationTokenService.deleteToken(verificationToken);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    public List<Account> checkAndUpdateExpiredAccounts(){
+        return accountRepository.findAllByExpiryDateBefore(LocalDateTime.now());
+    }
+
+
+
 }
 
 //    public boolean checkExpiryDate(String email) {

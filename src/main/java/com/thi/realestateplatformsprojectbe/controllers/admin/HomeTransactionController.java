@@ -3,8 +3,17 @@ package com.thi.realestateplatformsprojectbe.controllers.admin;
 import com.thi.realestateplatformsprojectbe.dto.request.TransactionRequest;
 import com.thi.realestateplatformsprojectbe.dto.response.ResponsePage;
 import com.thi.realestateplatformsprojectbe.dto.response.TransactionResponse;
+import com.thi.realestateplatformsprojectbe.models.Buyer;
+import com.thi.realestateplatformsprojectbe.models.Employee;
+import com.thi.realestateplatformsprojectbe.models.RealEstate;
+import com.thi.realestateplatformsprojectbe.models.Seller;
 import com.thi.realestateplatformsprojectbe.models.Transaction;
+import com.thi.realestateplatformsprojectbe.services.impl.BuyerService;
+import com.thi.realestateplatformsprojectbe.services.impl.EmployeeService;
+import com.thi.realestateplatformsprojectbe.services.impl.RealEstateService;
+import com.thi.realestateplatformsprojectbe.services.impl.SellerService;
 import com.thi.realestateplatformsprojectbe.services.impl.TransactionServiceImpl;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +26,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -88,6 +98,12 @@ public class HomeTransactionController {
     public ResponseEntity<Optional<Transaction>> findByIdProduct(@PathVariable Long id) {
         Optional<Transaction> productOptional = transactionService.findById(id);
         return new ResponseEntity<>(productOptional, HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ResponsePage> updateTransaction(@RequestBody TransactionRequest transactionRequest) {
+        ResponsePage responsePage = transactionService.update(transactionRequest);
+        return new ResponseEntity<>(responsePage, responsePage.getStatus());
     }
 
 

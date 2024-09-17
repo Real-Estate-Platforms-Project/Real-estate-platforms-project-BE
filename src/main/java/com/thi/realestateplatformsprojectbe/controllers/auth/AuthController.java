@@ -126,22 +126,10 @@ public class AuthController {
 
         accountService.save(account);
 
-        Buyer user = new Buyer();
-        user.setAccount(account);
-        user.setName(account.getName());
-        user.setEmail(account.getEmail());
-        user.setCode(buyerService.generateBuyerCode());
-        user.setAddress("");
-        user.setEnable(true);
-        user.setGender("");
-        user.setDob(LocalDate.of(2000, 1, 1));
-        user.setIdCard("");
-        user.setPhoneNumber("");
-        user.setImageUrl("");
-        buyerService.save(user);
+        buyerService.createBuyerRegister(account);
 
         VerificationToken token = verificationTokenService.createVerificationToken(account);
-        String confirmationUrl = "http://localhost:3000/activation-success?token=" + token.getToken(); // Frontend URL
+        String confirmationUrl = "http://localhost:3000/activation-success?token=" + token.getToken();
         emailService.sendVerifyEmail(account.getEmail(), confirmationUrl);
 
         return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.");
@@ -190,7 +178,11 @@ public class AuthController {
             if (role.getName().equals(RoleName.ROLE_SELLER.toString())) {
                 user = sellerService.findByAccountId(account.getId());
             }
-            if (role.getName().equals(RoleName.ROLE_EMPLOYEE.toString()) || role.getName().equals(RoleName.ROLE_ADMIN.toString())) {
+            if (
+                    role.getName().equals(RoleName.ROLE_EMPLOYEE.toString())
+                    ||
+                    role.getName().equals(RoleName.ROLE_ADMIN.toString())
+            ) {
                 user = employeeService.findByAccountId(account.getId());
             }
         }
@@ -284,7 +276,7 @@ public class AuthController {
 
     }
 
-    //    @Scheduled(fixedDelay = 60000)
+
     @Scheduled(cron = "0 0 0 * * ?")
     public void checkAndUpdateExpiredAccounts() {
         List<Account> expiredAccounts = accountService.findAllByExpiryDateBefore();
@@ -294,6 +286,8 @@ public class AuthController {
         });
     }
 
+
+    //    @Scheduled(fixedDelay = 60000)
     @Scheduled(cron = "0 0 0 * * ?")
     public void NotifyEmailToChangePassword() throws MessagingException {
         List<Account> expiredAccounts = accountService.accountsWhichOver30DayPassHaveNotChangePassword();
@@ -306,7 +300,6 @@ public class AuthController {
             }
         }
     }
-
 
 
 }

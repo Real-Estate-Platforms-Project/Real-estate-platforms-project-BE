@@ -1,21 +1,16 @@
 package com.thi.realestateplatformsprojectbe.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
-public class CustomerDTO {
-
+public class CustomerUpdateDTO {
     @NotNull(message = "Email không được để trống")
     @Email(message = "Email không đúng định dạng")
-    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@gmail\\.com$", message = "Email phải có đuôi @gmail.com")
-    @Size(max = 100, message = "Email không được vượt quá 100 ký tự")
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "Định dạng email không hợp lệ.")
+    @Size(max = 155, message = "Email không được vượt quá 155 ký tự")
     private String email;
 
     @NotNull(message = "Tên không được để trống")
@@ -27,7 +22,6 @@ public class CustomerDTO {
     private LocalDate dob;
 
     @NotNull(message = "Giới tính không được để trống")
-    @Size(max = 10, message = "Giới tính không được vượt quá 10 ký tự")
     private String gender;
 
     @NotNull(message = "Địa chỉ không được để trống")
@@ -35,17 +29,12 @@ public class CustomerDTO {
     private String address;
 
     @NotNull(message = "Số điện thoại không được để trống")
-    @Pattern(regexp = "^[0-9]{10}$", message = "Số điện thoại phải có đúng 10 chữ số")
+    @Pattern(regexp = "^([+0])\\d{9,12}$", message = "Số điện thoại không hợp lệ.")
     private String phoneNumber;
 
     @NotNull(message = "ID card không được để trống")
-    @Pattern(regexp = "^[0-9]{9,12}$", message = "ID card phải có từ 9 đến 12 chữ số")
+    @Pattern(regexp = "^(?:\\d{12}|[A-Z0-9]{8}|[A-Z][0-9]{8})$", message = "CCCD/Hộ chiếu không hợp lệ.")
     private String idCard;
 
-    @NotNull(message = "Loại khách hàng không được để trống")
-    @Pattern(regexp = "^(seller|buyer)$", message = "Loại khách hàng phải là ROLE_SELLER hoặc ROLE_BUYER")
-    private String customerType;
-
-    @Size(max = 255, message = "URL của ảnh không được vượt quá 255 ký tự")
     private String imageUrl;
 }

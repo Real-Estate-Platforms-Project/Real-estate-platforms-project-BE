@@ -9,11 +9,14 @@ import com.thi.realestateplatformsprojectbe.models.Demand;
 import com.thi.realestateplatformsprojectbe.models.Role;
 import com.thi.realestateplatformsprojectbe.services.IDemandService;
 import com.thi.realestateplatformsprojectbe.services.impl.BuyerService;
-import com.thi.realestateplatformsprojectbe.services.impl.SellerService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,38 +33,8 @@ public class DemandController {
     private BuyerService buyerService;
     @Autowired
     private AccountService accountService;
-    @Autowired
-    private SellerService sellerService;
 
-
-    @GetMapping
-    public ResponseEntity<?> getAllDemand(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.replace("Bearer ", "");
-
-            String userName = jwtService.getUsernameFromJwtToken(token);
-            Account account = accountService.findByEmail(userName);
-            if (account != null) {
-                for (Role role : account.getRoles()) {
-                    if (role.getName().equals("ROLE_ADMIN") || role.getName().equals("ROLE_EMPLOYEE")) {
-                        List<Demand> demands = demandService.findAll();
-                        if (demands.isEmpty()) {
-                            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-                        }
-                        return new ResponseEntity<>(demands, HttpStatus.OK);
-                    }
-                }
-            }
-        }
-        List<Demand> demands = demandService.findAllVerifiedDemand();
-        if (demands.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(demands, HttpStatus.OK);
-    }
-
+    @PreAuthorize("hasAnyRole('ADMIN','BUYER','EMPLOYEE')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getDemand(@PathVariable Long id, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -72,7 +45,7 @@ public class DemandController {
             Account account = accountService.findByEmail(userName);
 
             if (account != null) {
-                Buyer buyer = buyerService.getBuyerById(account.getId());
+                Buyer buyer = buyerService.findByAccountId(account.getId());
                 Demand demand = demandService.findById(id);
                 for (Role role : account.getRoles()) {
                     if (demand != null) {
@@ -90,36 +63,19 @@ public class DemandController {
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
-    @GetMapping("/account")
-    public ResponseEntity<?> getAccountDemand(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.replace("Bearer ", "");
-
-            String userName = jwtService.getUsernameFromJwtToken(token);
-            Account account = accountService.findByEmail(userName);
-            if (account != null) {
-                Buyer buyer = buyerService.findByAccountId(account.getId());
-                if (buyer != null) {
-                    List<Demand> demands = demandService.findAllByBuyer(buyer);
-                    return new ResponseEntity<>(demands, HttpStatus.OK);
-                }
-            }
-        }
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
     @GetMapping("/search")
-    public ResponseEntity<List<Demand>> searchDemands(
+    public ResponseEntity<Page<Demand>> searchDemands(
             @RequestParam(required = false) String notes,
             @RequestParam(required = false) List<String> region,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) List<String> realEstateType,
             @RequestParam(required = false) Integer minArea,
             @RequestParam(required = false) Integer maxArea,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "3") int size,
             HttpServletRequest request
     ) {
+        Pageable pageable = PageRequest.of(page, size);
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -130,7 +86,7 @@ public class DemandController {
             if (account != null) {
                 for (Role role : account.getRoles()) {
                     if (role.getName().equals("ROLE_ADMIN") || role.getName().equals("ROLE_EMPLOYEE")) {
-                        List<Demand> demands = demandService.searchDemand(notes, region, type, realEstateType, minArea, maxArea);
+                        Page<Demand> demands = demandService.searchDemand(notes, region, type, realEstateType, minArea, maxArea, pageable);
                         if (demands.isEmpty()) {
                             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                         }
@@ -140,7 +96,7 @@ public class DemandController {
             }
         }
 
-        List<Demand> demands = demandService.searchVerifiedDemand(notes, region, type, realEstateType, minArea, maxArea, true);
+        Page<Demand> demands = demandService.searchVerifiedDemand(notes, region, type, realEstateType, minArea, maxArea, true, pageable);
         if (demands.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
@@ -148,16 +104,20 @@ public class DemandController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('BUYER')")
     @GetMapping("/account/search")
-    public ResponseEntity<List<Demand>> searchAccountDemands(
+    public ResponseEntity<Page<Demand>> searchAccountDemands(
             @RequestParam(required = false) String notes,
             @RequestParam(required = false) List<String> region,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) List<String> realEstateType,
             @RequestParam(required = false) Integer minArea,
             @RequestParam(required = false) Integer maxArea,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "3") int size,
             HttpServletRequest request
     ) {
+        Pageable pageable = PageRequest.of(page, size);
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -168,7 +128,7 @@ public class DemandController {
             if (account != null) {
                 Buyer buyer = buyerService.findByAccountId(account.getId());
                 if (buyer != null) {
-                    List<Demand> demands = demandService.searchAccountDemand(buyer.getId(), notes, region, type, realEstateType, minArea, maxArea);
+                    Page<Demand> demands = demandService.searchAccountDemand(buyer.getId(), notes, region, type, realEstateType, minArea, maxArea, pageable);
                     if (demands.isEmpty()) {
                         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
                     }
@@ -180,6 +140,7 @@ public class DemandController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','EMPLOYEE')")
     @PutMapping("{id}/verify")
     public ResponseEntity<?> verifyDemand(@PathVariable Long id, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -200,6 +161,7 @@ public class DemandController {
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','BUYER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteDemand(@PathVariable Long id, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -231,6 +193,7 @@ public class DemandController {
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
+    @PreAuthorize("hasAnyRole('BUYER')")
     @PostMapping
     public ResponseEntity<DemandDTO> addDemand(@RequestBody DemandDTO demandDTO, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -250,27 +213,7 @@ public class DemandController {
 
     }
 
-    @PutMapping("{id}")
-    public ResponseEntity<?> verifyDemand(@PathVariable Long id, @RequestBody DemandDTO demandDTO, HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
-
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.replace("Bearer ", "");
-
-            String userName = jwtService.getUsernameFromJwtToken(token);
-            Account account = accountService.findByEmail(userName);
-            if (account != null) {
-                Buyer buyer = buyerService.getBuyerByAccountId(account.getId());
-                Demand demand = demandService.findById(id);
-                if (demand != null && demand.getBuyer().equals(buyer)) {
-                    demandService.save(demandDTO, buyer);
-                    return new ResponseEntity<>(demandDTO, HttpStatus.OK);
-                }
-            }
-        }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
-
+    @PreAuthorize("hasAnyRole('BUYER')")
     @PutMapping("{id}/edit")
     public ResponseEntity<?> updateDemand(@PathVariable Long id, @RequestBody Demand demand, HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
@@ -291,5 +234,3 @@ public class DemandController {
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 }
-
-

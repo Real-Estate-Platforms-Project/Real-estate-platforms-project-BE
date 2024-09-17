@@ -1,5 +1,6 @@
 package com.thi.realestateplatformsprojectbe.services.impl;
 
+import com.thi.realestateplatformsprojectbe.dto.CustomerUpdateDTO;
 import com.thi.realestateplatformsprojectbe.models.Seller;
 import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
 import com.thi.realestateplatformsprojectbe.services.ISellerService;
@@ -33,4 +34,26 @@ public class SellerService implements ISellerService {
     public Seller findByAccountId(Long id) {
         return  sellerRepository.findSellerByAccount_Id(id);
     }
+
+    @Override
+    public List<Seller> searchSellers(String code, String name, String email, String phoneNumber) {
+        return sellerRepository.searchSellers(code, name, email, phoneNumber);
+    }
+
+    @Override
+    public void update(Long id, CustomerUpdateDTO customer) {
+        Seller seller = sellerRepository.findSellerByAccount_Id(id);
+        if(customer.getImageUrl() != null) {
+            seller.setImageUrl(customer.getImageUrl());
+        } else {
+            seller.setName(customer.getName());
+            seller.setDob(customer.getDob());
+            seller.setAddress(customer.getAddress());
+            seller.setPhoneNumber(customer.getPhoneNumber());
+            seller.setIdCard(customer.getIdCard());
+            seller.setGender(customer.getGender());
+        }
+        sellerRepository.save(seller);
+    }
+
 }

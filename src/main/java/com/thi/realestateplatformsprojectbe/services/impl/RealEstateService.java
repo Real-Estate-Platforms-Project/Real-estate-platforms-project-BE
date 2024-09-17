@@ -7,12 +7,9 @@ import com.thi.realestateplatformsprojectbe.models.RealEstateDetail;
 import com.thi.realestateplatformsprojectbe.repositories.*;
 import com.thi.realestateplatformsprojectbe.services.IRealEstateService;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
 import org.springframework.stereotype.Service;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -77,7 +74,6 @@ public class RealEstateService implements IRealEstateService {
         }
         return savedRealEstate;
     }
-
 
     @Override
     public List<RealEstate> getAll() {

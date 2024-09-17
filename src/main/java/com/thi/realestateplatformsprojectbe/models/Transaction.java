@@ -47,7 +47,7 @@ public class Transaction {
 
     @NotNull
     @Column(name = "amount", nullable = false)
-    private Integer amount;
+    private Double amount;
 
     @NotNull
     @Column(name = "create_at", nullable = false)

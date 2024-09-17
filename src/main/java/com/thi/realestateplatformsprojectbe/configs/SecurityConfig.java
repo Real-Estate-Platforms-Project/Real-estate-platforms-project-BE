@@ -23,6 +23,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Arrays;
@@ -83,9 +84,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 //                                .requestMatchers("/api/admin/sellers/info").hasAnyRole("SELLER")
                                 .requestMatchers("/api/auth/login", "/api/auth/register", "api/auth/confirm").permitAll()
-                                .requestMatchers("**", "/api/client/notifications").permitAll()
+                                 .requestMatchers( "/api/client/notifications/**","/api/admin/notifications/**").permitAll()
+                                 .requestMatchers(  "/api/auth/updateForgetPassword",
+                                         "/api/auth/createToken/**","/ws/notifications/**",
+                                         "/api/auth/confirmEmail/**").permitAll()
                                 .anyRequest().authenticated()
-
                 )
                 .exceptionHandling(customizer -> customizer.accessDeniedHandler(customAccessDeniedHandler()))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

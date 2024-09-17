@@ -1,18 +1,17 @@
 package com.thi.realestateplatformsprojectbe.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -20,6 +19,7 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Notification {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -30,10 +30,19 @@ public class Notification {
     @Column(name = "create_at", nullable = false)
     private LocalDateTime createAt;
 
+    @NotNull
+    @LastModifiedDate
+    @Column(name = "update_at", nullable = false)
+    private LocalDateTime updateAt;
+
     @Size(max = 255)
     @NotNull
     @Column(name = "title", nullable = false)
     private String title;
+
+    @NotNull
+    @Column(name = "date_start", nullable = false)
+    private LocalDateTime dateStart;
 
     @NotNull
     @Lob
@@ -45,10 +54,9 @@ public class Notification {
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    @NotNull
-    @Lob
-    @Column(name = "image", nullable = false)
-    private String image;
+    @OneToMany(mappedBy = "notification", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<NotificationImage> images;
 
     @NotNull
     @ColumnDefault("1")
@@ -57,5 +65,4 @@ public class Notification {
 
     @Transient
     private String formattedCreateNotification;
-
 }

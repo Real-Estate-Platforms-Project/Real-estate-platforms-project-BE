@@ -139,12 +139,14 @@ public class AccountService implements UserDetailsService {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    public List<Account> checkAndUpdateExpiredAccounts(){
+    public List<Account> findAllByExpiryDateBefore(){
         return accountRepository.findAllByExpiryDateBefore(LocalDateTime.now());
     }
 
 
-
+    public List<Account> accountsWhichOver30DayPassHaveNotChangePassword() {
+        return accountRepository.findAllByExpiryDateAfter(LocalDateTime.now());
+    }
 }
 
 //    public boolean checkExpiryDate(String email) {

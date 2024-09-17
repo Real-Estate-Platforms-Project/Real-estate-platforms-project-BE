@@ -31,7 +31,7 @@ public class TransactionResponse {
 
     String seller;
 
-    Integer amount;
+    Double amount;
 
     LocalDate createAt;
 

@@ -82,13 +82,11 @@ public class SecurityConfig {
                 }))
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
-//                                .requestMatchers("/api/admin/sellers/info").hasAnyRole("SELLER")
                                 .requestMatchers("/api/auth/login", "/api/auth/register", "api/auth/confirm").permitAll()
 
-                                .requestMatchers("/api/admin/buyers/**","/api/customers/**","/api/admin/sellers/**").hasAnyRole("ADMIN","EMPLOYEE")
-                            
+                                .requestMatchers("/api/admin/buyers/**","/api/customers/**","/api/admin/sellers/**","/api/admin/notifications/**").hasAnyRole("ADMIN","EMPLOYEE")
 
-                                 .requestMatchers( "/api/client/notifications/**","/api/admin/notifications/**").permitAll()
+                                 .requestMatchers( "/api/client/notifications/**").permitAll()
 
                                  .requestMatchers(  "/api/auth/updateForgetPassword",
                                          "/api/auth/createToken/**","/ws/notifications/**",

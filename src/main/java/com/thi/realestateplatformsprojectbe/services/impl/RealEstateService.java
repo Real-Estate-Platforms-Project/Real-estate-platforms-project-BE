@@ -1,15 +1,24 @@
 package com.thi.realestateplatformsprojectbe.services.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thi.realestateplatformsprojectbe.dto.RealEstateWithDetailDTO;
 import com.thi.realestateplatformsprojectbe.models.Image;
 import com.thi.realestateplatformsprojectbe.models.RealEstate;
 import com.thi.realestateplatformsprojectbe.models.RealEstateDetail;
 import com.thi.realestateplatformsprojectbe.repositories.*;
 import com.thi.realestateplatformsprojectbe.services.IRealEstateService;
+import com.thi.realestateplatformsprojectbe.services.email.RealEstateCreationEmailService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -27,9 +36,11 @@ public class RealEstateService implements IRealEstateService {
     private final IWardRepository wardRepository;
     private final IRealEstateDetailRepository realEstateDetailRepository;
     private final IImageRepository imageRepository;
+    private final RealEstateCreationEmailService emailService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
-    public RealEstate addRealEstatePost(RealEstateWithDetailDTO realEstatePostDTO) {
+    public RealEstate addRealEstatePost(RealEstateWithDetailDTO realEstatePostDTO)  {
         Random random = new Random();
         int randomNumber = 1000 + random.nextInt(9000);
         String generatedCode = "MBDS-" + randomNumber;
@@ -43,6 +54,7 @@ public class RealEstateService implements IRealEstateService {
                 images.add(image);
             }
         }
+
         RealEstate realEstate = RealEstate.builder()
                 .seller(sellerRepository.findById(realEstatePostDTO.getSellerId()).orElse(null))
                 .title(realEstatePostDTO.getTitle())
@@ -61,7 +73,9 @@ public class RealEstateService implements IRealEstateService {
                 .code(generatedCode)
                 .images(images) // Associate multiple images
                 .build();
+
         RealEstate savedRealEstate = realEstateRepository.save(realEstate);
+
         // Conditionally create and save RealEstateDetail if type is "Nhà ở"
         if ("Nhà ở".equals(realEstatePostDTO.getType())) {
             RealEstateDetail realEstateDetail = RealEstateDetail.builder()
@@ -72,8 +86,26 @@ public class RealEstateService implements IRealEstateService {
                     .build();
             realEstateDetailRepository.save(realEstateDetail);
         }
+
+        // Sau khi thêm bất động sản thành công, gửi email thông báo cho admin
+        String adminEmail = realEstate.getSeller().getEmail();
+        String content = "Người dùng: " + realEstate.getSeller().getName()
+                + " đã thêm mới thành công bài viết có tiêu đề: '" + realEstate.getTitle() + "'.";
+        try {
+            emailService.sendRealEstateCreationEmail(adminEmail, content);  // Gửi email thông báo
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+        String notificationMessage = null;
+        try {
+            notificationMessage = new ObjectMapper().writeValueAsString(realEstatePostDTO);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        messagingTemplate.convertAndSend("/topic/seller-notifications", notificationMessage);
         return savedRealEstate;
     }
+
 
     @Override
     public List<RealEstate> getAll() {
@@ -90,5 +122,11 @@ public class RealEstateService implements IRealEstateService {
     public RealEstate findById(Long id) {
         return realEstateRepository.findById(id).orElse(null);
     }
+
+    @Override
+    public List<RealEstate> findAllRealEstateBySellerId(Long id) {
+        return realEstateRepository.findAllBySellerId(id);
+    }
+
 
 }

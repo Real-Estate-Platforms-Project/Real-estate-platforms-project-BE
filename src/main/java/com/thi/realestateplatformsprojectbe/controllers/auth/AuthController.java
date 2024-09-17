@@ -15,7 +15,9 @@ import com.thi.realestateplatformsprojectbe.services.IVerificationTokenService;
 import com.thi.realestateplatformsprojectbe.services.email.ConfirmEmailService;
 import com.thi.realestateplatformsprojectbe.services.email.EmailService;
 import com.thi.realestateplatformsprojectbe.services.email.NotifyEmailToChangePasswordService;
+import com.thi.realestateplatformsprojectbe.services.impl.BuyerService;
 import com.thi.realestateplatformsprojectbe.services.impl.EmployeeService;
+import com.thi.realestateplatformsprojectbe.services.impl.SellerService;
 import com.thi.realestateplatformsprojectbe.services.role.IRoleService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
@@ -185,7 +188,7 @@ public class AuthController {
         }
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Người dùng không tồn tại");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Người dùng không tồn tại");
         }
 
         UserDTO userDTO = new UserDTO();

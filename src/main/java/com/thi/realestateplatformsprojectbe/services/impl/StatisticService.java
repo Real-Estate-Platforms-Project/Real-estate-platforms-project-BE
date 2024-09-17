@@ -114,4 +114,23 @@ public class StatisticService implements IStatisticService {
                 .isDeleted(transaction.getIsDeleted())
                 .build()).collect(Collectors.toList());
     }
+
+    @Override
+    public List<StatisticTransactionDTO> findTransactionByDay(LocalDate startDate, LocalDate endDate) {
+        List<Transaction> transactions = statisticRepository.findTransactionByDay(startDate, endDate);
+        return transactions.stream().map(transaction -> StatisticTransactionDTO.builder()
+                .id(transaction.getId())
+                .code(transaction.getCode())
+                .nameEmployee(transaction.getEmployee().getName())
+                .titleRealEstate(transaction.getRealEstate().getTitle())
+                .nameBuyer(transaction.getBuyer().getName())
+                .nameSeller(transaction.getSeller().getName())
+                .amount(transaction.getAmount())
+                .createdAt(transaction.getCreateAt())
+                .commissionFee(transaction.getCommissionFee())
+                .description(transaction.getDescription())
+                .status(transaction.getStatus())
+                .isDeleted(transaction.getIsDeleted())
+                .build()).collect(Collectors.toList());
+    }
 }

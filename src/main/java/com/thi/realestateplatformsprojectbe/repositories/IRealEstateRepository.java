@@ -29,4 +29,7 @@ public interface IRealEstateRepository extends JpaRepository<RealEstate, Long> {
             @Param("maxArea") Integer maxArea,
             Pageable pageable
     );
+
+
+    List<RealEstate> findAllBySellerId(Long id);
 }

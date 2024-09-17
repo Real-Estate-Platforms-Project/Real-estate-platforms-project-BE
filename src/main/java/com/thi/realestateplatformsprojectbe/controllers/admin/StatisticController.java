@@ -67,4 +67,13 @@ public class StatisticController {
         List<StatisticTransactionDTO> list = statisticService.findTransactionByMonth(year, month);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
+
+    @GetMapping("/transactions/day")
+    @PermitAll
+    public ResponseEntity<?> getStatisticTransactionByDay(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        List<StatisticTransactionDTO> list = statisticService.findTransactionByDay(startDate, endDate);
+        return new ResponseEntity<>(list, HttpStatus.OK);
+    }
 }

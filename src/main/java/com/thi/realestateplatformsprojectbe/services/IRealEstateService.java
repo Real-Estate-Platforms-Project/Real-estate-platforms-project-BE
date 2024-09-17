@@ -13,4 +13,7 @@ public interface IRealEstateService {
 
     List<RealEstate> getAll();
     RealEstate findById(Long id);
+
+
+    List<RealEstate> findAllRealEstateBySellerId(Long id);
 }

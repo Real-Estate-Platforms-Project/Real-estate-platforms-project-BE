@@ -1,6 +1,7 @@
 package com.thi.realestateplatformsprojectbe.services;
 
 import com.thi.realestateplatformsprojectbe.dto.statisticDTO.StatisticDemandDTO;
+import com.thi.realestateplatformsprojectbe.dto.statisticDTO.StatisticTransactionDTO;
 import com.thi.realestateplatformsprojectbe.models.Transaction;
 
 import java.time.LocalDate;
@@ -14,9 +15,9 @@ public interface IStatisticService {
 
     List<StatisticDemandDTO> findDemandByDay(LocalDate startDate, LocalDate endDate);
 
-    List<Transaction> findTransactionByYear(Integer year);
+    List<StatisticTransactionDTO> findTransactionByYear(Integer year);
 
-    List<Transaction> findTransactionByMonth(Integer year, Integer month);
+    List<StatisticTransactionDTO> findTransactionByMonth(Integer year, Integer month);
 
 
 }

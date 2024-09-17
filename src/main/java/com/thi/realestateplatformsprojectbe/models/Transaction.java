@@ -16,6 +16,7 @@ import java.time.LocalDate;
 public class Transaction {
     @Id
     @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Size(max = 10)
@@ -45,7 +46,7 @@ public class Transaction {
 
     @NotNull
     @Column(name = "amount", nullable = false)
-    private Integer amount;
+    private Double amount;
 
     @NotNull
     @Column(name = "create_at", nullable = false)

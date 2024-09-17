@@ -7,17 +7,17 @@ import java.time.LocalDate;
 
 @Data
 @Builder
-public class StatisticDemandDTO {
+public class StatisticTransactionDTO {
     Long id;
-    String title;
+    String code;
+    String nameEmployee;
+    String titleRealEstate;
     String nameBuyer;
-    String type;
-    String realEstateType;
-    String region;
-    Integer minArea;
-    Integer maxArea;
+    String nameSeller;
+    Double amount;
     LocalDate createdAt;
-    String notes;
-    Boolean isVerify;
+    Integer commissionFee;
+    String description;
+    String status;
     Boolean isDeleted;
 }

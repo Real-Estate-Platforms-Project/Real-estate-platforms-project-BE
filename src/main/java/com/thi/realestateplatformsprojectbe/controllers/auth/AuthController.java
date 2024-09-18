@@ -114,8 +114,8 @@ public class AuthController {
         }
 
         Account account = new Account();
-        account.setUpdateDay(LocalDateTime.now());
-        account.setExpiryDate(account.getUpdateDay().plusDays(45));
+//        account.setUpdateDay(LocalDateTime.now());
+//        account.setExpiryDate(account.getUpdateDay().plusDays(45));
         account.setEmail(accountDTO.getEmail());
         account.setPassword(passwordEncoder.encode(accountDTO.getPassword()));
         account.setName(accountDTO.getName());
@@ -188,7 +188,7 @@ public class AuthController {
         }
 
         if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Người dùng không tồn tại");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Người dùng không tồn tại");
         }
 
         UserDTO userDTO = new UserDTO();

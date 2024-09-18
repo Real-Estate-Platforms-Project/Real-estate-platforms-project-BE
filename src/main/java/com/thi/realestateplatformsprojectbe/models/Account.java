@@ -47,6 +47,15 @@ public class Account {
 
     private LocalDateTime updateDay;
     private LocalDateTime expiryDate;
+
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
+
+    @PrePersist
+    private void setUpdateDayAndExpiryDate(){
+        this.updateDay = LocalDateTime.now();
+        this.expiryDate = getUpdateDay().plusDays(45);
+    }
+
+
 }

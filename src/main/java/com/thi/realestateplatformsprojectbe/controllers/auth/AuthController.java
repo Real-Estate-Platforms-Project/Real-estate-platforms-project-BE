@@ -208,7 +208,6 @@ public class AuthController {
         if (account != null) {
             Set<Role> roles = account.getRoles();
             return ResponseEntity.ok(roles);
-            // neu k co
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Tài khoản này không có quyền truy cập");

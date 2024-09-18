@@ -1,14 +1,13 @@
 package com.thi.realestateplatformsprojectbe.services.impl;
 
 import com.thi.realestateplatformsprojectbe.dto.EmployeeDTO;
-import com.thi.realestateplatformsprojectbe.models.Account;
-import com.thi.realestateplatformsprojectbe.models.Employee;
-import com.thi.realestateplatformsprojectbe.models.Position;
+import com.thi.realestateplatformsprojectbe.models.*;
 import com.thi.realestateplatformsprojectbe.repositories.IAccountRepository;
 import com.thi.realestateplatformsprojectbe.repositories.IEmployeeRepository;
 import com.thi.realestateplatformsprojectbe.repositories.IPositionRepository;
 import com.thi.realestateplatformsprojectbe.services.IEmployeeService;
 import com.thi.realestateplatformsprojectbe.services.email.EmployeeAccountCreationEmailService;
+import com.thi.realestateplatformsprojectbe.services.role.IRoleService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -17,12 +16,14 @@ import org.springframework.stereotype.Service;
 
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class EmployeeService implements IEmployeeService {
-
+    private final IRoleService roleService;
     private final IEmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
     private final IAccountRepository accountRepository;
@@ -67,6 +68,13 @@ public class EmployeeService implements IEmployeeService {
                 .isActive(true)
                 .isDeleted(false)
                 .password(passwordEn).build();
+        String role = RoleName.ROLE_EMPLOYEE.toString();
+        Set<Role> roles = new HashSet<>();
+        if (employeeDTO.getRole().equals("Admin")) {
+            role = RoleName.ROLE_ADMIN.toString();
+        }
+        roles.add(roleService.findByName(role));
+        newAccount.setRoles(roles);
         newAccount = accountRepository.save(newAccount);
 
         Employee newEmployee = Employee.builder()

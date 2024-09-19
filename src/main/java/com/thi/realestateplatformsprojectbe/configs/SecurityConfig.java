@@ -87,6 +87,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/admin/buyers/**","/api/customers/**","/api/admin/sellers/**","/api/admin/notifications/**").hasAnyRole("ADMIN","EMPLOYEE")
                         .requestMatchers("/api/real-estate/**").permitAll()
                         .requestMatchers("/api/admin/employees/**").permitAll()
+                        .requestMatchers("/api/admin/statistics/**").permitAll()
                         .requestMatchers("/api/employees/**").permitAll()
                         .requestMatchers("/api/demand/search/**").permitAll()
                         .requestMatchers( "/api/client/notifications/**","/api/admin/notifications/**").permitAll()

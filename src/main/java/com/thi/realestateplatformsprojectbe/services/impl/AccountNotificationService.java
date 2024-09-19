@@ -1,7 +1,5 @@
 package com.thi.realestateplatformsprojectbe.services.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thi.realestateplatformsprojectbe.dto.AccountNotificationDTO;
 import com.thi.realestateplatformsprojectbe.dto.RealEstateWithDetailDTO;
 import com.thi.realestateplatformsprojectbe.models.Account;
@@ -14,7 +12,6 @@ import com.thi.realestateplatformsprojectbe.repositories.IEmployeeRepository;
 import com.thi.realestateplatformsprojectbe.repositories.ISellerRepository;
 import com.thi.realestateplatformsprojectbe.services.IAccountNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -32,9 +29,6 @@ public class AccountNotificationService implements IAccountNotificationService {
     @Autowired
     private ISellerRepository sellerRepository;
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-
 
     @Override
     public void addNotification(RealEstateWithDetailDTO realEstatePostDTO) {
@@ -48,15 +42,7 @@ public class AccountNotificationService implements IAccountNotificationService {
                     .reading(false)
                     .account(employeeAccount)
                     .build();
-            employeeNotification = accountNotificationRepository.save(employeeNotification);
-
-            String notificationMessage = null;
-            try {
-                notificationMessage = new ObjectMapper().writeValueAsString(employeeNotification);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-            messagingTemplate.convertAndSend("/topic/seller-notifications/"+ employee.getId(), notificationMessage);
+            accountNotificationRepository.save(employeeNotification);
         }
     }
 

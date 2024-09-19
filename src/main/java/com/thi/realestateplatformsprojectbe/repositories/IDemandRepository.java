@@ -47,7 +47,7 @@ public interface IDemandRepository extends JpaRepository<Demand, Long> {
             @Param("minArea") Integer minArea,
             @Param("maxArea") Integer maxArea,
             Pageable pageable
-            );
+    );
 
     @Query("SELECT r FROM Demand r WHERE "
             + "(r.isDeleted = false) AND "

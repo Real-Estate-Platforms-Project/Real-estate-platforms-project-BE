@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -22,19 +23,19 @@ public class TransactionRequest {
 
     String code;
 
-    Long employeeId;
+    Long employee;
 
-    Long realEstateId;
+    Long realEstate;
 
-    Long buyerId;
+    Long buyer;
 
-    Long SellerId;
+    Long seller;
 
-    Integer amount;
+    Double amount;
 
     LocalDate createAt;
 
-    Integer commissionFee;
+    BigDecimal commissionFee;
 
     String description;
 

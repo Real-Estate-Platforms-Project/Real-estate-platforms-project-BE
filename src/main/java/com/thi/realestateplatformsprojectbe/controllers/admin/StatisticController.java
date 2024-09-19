@@ -63,7 +63,7 @@ public class StatisticController {
     @GetMapping("/transactions/month")
     @PermitAll
     public ResponseEntity<?> getStatisticTransactionByMonth(@RequestParam(required = false) Integer year,
-                                                       @RequestParam(required = false) Integer month) {
+                                                            @RequestParam(required = false) Integer month) {
         List<StatisticTransactionDTO> list = statisticService.findTransactionByMonth(year, month);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }

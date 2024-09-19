@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -54,7 +55,7 @@ public class Transaction {
 
     @NotNull
     @Column(name = "commission_fee", nullable = false)
-    private Integer commissionFee;
+    private BigDecimal commissionFee;
 
     @Size(max = 255)
     @Column(name = "description")

@@ -3,6 +3,7 @@ package com.thi.realestateplatformsprojectbe.dto.statisticDTO;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -16,7 +17,7 @@ public class StatisticTransactionDTO {
     String nameSeller;
     Double amount;
     LocalDate createdAt;
-    Integer commissionFee;
+    BigDecimal commissionFee;
     String description;
     String status;
     Boolean isDeleted;

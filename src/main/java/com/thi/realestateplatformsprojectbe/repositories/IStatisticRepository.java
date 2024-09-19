@@ -48,4 +48,3 @@ public interface IStatisticRepository extends JpaRepository<Demand, Long> {
             "ORDER BY t.createAt")
     List<Transaction> findTransactionByDay(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }
-

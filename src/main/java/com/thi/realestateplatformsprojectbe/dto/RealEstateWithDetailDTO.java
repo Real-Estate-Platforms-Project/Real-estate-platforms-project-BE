@@ -55,7 +55,7 @@ public class RealEstateWithDetailDTO {
     private Integer floor;
 
     private Integer bedroom;
-    
+
     private Integer toilet;
 
     @NotNull(message = "Ảnh không được để trống")

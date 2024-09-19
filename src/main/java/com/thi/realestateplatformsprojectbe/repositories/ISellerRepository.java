@@ -23,7 +23,7 @@ public interface ISellerRepository extends JpaRepository<Seller,Long> {
             "(:email IS NULL OR LOWER(b.email) LIKE LOWER(CONCAT('%', :email, '%'))) AND " +
             "(:phoneNumber IS NULL OR b.phoneNumber LIKE %:phoneNumber%)")
     List<Seller> searchSellers(@Param("code") String code,
-                             @Param("name") String name,
-                             @Param("email") String email,
-                             @Param("phoneNumber") String phoneNumber);
+                               @Param("name") String name,
+                               @Param("email") String email,
+                               @Param("phoneNumber") String phoneNumber);
 }

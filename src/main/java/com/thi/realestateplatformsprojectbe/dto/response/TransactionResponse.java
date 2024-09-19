@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -34,7 +35,7 @@ public class TransactionResponse {
 
     LocalDate createAt;
 
-    Integer commissionFee;
+    BigDecimal commissionFee;
 
     String description;
 

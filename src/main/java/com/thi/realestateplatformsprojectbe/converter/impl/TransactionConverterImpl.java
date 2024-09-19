@@ -24,10 +24,10 @@ public class TransactionConverterImpl implements ITransactionConverter {
         LOGGER.debug("TransactionConverterImpl -> dtoToEntity");
         Transaction transaction = new Transaction();
         BeanUtils.copyProperties(transactionRequest, transaction);
-        Employee employee = Employee.builder().id(transactionRequest.getEmployeeId()).build();
-        RealEstate realEstate = RealEstate.builder().id(transactionRequest.getRealEstateId()).build();
-        Buyer buyer = Buyer.builder().id(transactionRequest.getBuyerId()).build();
-        Seller seller = Seller.builder().id(transactionRequest.getSellerId()).build();
+        Employee employee = Employee.builder().id(transactionRequest.getEmployee()).build();
+        RealEstate realEstate = RealEstate.builder().id(transactionRequest.getRealEstate()).build();
+        Buyer buyer = Buyer.builder().id(transactionRequest.getBuyer()).build();
+        Seller seller = Seller.builder().id(transactionRequest.getSeller()).build();
         transaction.setEmployee(employee);
         transaction.setRealEstate(realEstate);
         transaction.setBuyer(buyer);

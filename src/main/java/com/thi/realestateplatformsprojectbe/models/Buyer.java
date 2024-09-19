@@ -85,4 +85,3 @@ public class Buyer implements IUser {
     private String imageUrl;
 
 }
-

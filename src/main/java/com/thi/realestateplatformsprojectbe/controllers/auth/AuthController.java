@@ -114,8 +114,8 @@ public class AuthController {
         }
 
         Account account = new Account();
-//        account.setUpdateDay(LocalDateTime.now());
-//        account.setExpiryDate(account.getUpdateDay().plusDays(45));
+        account.setUpdateDay(LocalDateTime.now());
+        account.setExpiryDate(account.getUpdateDay().plusDays(45));
         account.setEmail(accountDTO.getEmail());
         account.setPassword(passwordEncoder.encode(accountDTO.getPassword()));
         account.setName(accountDTO.getName());
@@ -180,8 +180,8 @@ public class AuthController {
             }
             if (
                     role.getName().equals(RoleName.ROLE_EMPLOYEE.toString())
-                    ||
-                    role.getName().equals(RoleName.ROLE_ADMIN.toString())
+                            ||
+                            role.getName().equals(RoleName.ROLE_ADMIN.toString())
             ) {
                 user = employeeService.findByAccountId(account.getId());
             }
@@ -303,6 +303,5 @@ public class AuthController {
 
 
 }
-
 
 

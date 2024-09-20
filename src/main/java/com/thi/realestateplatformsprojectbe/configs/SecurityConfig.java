@@ -84,19 +84,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("**").permitAll()
                         .requestMatchers("/api/admin/sellers/info").hasAnyRole("SELLER")
-                                .requestMatchers("/api/auth/login", "/api/auth/register", "api/auth/confirm").permitAll()
-                                .requestMatchers("/api/admin/buyers/**","/api/customers/**","/api/admin/sellers/**","/api/admin/notifications/**").hasAnyRole("ADMIN","EMPLOYEE")
+                        .requestMatchers("/api/auth/login", "/api/auth/register", "api/auth/confirm").permitAll()
+                        .requestMatchers("/api/admin/buyers/**", "/api/customers/**", "/api/admin/sellers/**", "/api/admin/notifications/**").hasAnyRole("ADMIN", "EMPLOYEE")
                         .requestMatchers("/api/real-estate/**").permitAll()
                         .requestMatchers("/api/admin/employees/**").permitAll()
                         .requestMatchers("/api/admin/statistics/**").permitAll()
                         .requestMatchers("/api/employees/**").permitAll()
                         .requestMatchers("/api/demand/search/**").permitAll()
-                        .requestMatchers( "/api/client/notifications/**","/api/admin/notifications/**").permitAll()
-                                 .requestMatchers(  "/api/auth/updateForgetPassword",
-                                         "/api/auth/createToken/**","/ws/notifications/**",
-                                         "/api/auth/confirmEmail/**").permitAll()
+                        .requestMatchers("/api/client/notifications/**", "/api/admin/notifications/**").permitAll()
+                        .requestMatchers("/api/auth/updateForgetPassword",
+                                "/api/auth/createToken/**", "/ws/notifications/**",
+                                "/api/auth/confirmEmail/**").permitAll()
 
-                                .anyRequest().authenticated()
+                        .anyRequest().authenticated()
                 )
                 .exceptionHandling(customizer -> customizer.accessDeniedHandler(customAccessDeniedHandler()))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -46,7 +46,6 @@ public class CustomerService implements ICustomerService {
         return accountRepository.existsByEmail(email);
     }
 
-
     public void addNewCustomer(CustomerDTO customerDTO) throws MessagingException {
         if (emailExists(customerDTO.getEmail())) {
             throw new IllegalArgumentException("Email đã tồn tại. Vui lòng sử dụng email khác.");
@@ -97,16 +96,13 @@ public class CustomerService implements ICustomerService {
         emailService.sendAccountCreationEmail(customerDTO.getEmail(), customerDTO.getEmail(), tempPassword);
     }
 
-
     private String generateRandomPassword() {
         return RandomStringUtils.randomAlphanumeric(6);
     }
 
-
     private String generateRandomCode() {
         return RandomStringUtils.randomNumeric(4);
     }
-
 
     @Override
     public void updateCustomerRole(Long accountId, String newRole) {
@@ -125,24 +121,21 @@ public class CustomerService implements ICustomerService {
             throw new IllegalArgumentException("Tài khoản đã ở vai trò này rồi.");
         }
 
-        account.getRoles().clear();
-        account.getRoles().add(role);
-        accountRepository.save(account);
-
         if (newRole.equalsIgnoreCase("seller")) {
-            moveBuyerToSeller(account);
-        } else if (newRole.equalsIgnoreCase("buyer")) {
-            moveSellerToBuyer(account);
+            addSellerRoleToAccount(account);
         }
+
+        accountRepository.save(account);
     }
 
-    private void moveBuyerToSeller(Account account) {
+    private void addSellerRoleToAccount(Account account) {
+        Role sellerRole = roleRepository.findByName("ROLE_SELLER");
+        if (sellerRole != null) {
+            account.getRoles().add(sellerRole);
+        }
+
         Buyer buyer = buyerRepository.findByAccount(account);
         if (buyer != null) {
-            String existingCode = buyer.getCode();
-
-            buyerRepository.delete(buyer);
-
             Seller seller = new Seller();
             seller.setAccount(account);
             seller.setName(buyer.getName());
@@ -152,31 +145,9 @@ public class CustomerService implements ICustomerService {
             seller.setPhoneNumber(buyer.getPhoneNumber());
             seller.setGender(buyer.getGender());
             seller.setIdCard(buyer.getIdCard());
-            seller.setCode(existingCode != null ? existingCode : "REP-" + generateRandomCode());
+            seller.setCode(buyer.getCode());
             seller.setImageUrl(buyer.getImageUrl());
             sellerRepository.save(seller);
-        }
-    }
-
-    private void moveSellerToBuyer(Account account) {
-        Seller seller = sellerRepository.findByAccount(account);
-        if (seller != null) {
-            String existingCode = seller.getCode();
-
-            sellerRepository.delete(seller);
-
-            Buyer buyer = new Buyer();
-            buyer.setAccount(account);
-            buyer.setName(seller.getName());
-            buyer.setDob(seller.getDob());
-            buyer.setAddress(seller.getAddress());
-            buyer.setEmail(seller.getEmail());
-            buyer.setPhoneNumber(seller.getPhoneNumber());
-            buyer.setGender(seller.getGender());
-            buyer.setIdCard(seller.getIdCard());
-            buyer.setCode(existingCode != null ? existingCode : "REP-" + generateRandomCode());
-            buyer.setImageUrl(seller.getImageUrl());
-            buyerRepository.save(buyer);
         }
     }
 }

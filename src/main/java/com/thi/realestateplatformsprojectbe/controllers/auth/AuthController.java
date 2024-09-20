@@ -114,8 +114,8 @@ public class AuthController {
         }
 
         Account account = new Account();
-        account.setUpdateDay(LocalDateTime.now());
-        account.setExpiryDate(account.getUpdateDay().plusDays(45));
+//        account.setUpdateDay(LocalDateTime.now());
+//        account.setExpiryDate(account.getUpdateDay().plusDays(45));
         account.setEmail(accountDTO.getEmail());
         account.setPassword(passwordEncoder.encode(accountDTO.getPassword()));
         account.setName(accountDTO.getName());

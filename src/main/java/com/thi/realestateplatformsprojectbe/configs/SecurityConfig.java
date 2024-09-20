@@ -90,6 +90,7 @@ public class SecurityConfig {
                                  .requestMatchers(  "/api/auth/updateForgetPassword",
                                          "/api/auth/createToken/**","/ws/notifications/**",
                                          "/api/auth/confirmEmail/**").permitAll()
+
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(customizer -> customizer.accessDeniedHandler(customAccessDeniedHandler()))

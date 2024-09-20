@@ -85,7 +85,7 @@ public class SecurityConfig {
                         .requestMatchers("**").permitAll()
                         .requestMatchers("/api/admin/sellers/info").hasAnyRole("SELLER")
                                 .requestMatchers("/api/auth/login", "/api/auth/register", "api/auth/confirm").permitAll()
-                                .requestMatchers("/api/admin/buyers/**","/api/customers/**","/api/admin/sellers/**","/api/admin/notifications/**").hasAnyRole("ADMIN","EMPLOYEE")
+                                .requestMatchers("/api/admin/buyers/**","/api/admin/customers/**","/api/admin/sellers/**","/api/admin/notifications/**").hasAnyRole("ADMIN","EMPLOYEE")
                         .requestMatchers("/api/real-estate/**").permitAll()
                         .requestMatchers("/api/admin/employees/**").permitAll()
                         .requestMatchers("/api/admin/statistics/**").permitAll()

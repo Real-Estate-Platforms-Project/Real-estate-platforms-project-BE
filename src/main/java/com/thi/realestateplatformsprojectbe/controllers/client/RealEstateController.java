@@ -1,10 +1,6 @@
 package com.thi.realestateplatformsprojectbe.controllers.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thi.realestateplatformsprojectbe.dto.AccountNotificationDTO;
 import com.thi.realestateplatformsprojectbe.dto.RealEstateWithDetailDTO;
-import com.thi.realestateplatformsprojectbe.models.AccountNotification;
 import com.thi.realestateplatformsprojectbe.models.RealEstate;
 import com.thi.realestateplatformsprojectbe.services.IAccountNotificationService;
 import com.thi.realestateplatformsprojectbe.services.IRealEstateService;

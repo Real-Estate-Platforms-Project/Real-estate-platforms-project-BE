@@ -86,6 +86,8 @@ public class AccountService implements UserDetailsService {
         // Mã hoá encoder mật khẩu mới
         String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
 
+        account1.setUpdateDay(LocalDateTime.now());
+        account1.setExpiryDate(account1.getUpdateDay().plusDays(45));
         // Lưu vào db
         account1.setPassword(pw);
         save(account1);
@@ -133,6 +135,8 @@ public class AccountService implements UserDetailsService {
         Account account = verificationToken.getAccount();
         String pw = passwordEncoder.encode(updateAccount.getNewPassWord());
         account.setPassword(pw);
+        account.setUpdateDay(LocalDateTime.now());
+        account.setExpiryDate(account.getUpdateDay().plusDays(45));
         save(account);
 
         verificationTokenService.deleteToken(verificationToken);
